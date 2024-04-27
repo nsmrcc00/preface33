@@ -2,7 +2,7 @@ import React from 'react'
 import Login from './components/login/Login'
 import AdminHome from './components/admin/adminHome';
 import './App.css'
-import { AuthProvider } from './contexts/authContexts';
+import { AuthProvider } from './contexts/authContext';
 import { useRoutes } from "react-router-dom";
 
 function App() {
