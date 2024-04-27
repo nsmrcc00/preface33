@@ -21,22 +21,6 @@ const Login = () => {
             })
         }
     }
-    
-    /*
-    const logIn = async (e) => {
-        e.preventDefault();
-        signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            console.log(userCredential);
-        }).catch((error) => {
-            console.log(error);
-        })
-    }
-
-    <button
-                    type="submit"
-                >Log In</button>
-    */
 
     return (
         <div>
@@ -77,3 +61,20 @@ const Login = () => {
 }
 
 export default Login
+
+    
+    /*
+    const logIn = async (e) => {
+        e.preventDefault();
+        signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            console.log(userCredential);
+        }).catch((error) => {
+            console.log(error);
+        })
+    }
+
+    <button
+                    type="submit"
+                >Log In</button>
+    */
