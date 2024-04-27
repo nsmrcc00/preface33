@@ -17,8 +17,9 @@ const Login = () => {
             await doSignInWithEmailAndPassword(email, password).then((userCredential) => {
                 console.log(userCredential);
             }).catch((error) => {
-                console.log(error);
-            })
+                console.error(error);
+                setErrorMessage(error.message || "An error occurred during sign-in."); // Set generic message if error.message is not available
+              })
         }
     }
 
