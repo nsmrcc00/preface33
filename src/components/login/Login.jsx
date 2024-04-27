@@ -52,9 +52,6 @@ const Login = () => {
                     {isSigningIn ? 'Signing In...' : 'Sign In'}
                 </button>
 
-                
-                
-
             </form>  
         </div>
     )
