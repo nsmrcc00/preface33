@@ -1,5 +1,5 @@
 import React from 'react'
-import { useAuth } from '../../contexts/authContexts'
+import { useAuth } from '../../contexts/authContext'
 import Header from '../header/Header'
 
 const AdminHome = () => {
