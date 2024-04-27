@@ -10,7 +10,7 @@ const AdminHome = () => {
     const { userLoggedIn } = useAuth()
     return (
         <>
-            <div>Hello {currentUser.displayName ? currentUser.displayName : currentUser.email}, you are now logged in to PreFace.</div>
+            <div>Hello {currentUser.displayName ? currentUser.displayName : currentUser.email}, you are now logged in.</div>
             <div>
             {
                 userLoggedIn
