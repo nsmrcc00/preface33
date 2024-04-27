@@ -26,32 +26,45 @@ const Login = () => {
         <div>
             {userLoggedIn && (<Navigate to={'/admin-home'} replace={true} />)}
             <form onSubmit={logIn}>
-                <h1>PreFace</h1>
-                <input 
-                    type="email" 
-                    placeholder='Email' 
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value) }}
-                ></input>
+                <div className="mb-3 text-center">
+                    <h1 id="login_heading">PREFACE</h1>
+                </div>
 
-                <input 
-                    type="password" 
-                    placeholder='Password'
-                    value={password}
-                    onChange={(e) => { setPassword(e.target.value) }}
-                ></input>
+                <div className="mb-3">
+                    <input
+                        className="form-control" 
+                        type="email" 
+                        placeholder='Email' 
+                        value={email}
+                        onChange={(e) => { setEmail(e.target.value) }}
+                    ></input>
+                </div>
+                
+
+                <div className="mb-3">
+                    <input
+                        className="form-control" 
+                        type="password" 
+                        placeholder='Password'
+                        value={password}
+                        onChange={(e) => { setPassword(e.target.value) }}
+                    ></input>
+                </div>
+
+                
                 
                 {errorMessage && (<span>{errorMessage}</span>)}
-
-
-                <button
-                    type="submit"
-                    disabled={isSigningIn}
-                    className={`${isSigningIn}`}
-                >
-                    {isSigningIn ? 'Signing In...' : 'Sign In'}
-                </button>
-
+                
+                <div className="mb-3 text-center">
+                    <button
+                        id="login_btn"
+                        type="submit"
+                        disabled={isSigningIn}
+                        className={`${isSigningIn} btn btn-primary`}
+                    >
+                        {isSigningIn ? 'Signing In...' : 'Sign In'}
+                    </button>
+                </div>
             </form>  
         </div>
     )

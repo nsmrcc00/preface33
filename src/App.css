@@ -1,0 +1,22 @@
+body {
+    background-color: #FFFA79;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .form-control{
+    width: 320px;
+  }
+
+#login_heading{
+    font-family: 'Katahdin Round', sans-serif;
+    color: #81080B;
+    margin-bottom: 2rem;                                                
+}
+  
+#login_btn{
+    background-color: #81080B;
+    border-color: #81080B;
+}
