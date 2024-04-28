@@ -26,6 +26,11 @@
     background-color: #81080B;
     border-color: #81080B;
 }
+
+#heading{
+  background-color: #81080B;
+  color: white;
+}
 /*
 position: absolute;
     top: 50%;
