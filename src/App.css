@@ -1,22 +1,35 @@
-body {
-    background-color: #FFFA79;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-  
-  .form-control{
-    width: 320px;
-  }
+#login-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #FFFA79;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+
+
+.form-control{
+  width: 320px;
+  margin: 0 auto;
+  margin-bottom: 1rem; 
+}
 
 #login_heading{
     font-family: 'Katahdin Round', sans-serif;
     color: #81080B;
-    margin-bottom: 2rem;                                                
+    margin-bottom: 1.5rem;
+
 }
-  
+
 #login_btn{
     background-color: #81080B;
     border-color: #81080B;
 }
+/*
+position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+*/
