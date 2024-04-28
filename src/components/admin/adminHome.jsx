@@ -8,8 +8,17 @@ const AdminHome = () => {
     return (
         <>
             <Header/>
-            <div>Hello {currentUser.displayName ? currentUser.displayName : currentUser.email}, you are now logged in.</div>
-            
+            <div>
+                <h2>
+                Hello {currentUser.displayName ? currentUser.displayName : currentUser.email}, you are now logged in.    
+                </h2>            
+            </div>
+            <div>
+                a
+            </div>
+            <div>
+                b
+            </div>
         </>
     )
 }

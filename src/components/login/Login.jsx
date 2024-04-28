@@ -15,7 +15,8 @@ const Login = () => {
         if(!isSigningIn){
             setIsSigningIn(true)
             await doSignInWithEmailAndPassword(email, password).then((userCredential) => {
-                console.log(userCredential);
+                //FOR TESTING ONLY. WILL BE REMOVED AT LAUNCH
+                console.log(userCredential);            
             }).catch((error) => {
                 console.error(error);
                 setErrorMessage(error.message || "An error occurred during sign-in."); // Set generic message if error.message is not available
@@ -24,9 +25,9 @@ const Login = () => {
     }
 
     return (
-        <div>
+        <div id="login-page">
             {userLoggedIn && (<Navigate to={'/admin-home'} replace={true} />)}
-            <form onSubmit={logIn}>
+            <form id="inputs" onSubmit={logIn}>
                 <div className="mb-3 text-center">
                     <h1 id="login_heading">PREFACE</h1>
                 </div>
@@ -72,20 +73,3 @@ const Login = () => {
 }
 
 export default Login
-
-    
-    /*
-    const logIn = async (e) => {
-        e.preventDefault();
-        signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            console.log(userCredential);
-        }).catch((error) => {
-            console.log(error);
-        })
-    }
-
-    <button
-                    type="submit"
-                >Log In</button>
-    */
