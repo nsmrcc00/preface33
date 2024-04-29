@@ -1,9 +1,12 @@
 import React from 'react'
 import Login from './components/login/Login'
 import AdminHome from './components/admin/adminHome';
+import AccountsPage from './components/add-account/AddAccount';
 import './App.css'
 import { AuthProvider } from './contexts/authContext';
 import { useRoutes } from "react-router-dom";
+
+
 
 function App() {
   const routesArray = [
@@ -18,6 +21,10 @@ function App() {
     {
       path: "/admin-home",
       element: <AdminHome />,
+    },
+    {
+      path: "/accounts",
+      element: <AccountsPage />,
     },
   ];
   let routesElement = useRoutes(routesArray);
