@@ -19,47 +19,37 @@ const Login = () => {
                 console.log(userCredential);            
             }).catch((error) => {
                 console.error(error);
-                setErrorMessage(error.message || "An error occurred during sign-in."); // Set generic message if error.message is not available
               })
         }
     }
 
     return (
-        <div id="login-page">
+        <main id="login-page">
             {userLoggedIn && (<Navigate to={'/admin-home'} replace={true} />)}
-            <form id="inputs" onSubmit={logIn}>
-                <div className="mb-3 text-center">
+
+            <div className="mb-3 text-center">
                     <h1 id="login_heading">PREFACE</h1>
-                </div>
-
-                <div className="mb-3">
-                    <input
-                        className="form-control" 
-                        type="email" 
-                        placeholder='Email' 
-                        value={email}
-                        onChange={(e) => { setEmail(e.target.value) }}
-                    ></input>
-                </div>
+            </div>
+            <form id="inputs" onSubmit={logIn}>
+                <input
+                    className="form-control" 
+                    type="email" 
+                    placeholder='Email' 
+                    value={email}
+                    onChange={(e) => { setEmail(e.target.value) }}
+                ></input>
                 
-
-                <div className="mb-3">
-                    <input
-                        className="form-control" 
-                        type="password" 
-                        placeholder='Password'
-                        value={password}
-                        onChange={(e) => { setPassword(e.target.value) }}
-                    ></input>
-                </div>
-
-                
-                
-                {errorMessage && (<span>{errorMessage}</span>)}
-                
+                <input
+                    className="form-control" 
+                    type="password" 
+                    placeholder='Password'
+                    value={password}
+                    onChange={(e) => { setPassword(e.target.value) }}
+                ></input>
+        
                 <div className="mb-3 text-center">
                     <button
-                        id="login_btn"
+                        id="gen_btn"
                         type="submit"
                         disabled={isSigningIn}
                         className={`${isSigningIn} btn btn-primary`}
@@ -68,7 +58,7 @@ const Login = () => {
                     </button>
                 </div>
             </form>  
-        </div>
+        </main>
     )
 }
 
