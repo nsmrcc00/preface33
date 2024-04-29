@@ -1,13 +1,11 @@
 #login-page {
   width: 100%;
-  min-height: 100vh;
-  background-color: #FFFA79;
+  min-height: 100svh;
+  background-color: #DFCD8E;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
-
-
 
 .form-control{
   width: 320px;
@@ -17,21 +15,33 @@
 
 #login_heading{
     font-family: 'Katahdin Round', sans-serif;
-    color: #81080B;
-    margin-bottom: 1.5rem;
+    color: #AD1212;
+    
 
 }
 
-#login_btn{
-    background-color: #81080B;
-    border-color: #81080B;
+#gen_btn{
+    background-color: #AD1212;
+    border-color: #AD1212;
 }
 
 #heading{
-  background-color: #81080B;
+  background-color: #AD1212;
   color: white;
 }
-/*
+
+#adminHome{
+  width: 100%;
+  height: 100vh;
+  background-color: #DFCD8E;
+  display: flex;
+  flex-direction: column;
+}
+
+.header-off-canvas{
+  background-color: #DFCD8E;
+}
+/*margin-bottom: 1.5rem;
 position: absolute;
     top: 50%;
     left: 50%;
