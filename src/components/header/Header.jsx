@@ -54,30 +54,3 @@ function Header() {
 }
 
 export default Header
-/**
- * <Offcanvas.Title>{currentUser.displayName ? currentUser.displayName : currentUser.email}</Offcanvas.Title>
- * 
- * import NavDropdown from 'react-bootstrap/NavDropdown';
- * 
- * <Navbar.Brand href="#home" style={{color: "white"}}>PreFace</Navbar.Brand>            
-                    <Navbar.Collapse className="justify-content-end">               
-                        <NavDropdown title={"Signed in as: " + (currentUser.displayName ? currentUser.displayName : currentUser.email)} drop="down-centered" id="basic-nav-dropdown">
-                            <NavDropdown.Item onClick={() => { doSignOut().then(() => { navigate('/login') }) }}>Logout</NavDropdown.Item>
-                        </NavDropdown>
-                    </Navbar.Collapse>
- * 
-            const { userLoggedIn } = useAuth()
-            <div>
-            {
-                userLoggedIn
-                ?
-                <>
-                    <button onClick={() => { doSignOut().then(() => { navigate('/login') }) }}>Logout</button>
-                </>
-                :
-                <>
-                    <Link to={'/login'}>Login</Link>
-                </>
-            }
-            </div>
- */
