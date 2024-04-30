@@ -2,7 +2,12 @@ import React, { useState } from "react"
 import { Navigate, Link } from 'react-router-dom'
 import { useAuth } from "../../contexts/authContext"
 import { doCreateUserWithEmailAndPassword } from "../../firebase/auth"
+/*
 
+ADD ACCOUNT, FIND A WAY TO DO ROLE BASED AUTHENTICATION ASAP
+
+
+*/
 const AccountsPage = () => {
 
     const navigate = useNavigate()
