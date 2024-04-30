@@ -2,4 +2,4 @@
 
 after cloning run `npm install`
 
-then 'npm run dev'
+then `npm run dev`
