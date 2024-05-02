@@ -13,7 +13,7 @@ const AdminHome = () => {
             <main id='adminHome'>
                 
                 <section>
-                    <container >
+                    <Container >
                     <h2>
                     Hello {currentUser.displayName ? currentUser.displayName : currentUser.email}, you are now logged in.    
                     </h2>
@@ -26,7 +26,7 @@ const AdminHome = () => {
                     <section id="subj-list">
                         <h2>TEST</h2>
                     </section>
-                    </container>
+                    </Container>
                     
                 </section>
             </main>            
