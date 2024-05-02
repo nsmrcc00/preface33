@@ -41,6 +41,13 @@
 .header-off-canvas{
   background-color: #DFCD8E;
 }
+
+#student-account-div{
+  border-radius: 25px;
+  width: 360px;
+  height: 240px;
+  background-color: #AD1212
+}
 /*margin-bottom: 1.5rem;
 position: absolute;
     top: 50%;

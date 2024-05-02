@@ -18,16 +18,15 @@ const AdminHome = () => {
                     Hello {currentUser.displayName ? currentUser.displayName : currentUser.email}, you are now logged in.    
                     </h2>
 
-                    <section id="acc-list">
-                        <p>a</p>
-                           
-                    </section>
-
-                    <section id="subj-list">
-                        <h2>TEST</h2>
-                    </section>
-                    </Container>
+                    <div id="student-account-div">
                     
+                           
+                    </div>
+
+                    <div id="student-account-div">
+                        <h2>TEST</h2>
+                    </div>
+                    </Container>                    
                 </section>
             </main>            
         </>
