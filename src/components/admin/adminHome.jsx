@@ -3,6 +3,8 @@ import { Navigate, Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/authContext'
 import Header from '../header/Header'
 import Container from 'react-bootstrap/Container';
+import background from "/banner_1.jpg"
+import { Image } from 'react-bootstrap';
 
 const AdminHome = () => {
     const { currentUser } = useAuth()
@@ -10,23 +12,33 @@ const AdminHome = () => {
     return (
         <>
             <Header/>
-            <main id='adminHome'>
+            <main 
+            id="adminHome"
+            style={{ 
+                backgroundImage: `url(${background})`,
+                backgroundPosition: 'center',
+                backgroundSize: 'cover',
+                backgroundRepeat: 'no-repeat'                         
+            }}
+            >
                 
-                <section>
-                    <Container >
-                    <h2>
-                    Hello {currentUser.displayName ? currentUser.displayName : currentUser.email}, you are now logged in.    
-                    </h2>
+                <section
+                id='adminHome-sec'
+                
+                >
 
-                    <div id="student-account-div">
                     
-                           
+
+                    <div id="instructor-acc-div"className="admin-dash-div">
+                        <h2>Instructor Accounts</h2>                           
                     </div>
 
-                    <div id="student-account-div">
-                        <h2>TEST</h2>
+                    <div id="student-acc-div" className="admin-dash-div">
+                        <h2>Students Accounts</h2>
                     </div>
-                    </Container>                    
+
+                    
+                                      
                 </section>
             </main>            
         </>
