@@ -8,18 +8,19 @@ const Login = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [isSigningIn, setIsSigningIn] = useState(false)
-    const [errorMessage, setErrorMessage] = useState('')//NEED TO ADD ERROR CHECKING
+    const [errorMessage, setErrorMessage] = useState('')//NEED TO ADD ERROR CHECKING AND VALIDATION
 
     const logIn = async (e) => {
         e.preventDefault();
         if(!isSigningIn){
             setIsSigningIn(true)
             await doSignInWithEmailAndPassword(email, password).then((userCredential) => {
+                console.log("User logged in successfully");
                 //FOR TESTING ONLY. WILL BE REMOVED AT LAUNCH
                 console.log(userCredential);            
             }).catch((error) => {
                 console.error(error);
-              })
+            })
         }
     }
 
