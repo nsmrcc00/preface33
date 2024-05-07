@@ -1,12 +1,11 @@
 import React from 'react'
 import Login from './components/login/Login'
 import AdminHome from './components/admin/adminHome/adminHome';
-import AccountsPage from './components/add-account/AddAccountTEMP';
 import './App.css'
 import { AuthProvider } from './contexts/authContext';
 import { useRoutes } from "react-router-dom";
-import InsAccount from './components/add-account/InstructorAccount';
-import StudentAccount from './components/add-account/StudentAccount';
+import InsAccount from './components/admin/add-account/InstructorAccount';
+import StudentAccount from './components/admin/add-account/StudentAccount';
 
 
 

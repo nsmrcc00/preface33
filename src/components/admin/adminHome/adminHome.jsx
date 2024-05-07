@@ -6,7 +6,7 @@ import background from "/banner_1.jpg"
 
 
 const AdminHome = () => {
-    const { currentUser } = useAuth()
+    const { userLoggedIn,currentUser } = useAuth()
     const navigate = useNavigate()
     //navigate to instructor account page
     const navi1 = () => {
@@ -37,9 +37,10 @@ const AdminHome = () => {
             id="adminHome"
             style={{ 
                 backgroundImage: `url(${background})`,
-                backgroundPosition: 'center',
+                backgroundPosition: 'center center',
                 backgroundSize: 'cover',
-                backgroundRepeat: 'no-repeat'                         
+                backgroundRepeat: 'no-repeat',
+                backgroundAttachment: 'fixed',                         
             }}
             >
                 
@@ -51,7 +52,7 @@ const AdminHome = () => {
                         <h2>Instructor Accounts</h2>                           
                     </div>
 
-                    <div id="student-acc-div" className="admin-dash-div">
+                    <div id="student-acc-div" className="admin-dash-div" onClick={navi2}>
                         <h2>Students Accounts</h2>
                     </div>
 
