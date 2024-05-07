@@ -10,11 +10,19 @@ import ListGroup from 'react-bootstrap/ListGroup';
 
 function Header() {
     const navigate = useNavigate()
-    const { currentUser } = useAuth()
+    const { userLoggedIn,currentUser } = useAuth()
     const [show, setShow] = useState(false);
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
+
+    const navi1 = () => {
+        if (userLoggedIn == true) {
+            navigate('/accounts');
+        }
+    };
+
+    
     
     return (
         <>
@@ -47,6 +55,7 @@ function Header() {
                 Signed in as: {currentUser.displayName ? currentUser.displayName : currentUser.email}
                 <ListGroup>
                     <ListGroup.Item>
+                        
                         Instructor Accounts
                     </ListGroup.Item>
                     <ListGroup.Item>
