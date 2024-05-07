@@ -14,13 +14,14 @@ const Login = () => {
         e.preventDefault();
         if(!isSigningIn){
             setIsSigningIn(true)
-            await new Promise(resolve => setTimeout(resolve, 300));
+            await new Promise(resolve => setTimeout(resolve, 150));
             await doSignInWithEmailAndPassword(email, password).then((userCredential) => {
                 console.log("User logged in successfully");
                 //FOR TESTING ONLY. WILL BE REMOVED AT LAUNCH
                 console.log(userCredential);            
             }).catch((error) => {
                 console.error(error);
+                alert("Error! Please sign in with valid credentials.")
             })
             setIsSigningIn(false); // Reset signing in state after attempt
         }
@@ -60,6 +61,7 @@ const Login = () => {
                         {isSigningIn ? 'Signing In...' : 'Sign In'}
                     </button>
                 </div>
+                
             </form>  
         </main>
     )
