@@ -14,6 +14,7 @@ const Login = () => {
         e.preventDefault();
         if(!isSigningIn){
             setIsSigningIn(true)
+            await new Promise(resolve => setTimeout(resolve, 300));
             await doSignInWithEmailAndPassword(email, password).then((userCredential) => {
                 console.log("User logged in successfully");
                 //FOR TESTING ONLY. WILL BE REMOVED AT LAUNCH
@@ -21,6 +22,7 @@ const Login = () => {
             }).catch((error) => {
                 console.error(error);
             })
+            setIsSigningIn(false); // Reset signing in state after attempt
         }
     }
 

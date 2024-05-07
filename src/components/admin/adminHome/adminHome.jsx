@@ -1,14 +1,35 @@
 import React from 'react'
-import { Navigate, Link } from 'react-router-dom'
-import { useAuth } from '../../contexts/authContext'
-import Header from '../header/Header'
-import Container from 'react-bootstrap/Container';
+import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../../../contexts/authContext'
+import Header from '../../header/Header'
 import background from "/banner_1.jpg"
-import { Image } from 'react-bootstrap';
+
 
 const AdminHome = () => {
     const { currentUser } = useAuth()
-    
+    const navigate = useNavigate()
+    //navigate to instructor account page
+    const navi1 = () => {
+        if (userLoggedIn == true) {
+            navigate('/instructor-accounts');
+        }
+        else {
+            doSignOut();
+            navigate('/login');
+        }
+    };
+
+    //navigate to student account page
+    const navi2 = () => {
+        if (userLoggedIn == true) {
+            navigate('/student-accounts');
+        }
+        else {
+            doSignOut();
+            navigate('/login');
+        }
+    };
+
     return (
         <>
             <Header/>
@@ -26,10 +47,7 @@ const AdminHome = () => {
                 id='adminHome-sec'
                 
                 >
-
-                    
-
-                    <div id="instructor-acc-div"className="admin-dash-div">
+                    <div id="instructor-acc-div"className="admin-dash-div" onClick={navi1}>
                         <h2>Instructor Accounts</h2>                           
                     </div>
 

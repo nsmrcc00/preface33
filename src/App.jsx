@@ -1,6 +1,6 @@
 import React from 'react'
 import Login from './components/login/Login'
-import AdminHome from './components/admin/adminHome';
+import AdminHome from './components/admin/adminHome/adminHome';
 import AccountsPage from './components/add-account/AddAccountTEMP';
 import './App.css'
 import { AuthProvider } from './contexts/authContext';
