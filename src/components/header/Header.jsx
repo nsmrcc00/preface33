@@ -16,13 +16,34 @@ function Header() {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
+    //navigate to instructor account page
     const navi1 = () => {
         if (userLoggedIn == true) {
-            navigate('/accounts');
+            navigate('/instructor-accounts');
+        }
+        else {
+            doSignOut();
+            navigate('/login');
         }
     };
 
-    
+    //navigate to student account page
+    const navi2 = () => {
+        if (userLoggedIn == true) {
+            navigate('/student-accounts');
+        }
+        else {
+            doSignOut();
+            navigate('/login');
+        }
+    };
+
+    //navigate to home
+    const navi3 = () => {
+        if (userLoggedIn == true) {
+            navigate('/admin-home')
+        }
+    }
     
     return (
         <>
@@ -38,7 +59,8 @@ function Header() {
                             src='preface.png' 
                             alt="PreFace" 
                             width="135" 
-                            height="30"                             
+                            height="30"
+                            onClick={navi3}                             
                         />
                     </Navbar.Brand>
                     </Navbar.Collapse>
@@ -54,11 +76,10 @@ function Header() {
                 
                 Signed in as: {currentUser.displayName ? currentUser.displayName : currentUser.email}
                 <ListGroup>
-                    <ListGroup.Item>
-                        
+                    <ListGroup.Item action onClick={navi1}>                        
                         Instructor Accounts
                     </ListGroup.Item>
-                    <ListGroup.Item>
+                    <ListGroup.Item action onClick={navi2}>
                         Student Accounts
                     </ListGroup.Item>
                 </ListGroup> 
