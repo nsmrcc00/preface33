@@ -1,65 +1,57 @@
 import React, { useState, useEffect } from 'react'
 import { db } from '../../../firebase/firebase';
 
-const addSubject = () => {
-    const [newTask, setNewTask] = useState('');
-    const [tasks, setTasks] = useState([]);
-    const [selectedId, setSelectedId] = useState('');
+const AddSubject = () => {
+    const [subjectData, setSubjectData] = useState({
+        title: '',
+        instructor: '',
+        schedule: '',
+      });
+      const [subjects, setSubjects] = useState([])
 
-    // Fetch tasks on component mount
-    useEffect(() => {
-        const unsubscribe = db.collection('tasks').onSnapshot((snapshot) => {
-            const allTasks = snapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
-            setTasks(allTasks);
-        });
-
-        return unsubscribe;
-    }, []);
-
-    // Create a new task
-    const handleAddTask = async (e) => {
+      const handleSubmit = async (e) => {
         e.preventDefault();
-        if (newTask) {
-            await db.collection('tasks').add({
-                task: newTask,
-            });
-            setNewTask('');
-        }
-    };
+        await db.collection('subject').add(subjectData);
+        setSubjectData({ title: '', instructor: '', schedule: '' });
+      };
 
-    // Update a task
-    const handleUpdateTask = async (id, updatedTask) => {
-        await db.collection('tasks').doc(id).update({
-            task: updatedTask,
+      useEffect(() => {
+        const unsubscribe = db.collection('subject').onSnapshot((snapshot) => {
+          const subjectList = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setSubjects(subjectList);
         });
-    };
-
-    // Delete a task
-    const handleDeleteTask = async (id) => {
-        await db.collection('tasks').doc(id).delete();
-    };
+      
+        return () => unsubscribe(); // Cleanup function to prevent memory leaks
+      }, []);
 
     return (
         <div>
-            <h2>CRUD App</h2>
-            <form onSubmit={handleAddTask}>
-                <input type="text" value={newTask} onChange={(e) => setNewTask(e.target.value)} placeholder="Add Task" />
-                <button type="submit">Add</button>
-            </form>
-            <ul>
-                {tasks.map((task) => (
-                    <li key={task.id}>
-                        {task.task}
-                        <button onClick={() => handleUpdateTask(task.id, prompt('Update Task:'))}>Update</button>
-                        <button onClick={() => handleDeleteTask(task.id)}>Delete</button>
+            {/* Form to capture subject data */}
+            <input
+                type="text"
+                placeholder="Title"
+                value={subjectData.title}
+                onChange={(e) => setSubjectData({ ...subjectData, title: e.target.value })}
+            />
+            {/* ... (similar inputs for instructor and schedule) */}
+            <button onClick={handleSubmit}>Add Subject</button>
+
+            {/* Display a list of subjects (optional) */}
+            {subjects.length > 0 && (
+                <ul>
+                {subjects.map((subject) => (
+                    <li key={subject.id}>
+                    {subject.title} - {subject.instructor} ({subject.schedule})
+                    {/* Buttons for edit and delete (optional) */}
                     </li>
                 ))}
-            </ul>
+                </ul>
+            )}
         </div>
     )
 }
 
-export default addSubject
+export default AddSubject
