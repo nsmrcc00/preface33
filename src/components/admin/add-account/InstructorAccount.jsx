@@ -1,14 +1,21 @@
 import React from 'react'
 import Header from '../../header/Header'
-
+import addSubject from '../add-subject/addSubject'
 
 const InsAccount = () => {
   return (
     <>
     <Header/>
-    <div>
-      <h1>Hello World</h1>
-    </div>
+    <main>
+      <section>
+        <form>
+          <input></input>
+          <input></input>
+          <input></input>
+        </form>
+        <addSubject/>
+      </section>
+    </main>
     </>
     
   )

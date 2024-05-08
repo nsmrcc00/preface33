@@ -44,10 +44,7 @@ const AdminHome = () => {
             }}
             >
                 
-                <section
-                id='adminHome-sec'
-                
-                >
+                <section id='adminHome-sec'>
                     <div id="instructor-acc-div"className="admin-dash-div" onClick={navi1}>
                         <h2>Instructor Accounts</h2>                           
                     </div>
