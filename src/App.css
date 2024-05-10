@@ -85,6 +85,34 @@
 }
 
 
+#submitSub{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: space-evenly;
+}
+
+.addSubForm{
+  display: flex;
+  flex-direction: column;
+  width: 250px;  
+}
+
+#subCrudDiv{
+  display: flex;
+  margin-top: 10px;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+}
+.subCrudButton {
+  margin: 8px;
+  width: 180px;
+  height: 34px;
+}
+
+
 /*margin-bottom: 1.5rem;
 position: absolute;
     top: 50%;

@@ -51,6 +51,11 @@ const AddSubject = () => {
     try {
       await updateDoc(doc(db, "Subjects", title), updatedData);
       console.log("Subject updated successfully!");
+      setSubject({
+        instructor: '',
+        schedule: '',
+        title: ''
+      });
     } catch (error) {
       console.error("Error updating subject:", error);
     }
@@ -60,51 +65,76 @@ const AddSubject = () => {
     try {
       await deleteDoc(doc(db, "Subjects", title));
       console.log("Subject deleted successfully!");
+      setSubject({
+        instructor: '',
+        schedule: '',
+        title: ''
+      });
     } catch (error) {
       console.error("Error deleting subject:", error);
     }
+    
   };
 
   return (
-    <>    
-      <form onSubmit={addSub}>
-        <label>
-          Instructor:
-          <input
-            type="text"
-            name="instructor"
-            value={subject.instructor}
-            onChange={handleChange}
-          />
-        </label>
-        <label>
-          Schedule:
-          <input
-            type="text"
-            name="schedule"
-            value={subject.schedule}
-            onChange={handleChange}
-          />
-        </label>
-        <label>
-          Title:
-          <input
-            type="text"
-            name="title"
-            value={subject.title}
-            onChange={handleChange}
-          />
-        </label>
-        <button type="submit">Add Subject</button>
-      </form>
-
-      <button onClick={() => getSub(subject.title)}>Get Subject</button>
-      <button onClick={() => updateSub(subject.title, {
-        instructor: subject.instructor,
-        schedule: subject.schedule,
-        title: subject.title
-      })}>Update Subject</button>
-      <button onClick={() => deleteSub(subject.title)}>Delete Subject</button>
+    <>  
+      <main>
+        <section>
+          <form id='submitSub' onSubmit={addSub}>
+            <label className='addSubForm'>
+              Instructor:
+              <input
+                type="text"
+                name="instructor"
+                value={subject.instructor}
+                onChange={handleChange}
+              />
+            </label>
+            <label className='addSubForm'>
+              Schedule:
+              <input
+                type="text"
+                name="schedule"
+                value={subject.schedule}
+                onChange={handleChange}
+              />
+            </label>
+            <label className='addSubForm'>
+              Title:
+              <input
+                type="text"
+                name="title"
+                value={subject.title}
+                onChange={handleChange}
+              />
+            </label>
+            <button 
+              type="submit" 
+              class="subCrudButton"
+            >Add Subject</button>             
+          </form>
+          <div id="subCrudDiv">
+            
+            <button 
+              onClick={() => getSub(subject.title)} 
+              class="subCrudButton"
+            >Get Subject</button>
+            <button 
+              onClick={() => updateSub(subject.title, 
+              {
+                instructor: subject.instructor,
+                schedule: subject.schedule,
+                title: subject.title
+              })}
+              class="subCrudButton"
+            >Update Subject</button>
+            <button 
+              onClick={() => deleteSub(subject.title)}
+              class="subCrudButton"
+            >Delete Subject</button>
+          </div> 
+        </section>
+      </main>
     </>
   );
 };
