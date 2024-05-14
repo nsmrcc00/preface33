@@ -5,10 +5,12 @@ import Header from '../../header/Header'
 const StudentAccount = () => {
   return (
     <>
-        <Header />
-        <div>
-            <h1>Student Account</h1>
-        </div>
+        <Header />        
+        <main>
+          <section>
+            <h1>Student</h1>
+          </section>
+        </main>
     </>
 
   )
