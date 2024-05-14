@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Header from '../../header/Header'; 
 import background from "/banner_1.jpg"; 
+import AddSubject from '../add-subject/addSubject'
 
 const InsAccount = () => {
   const [searchQuery, setSearchQuery] = useState('');
