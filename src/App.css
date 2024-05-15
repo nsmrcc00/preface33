@@ -108,6 +108,20 @@
   height: 34px;
 }
 
+
+/*Instructor Account Table*/
+#instructorHome {
+  width: auto;  
+  min-height: 100vh;  
+}
+
+#instructorsTable {  
+  display: grid;
+  justify-items: center;
+}
+
+
+
 table-container {
   margin-top: 20px;
   overflow-x: auto; 
@@ -137,20 +151,34 @@ tbody tr:hover {
   background-color: #ddd;
 }
 
-
-
-
-/*
-html {
-  font-size: 62.5%;
+/**
+#ins-header, #ins-header-content{
+  display: flex;
+}
+#ins-header{  
+  flex-direction: column;
+  justify-content: end;
+  height: 200px;
+  width: 65%;
+  background-color: #AD1212;
+  border-radius: 20px;
 }
 
-body{
-  font-size: 1.6rem;
+#ins-header-content{
+  height: 75px;
+  width: 100%;
+  background-color: white;
+  justify-content: center;
+  align-items: center;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
 }
 
-h2{
-  font-size: 2.4rem;
-}
+<div id='ins-header'>
+  <div id='ins-header-content'>INSTRUCTOR ACCOUNTS</div>
+</div>
 
-*/
+
+
+
+/
