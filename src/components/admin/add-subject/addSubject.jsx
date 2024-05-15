@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase/firebase';
-import { doc, setDoc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore'; 
+import { doc, setDoc, getDoc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore'; 
 
 const AddSubject = () => {
   const [subject, setSubject] = useState({
@@ -8,6 +8,8 @@ const AddSubject = () => {
     schedule: '',
     title: ''
   });
+
+  const [subjects, setSubjects] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,6 +30,7 @@ const AddSubject = () => {
         schedule: '',
         title: ''
       });
+      fetchSubjects(); // Refresh the table after adding a subject
     } catch (error) {
       console.error("Error adding subject:", error);
     }
@@ -56,6 +59,7 @@ const AddSubject = () => {
         schedule: '',
         title: ''
       });
+      fetchSubjects(); // Refresh the table after adding a subject
     } catch (error) {
       console.error("Error updating subject:", error);
     }
@@ -68,13 +72,30 @@ const AddSubject = () => {
       setSubject({
         instructor: '',
         schedule: '',
-        title: ''
+        title: '',
       });
+      fetchSubjects(); // Refresh the table after adding a subject
     } catch (error) {
       console.error("Error deleting subject:", error);
     }
     
   };
+
+  //not working yet
+  const fetchSubjects = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "Subjects"));
+      const subjectsList = querySnapshot.docs.map(doc => doc.data());
+      setSubjects(subjectsList);
+      console.log
+    } catch (error) {
+      console.error("Error fetching subjects:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSubjects(); // Fetch subjects when the component mounts
+  }, []);
 
   return (
     <>  
@@ -110,14 +131,14 @@ const AddSubject = () => {
             </label>
             <button 
               type="submit" 
-              class="subCrudButton"
+              className="subCrudButton"
             >Add Subject</button>             
           </form>
           <div id="subCrudDiv">
             
             <button 
               onClick={() => getSub(subject.title)} 
-              class="subCrudButton"
+              className="subCrudButton"
             >Get Subject</button>
             <button 
               onClick={() => updateSub(subject.title, 
@@ -126,12 +147,35 @@ const AddSubject = () => {
                 schedule: subject.schedule,
                 title: subject.title
               })}
-              class="subCrudButton"
+              className="subCrudButton"
             >Update Subject</button>
             <button 
               onClick={() => deleteSub(subject.title)}
-              class="subCrudButton"
+              className="subCrudButton"
             >Delete Subject</button>
+          </div>
+
+
+          <div>
+            <h2>Subjects List</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Instructor</th>
+                  <th>Schedule</th>
+                </tr>
+              </thead>
+              <tbody>
+                {subjects.map((sub, index) => (
+                  <tr key={index}>
+                    <td>{sub.title}</td>
+                    <td>{sub.instructor}</td>
+                    <td>{sub.schedule}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div> 
         </section>
       </main>
