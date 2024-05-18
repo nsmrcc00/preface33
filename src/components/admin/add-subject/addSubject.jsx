@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase/firebase';
-import { doc, setDoc, getDoc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore'; 
+import { doc, setDoc, getDoc, updateDoc, deleteDoc, getDocs, collection } from 'firebase/firestore'; 
 
 const AddSubject = () => {
   const [subject, setSubject] = useState({
@@ -33,20 +33,6 @@ const AddSubject = () => {
       fetchSubjects(); // Refresh the table after adding a subject
     } catch (error) {
       console.error("Error adding subject:", error);
-    }
-  };
-
-  const getSub = async (title) => {
-    try {
-      const docSnap = await getDoc(doc(db, "Subjects", title));
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        console.log("Subject:", data);
-      } else {
-        console.log("No such subject!");
-      }
-    } catch (error) {
-      console.error("Error getting subject:", error);
     }
   };
 
@@ -100,7 +86,30 @@ const AddSubject = () => {
   return (
     <>  
       <main>
-        <section>
+        <section id='schoolSectionPage'>
+
+        <div>
+            <h2>Subjects List</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Instructor</th>
+                  <th>Schedule</th>
+                </tr>
+              </thead>
+              <tbody>
+                {subjects.map((sub, index) => (
+                  <tr key={index}>
+                    <td>{sub.title}</td>
+                    <td>{sub.instructor}</td>
+                    <td>{sub.schedule}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div> 
+
           <form id='submitSub' onSubmit={addSub}>
             <label className='addSubForm'>
               Instructor:
@@ -129,54 +138,32 @@ const AddSubject = () => {
                 onChange={handleChange}
               />
             </label>
-            <button 
-              type="submit" 
-              className="subCrudButton"
-            >Add Subject</button>             
-          </form>
-          <div id="subCrudDiv">
             
-            <button 
-              onClick={() => getSub(subject.title)} 
-              className="subCrudButton"
-            >Get Subject</button>
-            <button 
-              onClick={() => updateSub(subject.title, 
-              {
-                instructor: subject.instructor,
-                schedule: subject.schedule,
-                title: subject.title
-              })}
-              className="subCrudButton"
-            >Update Subject</button>
-            <button 
-              onClick={() => deleteSub(subject.title)}
-              className="subCrudButton"
-            >Delete Subject</button>
-          </div>
+            <div id="subCrudDiv">            
+              <button 
+                type="submit" 
+                className="subCrudButton"
+              >Add Subject</button>
+
+              <button 
+                onClick={() => updateSub(subject.title, 
+                {
+                  instructor: subject.instructor,
+                  schedule: subject.schedule,
+                  title: subject.title
+                })}
+                className="subCrudButton"
+              >Update Subject</button>
+              <button 
+                onClick={() => deleteSub(subject.title)}
+                className="subCrudButton"
+              >Delete Subject</button>
+            </div>             
+          </form>
+          
 
 
-          <div>
-            <h2>Subjects List</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>Title</th>
-                  <th>Instructor</th>
-                  <th>Schedule</th>
-                </tr>
-              </thead>
-              <tbody>
-                {subjects.map((sub, index) => (
-                  <tr key={index}>
-                    <td>{sub.title}</td>
-                    <td>{sub.instructor}</td>
-                    <td>{sub.schedule}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div> 
+          
         </section>
       </main>
     </>
