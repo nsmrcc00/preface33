@@ -81,12 +81,19 @@
 }
 
 /*Subject*/
+#schoolSectionPage {
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+}
+
 #submitSub{
   display: flex;
   flex-direction: column;
   align-items: center;
   flex-wrap: nowrap;
   justify-content: space-evenly;
+  
 }
 
 .addSubForm{
