@@ -57,11 +57,7 @@ const AddSubject = () => {
     try {
       await deleteDoc(doc(db, "Subjects", title));
       console.log("Subject deleted successfully!");
-      setSubject({
-        instructor: '',
-        schedule: '',
-        title: '',
-      });
+      
       fetchSubjects(); // Refresh the table after adding a subject
     } catch (error) {
       alert("Error deleting subject.")
