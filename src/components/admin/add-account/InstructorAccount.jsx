@@ -3,7 +3,8 @@ import Modal from 'react-modal';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Header from '../../header/Header'; 
-import background from "/banner_1.jpg"; 
+import background from "/banner_1.jpg";
+import AddSubject from '../add-subject/addSubject';
 
 Modal.setAppElement('#root');
 
