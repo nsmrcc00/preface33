@@ -32,7 +32,8 @@ const AddSubject = () => {
       });
       fetchSubjects(); // Refresh the table after adding a subject
     } catch (error) {
-      console.error("Error adding subject:", error);
+      alert("Error adding subject.")
+      console.error(error);
     }
   };
 
@@ -47,7 +48,8 @@ const AddSubject = () => {
       });
       fetchSubjects(); // Refresh the table after adding a subject
     } catch (error) {
-      console.error("Error updating subject:", error);
+      alert("Error updating subject.")
+      console.error(error);
     }
   };
 
@@ -62,12 +64,16 @@ const AddSubject = () => {
       });
       fetchSubjects(); // Refresh the table after adding a subject
     } catch (error) {
-      console.error("Error deleting subject:", error);
+      alert("Error deleting subject.")
+      console.error(error);
     }
     
   };
 
-  //not working yet
+  const handleRowClick = (sub) => {
+    setSubject(sub);
+  };
+
   const fetchSubjects = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "Subjects"));
@@ -100,7 +106,7 @@ const AddSubject = () => {
               </thead>
               <tbody>
                 {subjects.map((sub, index) => (
-                  <tr key={index}>
+                  <tr key={index} onClick={() => handleRowClick(sub)}>
                     <td>{sub.title}</td>
                     <td>{sub.instructor}</td>
                     <td>{sub.schedule}</td>
@@ -111,6 +117,16 @@ const AddSubject = () => {
           </div> 
 
           <form id='submitSub' onSubmit={addSub}>
+
+            <label className='addSubForm'>
+              Title:
+              <input
+                type="text"
+                name="title"
+                value={subject.title}
+                onChange={handleChange}
+              />
+            </label>
             <label className='addSubForm'>
               Instructor:
               <input
@@ -129,16 +145,6 @@ const AddSubject = () => {
                 onChange={handleChange}
               />
             </label>
-            <label className='addSubForm'>
-              Title:
-              <input
-                type="text"
-                name="title"
-                value={subject.title}
-                onChange={handleChange}
-              />
-            </label>
-            
             <div id="subCrudDiv">            
               <button 
                 type="submit" 

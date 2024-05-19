@@ -85,6 +85,7 @@
   display: flex;
   justify-content: space-evenly;
   flex-wrap: wrap;
+  background-color: #fff;
 }
 
 #submitSub{
@@ -137,6 +138,7 @@ table-container {
 table {
   width: 100%;
   border-collapse: collapse;
+  cursor: pointer;
 }
 
 th, td {
