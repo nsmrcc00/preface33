@@ -160,6 +160,21 @@ tbody tr:hover {
   background-color: #ddd;
 }
 
+
+
+/*Student CRUD Page*/
+#studentCrudPage{
+  width: auto;  
+  min-height: 100vh;  
+}
+
+.studentCrudContent{
+  background-color: white;
+  min-height: 100vh;
+  width: 60%;
+  display: flex;
+  justify-content: center;
+}
 /**
 #ins-header, #ins-header-content{
   display: flex;
