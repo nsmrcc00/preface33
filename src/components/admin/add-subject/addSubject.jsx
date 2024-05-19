@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase/firebase';
-import { doc, setDoc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore'; 
+import { doc, setDoc, getDoc, updateDoc, deleteDoc, getDocs, collection } from 'firebase/firestore'; 
 
 const AddSubject = () => {
   const [subject, setSubject] = useState({
@@ -8,6 +8,8 @@ const AddSubject = () => {
     schedule: '',
     title: ''
   });
+
+  const [subjects, setSubjects] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,22 +30,10 @@ const AddSubject = () => {
         schedule: '',
         title: ''
       });
+      fetchSubjects(); // Refresh the table after adding a subject
     } catch (error) {
-      console.error("Error adding subject:", error);
-    }
-  };
-
-  const getSub = async (title) => {
-    try {
-      const docSnap = await getDoc(doc(db, "Subjects", title));
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        console.log("Subject:", data);
-      } else {
-        console.log("No such subject!");
-      }
-    } catch (error) {
-      console.error("Error getting subject:", error);
+      alert("Error adding subject.")
+      console.error(error);
     }
   };
 
@@ -56,8 +46,10 @@ const AddSubject = () => {
         schedule: '',
         title: ''
       });
+      fetchSubjects(); // Refresh the table after adding a subject
     } catch (error) {
-      console.error("Error updating subject:", error);
+      alert("Error updating subject.")
+      console.error(error);
     }
   };
 
@@ -65,22 +57,72 @@ const AddSubject = () => {
     try {
       await deleteDoc(doc(db, "Subjects", title));
       console.log("Subject deleted successfully!");
-      setSubject({
-        instructor: '',
-        schedule: '',
-        title: ''
-      });
+      
+      fetchSubjects(); // Refresh the table after adding a subject
     } catch (error) {
-      console.error("Error deleting subject:", error);
+      alert("Error deleting subject.")
+      console.error(error);
     }
     
   };
 
+  const handleRowClick = (sub) => {
+    setSubject(sub);
+  };
+
+  const fetchSubjects = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "Subjects"));
+      const subjectsList = querySnapshot.docs.map(doc => doc.data());
+      setSubjects(subjectsList);
+      console.log
+    } catch (error) {
+      console.error("Error fetching subjects:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSubjects(); // Fetch subjects when the component mounts
+  }, []);
+
   return (
     <>  
       <main>
-        <section>
+        <section id='schoolSectionPage'>
+
+        <div>
+            <h2>Subjects List</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Instructor</th>
+                  <th>Schedule</th>
+                </tr>
+              </thead>
+              <tbody>
+                {subjects.map((sub, index) => (
+                  <tr key={index} onClick={() => handleRowClick(sub)}>
+                    <td>{sub.title}</td>
+                    <td>{sub.instructor}</td>
+                    <td>{sub.schedule}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div> 
+
           <form id='submitSub' onSubmit={addSub}>
+
+            <label className='addSubForm'>
+              Title:
+              <input
+                type="text"
+                name="title"
+                value={subject.title}
+                onChange={handleChange}
+              />
+            </label>
             <label className='addSubForm'>
               Instructor:
               <input
@@ -99,40 +141,31 @@ const AddSubject = () => {
                 onChange={handleChange}
               />
             </label>
-            <label className='addSubForm'>
-              Title:
-              <input
-                type="text"
-                name="title"
-                value={subject.title}
-                onChange={handleChange}
-              />
-            </label>
-            <button 
-              type="submit" 
-              class="subCrudButton"
-            >Add Subject</button>             
+            <div id="subCrudDiv">            
+              <button 
+                type="submit" 
+                className="subCrudButton"
+              >Add Subject</button>
+
+              <button 
+                onClick={() => updateSub(subject.title, 
+                {
+                  instructor: subject.instructor,
+                  schedule: subject.schedule,
+                  title: subject.title
+                })}
+                className="subCrudButton"
+              >Update Subject</button>
+              <button 
+                onClick={() => deleteSub(subject.title)}
+                className="subCrudButton"
+              >Delete Subject</button>
+            </div>             
           </form>
-          <div id="subCrudDiv">
-            
-            <button 
-              onClick={() => getSub(subject.title)} 
-              class="subCrudButton"
-            >Get Subject</button>
-            <button 
-              onClick={() => updateSub(subject.title, 
-              {
-                instructor: subject.instructor,
-                schedule: subject.schedule,
-                title: subject.title
-              })}
-              class="subCrudButton"
-            >Update Subject</button>
-            <button 
-              onClick={() => deleteSub(subject.title)}
-              class="subCrudButton"
-            >Delete Subject</button>
-          </div> 
+          
+
+
+          
         </section>
       </main>
     </>

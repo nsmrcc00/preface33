@@ -81,12 +81,20 @@
 }
 
 /*Subject*/
+#schoolSectionPage {
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  background-color: #fff;
+}
+
 #submitSub{
   display: flex;
   flex-direction: column;
   align-items: center;
   flex-wrap: nowrap;
   justify-content: space-evenly;
+  
 }
 
 .addSubForm{
@@ -108,6 +116,20 @@
   height: 34px;
 }
 
+
+/*Instructor Account Table*/
+#instructorHome {
+  width: auto;  
+  min-height: 100vh;  
+}
+
+#instructorsTable {  
+  display: grid;
+  justify-items: center;
+}
+
+
+
 table-container {
   margin-top: 20px;
   overflow-x: auto; 
@@ -115,6 +137,7 @@ table-container {
 table {
   width: 100%;
   border-collapse: collapse;
+  cursor: pointer;
 }
 
 th, td {
@@ -136,21 +159,47 @@ tbody tr:hover {
   background-color: #ddd;
 }
 
+#studentCrudPage{
+  width: auto;  
+  min-height: 100vh;  
 
-
-
-
-/*
-html {
-  font-size: 62.5%;
 }
 
-body{
-  font-size: 1.6rem;
+.studentCrudContent{
+  background-color: white;
+  min-height: 100vh;
+  width: 60%;
+  display: flex;
+  justify-content: center;
+}
+/**
+#ins-header, #ins-header-content{
+  display: flex;
+}
+#ins-header{  
+  flex-direction: column;
+  justify-content: end;
+  height: 200px;
+  width: 65%;
+  background-color: #AD1212;
+  border-radius: 20px;
 }
 
-h2{
-  font-size: 2.4rem;
+#ins-header-content{
+  height: 75px;
+  width: 100%;
+  background-color: white;
+  justify-content: center;
+  align-items: center;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
 }
 
-*/
+<div id='ins-header'>
+  <div id='ins-header-content'>INSTRUCTOR ACCOUNTS</div>
+</div>
+
+
+
+
+/
