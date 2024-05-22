@@ -5,6 +5,7 @@ import Tabs from 'react-bootstrap/Tabs';
 import Header from '../../header/Header'; 
 import background from "/banner_1.jpg";
 import AddSubject from '../add-subject/addSubject';
+import Register from './Register1';
 
 Modal.setAppElement('#root');
 
@@ -112,6 +113,7 @@ const InsAccount = () => {
                 </table>
               </div>
             </section>
+            <Register/>
           </Tab>
           <Tab eventKey="addSubs" title="Subjects">
             <AddSubject />  
