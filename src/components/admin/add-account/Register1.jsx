@@ -31,6 +31,11 @@ const Register = () => {
 
             <form onSubmit={onSubmit}>
                 <input
+                    className="form-control"
+                    type="text"
+                    placeholder="ID Number"                    
+                />
+                <input
                     className="form-control" 
                     type="email" 
                     placeholder='Email'
@@ -38,8 +43,27 @@ const Register = () => {
                     require 
                     value={email}
                     onChange={(e) => { setEmail(e.target.value) }}
-                ></input>
+                />
                 
+                <input
+                    className="form-control"
+                    type="text"
+                    placeholder="First Name"                    
+                />
+                
+                <label>Leave blank if none</label>
+                <input
+                    className="form-control"
+                    type="text"
+                    placeholder="Middle Name"                    
+                />
+
+                <input
+                    className="form-control"
+                    type="text"
+                    placeholder="Last Name"                    
+                />
+
                 <input
                     className="form-control"
                     disabled={isRegistering} 
@@ -49,7 +73,7 @@ const Register = () => {
                     required
                     value={password}
                     onChange={(e) => { setPassword(e.target.value) }}
-                ></input>
+                />
 
                 <input
                     disabled={isRegistering}
