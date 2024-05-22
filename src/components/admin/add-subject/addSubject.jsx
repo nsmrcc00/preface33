@@ -141,6 +141,9 @@ const AddSubject = () => {
                 onChange={handleChange}
               />
             </label>
+
+
+            
             <div id="subCrudDiv">            
               <button 
                 type="submit" 
