@@ -134,7 +134,6 @@ table-container {
   margin-top: 20px;
   overflow-x: auto; 
 }
-
 table {
   width: 100%;
   border-collapse: collapse;
@@ -160,12 +159,10 @@ tbody tr:hover {
   background-color: #ddd;
 }
 
-
-
-/*Student CRUD Page*/
 #studentCrudPage{
   width: auto;  
   min-height: 100vh;  
+
 }
 
 .studentCrudContent{
