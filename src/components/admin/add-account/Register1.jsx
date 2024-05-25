@@ -8,11 +8,36 @@ const Register = () => {
     const [isRegistering, setIsRegistering] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')//NEED TO ADD ERROR CHECKING AND VALIDATION
 
+    
+
     const onSubmit = async (e) => {
         e.preventDefault();
         if(!isRegistering) {
             setIsRegistering(true)
             await new Promise(resolve => setTimeout(resolve, 150));
+            /*
+
+            Make adding to auth and firestore at the same time work ASAP
+
+            import { db } from "../../../firebase/firebase"
+            import { doc, setDoc } from "firebase/firestore"
+
+            const [instructorInfo] = useState({
+                Email: '',
+                FirstName: '',
+                ID: '',
+                LastName: '',
+                MiddleName: '',
+            });
+            await setDoc(doc(db, "Instructors", instructorInfo.Email), {
+                Email: instructorInfo.Email,
+                FirstName: instructorInfo.FirstName,
+                ID: instructorInfo.ID,
+                LastName: instructorInfo.LastName,
+                MiddleName: instructorInfo.MiddleName,
+            });
+             */
+            
             await doCreateUserWithEmailAndPassword(email, password).then((userCredential) => {
                 console.log("Added user!");
                 //FOR TESTING ONLY. WILL BE REMOVED AT LAUNCH
@@ -26,13 +51,15 @@ const Register = () => {
 
     }
 
-    return (
-        <main>
 
-            <form onSubmit={onSubmit}>
+
+    return (
+        <>
+
+            <form id='addInstuctorInfo' onSubmit={onSubmit}>
                 <input
                     className="form-control"
-                    type="text"
+                    type="number"
                     placeholder="ID Number"                    
                 />
                 <input
@@ -50,12 +77,11 @@ const Register = () => {
                     type="text"
                     placeholder="First Name"                    
                 />
-                
-                <label>Leave blank if none</label>
+                                
                 <input
                     className="form-control"
                     type="text"
-                    placeholder="Middle Name"                    
+                    placeholder="Middle Name (Leave blank if none.)"                    
                 />
 
                 <input
@@ -98,7 +124,7 @@ const Register = () => {
                 </div>
                 
             </form>  
-        </main>
+        </>
     )
 }
 
