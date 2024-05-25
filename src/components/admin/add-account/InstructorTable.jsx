@@ -39,51 +39,52 @@ const InsAccTable = () => {
 
   return (
     <>
-        <section id='instructorsTable'>
-            
+        <section id='instructorsTable'>            
             <div 
-            style={{ 
+              style={{ 
                 marginTop: '20px', 
                 padding: '20px', 
                 backgroundColor: 'white', 
                 borderRadius: '20px' , 
-                width: '65%'}}>
+                width: '65%',
+                overflowX: 'auto'}}>
             <input 
                 type="text" 
                 placeholder="Search..." 
                 value={searchQuery} 
                 onChange={handleSearch} 
-                style={{ marginBottom: '20px', 
-                float: 'right', 
-                marginRight: '20px' }} />
+                style={{ 
+                  marginBottom: '20px', 
+                  float: 'right', 
+                  marginRight: '20px' }}/>
             <table 
                 style={{ 
                 width: '100%', 
                 borderCollapse: 'collapse' }}>
                 <thead>
-                    <tr>
-                    <th style={{ textAlign: 'left', padding: '10px', borderBottom: '1px solid #ddd' }}>Email</th>
-                    <th style={{ textAlign: 'left', padding: '10px', borderBottom: '1px solid #ddd' }}>Name</th>
-                    <th style={{ textAlign: 'left', padding: '10px', borderBottom: '1px solid #ddd' }}>Student Number</th>
-                    <th style={{ textAlign: 'left', padding: '10px', borderBottom: '1px solid #ddd' }}>Section</th>
-                    </tr>
+                  <tr>
+                  <th className='adminTableStyle'>Email</th>
+                  <th className='adminTableStyle'>Name</th>
+                  <th className='adminTableStyle'>Student Number</th>
+                  <th className='adminTableStyle'>Section</th>
+                  </tr>
                 </thead>
                 
                 <tbody>
-                    {filteredData.length > 0 ? (
-                    filteredData.map((item, index) => (
-                        <tr key={index} onClick={() => openModal(item)}>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{item.email}</td>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{item.name}</td>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{item.studentNo}</td>
-                        <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>{item.section}</td>
-                        </tr>
-                    ))
-                    ) : (
-                    <tr>
-                        <td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: '#777' }}>No results found</td>
+                  {filteredData.length > 0 ? (
+                  filteredData.map((item, index) => (
+                    <tr key={index} onClick={() => openModal(item)}>
+                    <td className='adminTableStyle'>{item.email}</td>
+                    <td className='adminTableStyle'>{item.name}</td>
+                    <td className='adminTableStyle'>{item.studentNo}</td>
+                    <td className='adminTableStyle'>{item.section}</td>
                     </tr>
-                    )}
+                  ))
+                  ) : (
+                  <tr>
+                      <td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: '#777' }}>No results found</td>
+                  </tr>
+                  )}
                 </tbody>
                 
             </table>
