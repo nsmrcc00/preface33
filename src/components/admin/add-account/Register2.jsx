@@ -11,7 +11,7 @@ const Register = () => {
   const [firstName, setFirstName] = useState('');
   const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [role, setRole] = useState('instructor'); // Example role, you can make this dynamic based on your UI
+  const [role, setRole] = useState('student'); // Example role, you can make this dynamic based on your UI
 
   const onSubmit = async (e) => {
     e.preventDefault();
