@@ -3,6 +3,7 @@ import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Header from '../../header/Header'
 import background from "/banner_1.jpg"; 
+import Register from './Register2';
 
 const StudentAccount = () => {
   return (
@@ -25,13 +26,14 @@ const StudentAccount = () => {
           >
             <Tab className='studentCrudContent' eventKey="studentTable" title="Students">
               <section >
-                <h1>Student</h1>
+                <h2>Add Student</h2>
+                <Register/>
               </section>
             </Tab>
             <Tab className='studentCrudContent' eventKey="subjectTable" title="Subjects">
-            <section className='studentCrudContent'>
-              <h1>Student</h1>
-            </section>
+              <section className='studentCrudContent'>
+                <h1>Subjects</h1>
+              </section>
             </Tab>
           </Tabs>
         </main>
