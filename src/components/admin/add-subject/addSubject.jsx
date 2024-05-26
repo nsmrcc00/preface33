@@ -1,27 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase/firebase';
-import { doc, setDoc, getDoc, updateDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
 
-/*
-<button
-              type="button"
-              onClick={() => deleteSub(subject.title)}
-              className="subCrudButton"
-            >Delete Subject</button>
-*/
 const AddSubject = () => {
   const [subject, setSubject] = useState({
     instructor: '',
     schedule: '',
     title: '',
-    archived: false, // Initialize as a boolean
+    archived: false,
   });
 
   const [subjects, setSubjects] = useState([]);
+  const [showArchived, setShowArchived] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setSubject({ ...subject, [name]: name === "archived" ? value === "true" : value }); // Handle select for archived
+    setSubject({ ...subject, [name]: name === "archived" ? value === "true" : value });
   };
 
   const addSub = async (e) => {
@@ -31,7 +26,7 @@ const AddSubject = () => {
         instructor: subject.instructor,
         schedule: subject.schedule,
         title: subject.title,
-        archived: subject.archived // Include archived field
+        archived: subject.archived
       });
       console.log("Subject added successfully!");
       setSubject({
@@ -40,7 +35,7 @@ const AddSubject = () => {
         title: '',
         archived: false,
       });
-      fetchSubjects(); // Refresh the table after adding a subject
+      fetchSubjects();
     } catch (error) {
       alert("Error adding subject.");
       console.error(error);
@@ -57,7 +52,7 @@ const AddSubject = () => {
         title: '',
         archived: false,
       });
-      fetchSubjects(); // Refresh the table after updating a subject
+      fetchSubjects();
     } catch (error) {
       alert("Error updating subject.");
       console.error(error);
@@ -68,7 +63,7 @@ const AddSubject = () => {
     try {
       await deleteDoc(doc(db, "Subjects", title));
       console.log("Subject deleted successfully!");
-      fetchSubjects(); // Refresh the table after deleting a subject
+      fetchSubjects();
     } catch (error) {
       alert("Error deleting subject.");
       console.error(error);
@@ -90,14 +85,39 @@ const AddSubject = () => {
   };
 
   useEffect(() => {
-    fetchSubjects(); // Fetch subjects when the component mounts
+    fetchSubjects();
   }, []);
+
+  const filteredSubjects = subjects.filter(sub => {
+    const lowerCaseQuery = searchQuery.toLowerCase();
+    return (
+      (showArchived || !sub.archived) &&
+      (sub.title.toLowerCase().includes(lowerCaseQuery) ||
+        sub.instructor.toLowerCase().includes(lowerCaseQuery) ||
+        sub.schedule.toLowerCase().includes(lowerCaseQuery))
+    );
+  });
 
   return (
     <>
       <section id='schoolSectionPage'>
         <div>
           <h2>Subjects List</h2>
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <label>
+            <input
+              type="checkbox"
+              checked={showArchived}
+              onChange={() => setShowArchived(!showArchived)}
+            />
+            Show Archived
+          </label>
+          
           <table>
             <thead>
               <tr>
@@ -108,12 +128,12 @@ const AddSubject = () => {
               </tr>
             </thead>
             <tbody>
-              {subjects.map((sub, index) => (
+              {filteredSubjects.map((sub, index) => (
                 <tr key={index} onClick={() => handleRowClick(sub)}>
                   <td>{sub.title}</td>
                   <td>{sub.instructor}</td>
                   <td>{sub.schedule}</td>
-                  <td>{sub.archived ? "Yes" : "No"}</td> {/* Display Yes/No for boolean */}
+                  <td>{sub.archived ? "Yes" : "No"}</td>
                 </tr>
               ))}
             </tbody>
@@ -173,7 +193,6 @@ const AddSubject = () => {
               })}
               className="subCrudButton"
             >Update Subject</button>
-            
           </div>
         </form>
       </section>
@@ -182,3 +201,88 @@ const AddSubject = () => {
 };
 
 export default AddSubject;
+
+
+
+
+/*
+<button
+              type="button"
+              onClick={() => deleteSub(subject.title)}
+              className="subCrudButton"
+            >Delete Subject</button>
+
+
+
+    CODE FOR THE TABLE
+
+    <html>
+    <head>
+        <title>Test Components</title>
+        <style>
+            input {
+                width: 60px;
+            }
+            table, th, td {
+              border: 1px solid black;
+              border-collapse: collapse;
+            }
+            th {
+              text-align: left;
+            }
+            </style>
+    </head>
+    <body>       
+        <main>
+            <p>Hello World</p>
+               <table>
+                <thead>
+                    <th>DAY</th>
+                    <th>START TIME</th>
+                    <th>END TIME</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>MONDAY</td>
+                        <td><input type="number"min="0" max="23" onkeypress="return isNumberKey(event)">:<input type="number"min="0" max="59" onkeypress="return isNumberKey(event)"></td>
+                        <td><input type="number"min="0" max="23" onkeypress="return isNumberKey(event)">:<input type="number"min="0" max="59" onkeypress="return isNumberKey(event)"></td>
+                    </tr>
+                    <tr>
+                        <td>TUESDAY</td>
+                        <td><input type="number"min="0" max="23" onkeypress="return isNumberKey(event)">:<input type="number"min="0" max="59" onkeypress="return isNumberKey(event)"></td>
+                        <td><input type="number"min="0" max="23" onkeypress="return isNumberKey(event)">:<input type="number"min="0" max="59" onkeypress="return isNumberKey(event)"></td>
+                    </tr>
+                    <tr>
+                        <td>WEDNESDAY</td>
+                        <td><input type="number"min="0" max="23" onkeypress="return isNumberKey(event)">:<input type="number"min="0" max="59" onkeypress="return isNumberKey(event)"></td>
+                        <td><input type="number"min="0" max="23" onkeypress="return isNumberKey(event)">:<input type="number"min="0" max="59" onkeypress="return isNumberKey(event)"></td>
+                    </tr>
+                    <tr>
+                        <td>THURSDAY</td>
+                        <td><input type="number"min="0" max="23" onkeypress="return isNumberKey(event)">:<input type="number"min="0" max="59" onkeypress="return isNumberKey(event)"></td>
+                        <td><input type="number"min="0" max="23" onkeypress="return isNumberKey(event)">:<input type="number"min="0" max="59" onkeypress="return isNumberKey(event)"></td>
+                    </tr>
+                    <tr>
+                        <td>FRIDAY</td>
+                        <td><input type="number"min="0" max="23" onkeypress="return isNumberKey(event)">:<input type="number"min="0" max="59" onkeypress="return isNumberKey(event)"></td>
+                        <td><input type="number"min="0" max="23" onkeypress="return isNumberKey(event)">:<input type="number"min="0" max="59" onkeypress="return isNumberKey(event)"></td>
+                    </tr>
+                    <tr>
+                        <td>SATURDAY</td>
+                        <td><input type="number"min="0" max="23" onkeypress="return isNumberKey(event)">:<input type="number"min="0" max="59" onkeypress="return isNumberKey(event)"></td>
+                        <td><input type="number"min="0" max="23" onkeypress="return isNumberKey(event)">:<input type="number"min="0" max="59" onkeypress="return isNumberKey(event)"></td>
+                    </tr>
+                                       
+                </tbody>
+               </table>
+               <button>UPDATE SUBJECT</button>
+        </main>
+    </body>
+    <script>
+        function isNumberKey(evt){
+            var charCode = (evt.which) ? evt.which : event.keyCode;
+            return !(charCode > 31 && (charCode < 48 || charCode > 57));
+        }
+    </script>
+</html>
+*/
