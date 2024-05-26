@@ -8,6 +8,7 @@ import Register from './Register1';
 import InsAccTable from './InstructorTable';
 
 const InsAccount = () => {
+  const [selectedInstructor, setSelectedInstructor] = useState(null);
 
   return (
     <>
@@ -29,8 +30,8 @@ const InsAccount = () => {
           fill
         >
           <Tab eventKey="instructorTable" title="Instructors">
-            <InsAccTable/>
-            <Register/>
+            <InsAccTable setSelectedInstructor={setSelectedInstructor} />
+            <Register selectedInstructor={selectedInstructor} />
           </Tab>
           <Tab eventKey="addSubs" title="Subjects">
             <AddSubject />  
