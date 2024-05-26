@@ -1,17 +1,27 @@
-import React, { useState } from "react"
-import { doCreateUserWithEmailAndPassword } from "../../../firebase/auth"
+import React, { useState, useEffect } from "react";
+import { doCreateUserWithEmailAndPassword } from "../../../firebase/auth";
 
-const Register = () => {
+const Register = ({ selectedInstructor }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const [firstName, setFirstName] = useState('');
   const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [role, setRole] = useState('instructor'); // Example role, you can make this dynamic based on your UI
+
+  useEffect(() => {
+    if (selectedInstructor) {
+      setEmail(selectedInstructor.email);
+      setFirstName(selectedInstructor.name.firstName);
+      setMiddleName(selectedInstructor.name.middleName);
+      setLastName(selectedInstructor.name.lastName);
+    }
+  }, [selectedInstructor]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -31,6 +41,7 @@ const Register = () => {
       setMiddleName('');
       setLastName('');
       setErrorMessage(''); // Clear any previous error messages
+      setSuccessMessage('User registered successfully'); // Set success message
     } catch (error) {
       console.error(error);
       setErrorMessage("Error registering user");
@@ -50,10 +61,10 @@ const Register = () => {
         <input className="form-control" type="password" placeholder='Confirm Password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
         <div className="mb-3 text-center">
           <button id="gen_btn" type="submit" disabled={isRegistering} className="btn btn-primary">
-          {isRegistering ? 'Adding Account...' : 'Add Account'}
+            {isRegistering ? 'Adding Account...' : 'Add Account'}
           </button>
         </div>
-        {errorMessage && <p>{errorMessage}</p>}
+        
       </form>
     </>
   );
@@ -64,7 +75,14 @@ export default Register;
 
 
 
+
+
 /* 
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+{errorMessage && <div className="alert alert-danger" role="alert">{errorMessage}</div>}
+        {successMessage && <div className="alert alert-success" role="alert">{successMessage}</div>}
+
 import React, { useState } from "react"
 import { doCreateUserWithEmailAndPassword } from "../../../firebase/auth"
 
