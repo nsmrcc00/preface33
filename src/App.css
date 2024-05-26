@@ -86,6 +86,7 @@
   justify-content: space-evenly;
   flex-wrap: wrap;
   background-color: #fff;
+  padding: 15px 12px 50px 12px;
 }
 
 #submitSub{
