@@ -22,7 +22,7 @@ function InstructorsTable({ setSelectedInstructor }) {
     }, []);
   
     return (
-      <table>
+      <table >
         <thead>
           <tr>
             <th>Email</th>

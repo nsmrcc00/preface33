@@ -8,7 +8,7 @@
   justify-content: center;/*vertical alignment*/
   align-items: center;/*horizontal alignment*/
 }
-#inputs{
+#inputs, #addInstructorInfo {
   width: Min(400px,90%);
   /*display: flex; these 2 lines are similar to margin:0 auto; but longer
   flex-direction: column;*/
@@ -129,7 +129,7 @@
   justify-items: center;
 }
 
-#addInstuctorInfo {
+#addInstructorInfo {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -164,8 +164,7 @@ table {
 
 th, td {
   padding: 10px;
-  text-align: left;
-  
+  text-align: left;  
 }
 
 th {
