@@ -19,6 +19,7 @@ const AddSubject = () => {
     setSubject({ ...subject, [name]: name === "archived" ? value === "true" : value });
   };
 
+  //ADD SUBJECT TO COLLECTION
   const addSub = async (e) => {
     e.preventDefault();
     try {
@@ -42,6 +43,7 @@ const AddSubject = () => {
     }
   };
 
+  //UPDATE SUBJECT
   const updateSub = async (title, updatedData) => {
     try {
       await updateDoc(doc(db, "Subjects", title), updatedData);
@@ -59,21 +61,11 @@ const AddSubject = () => {
     }
   };
 
-  const deleteSub = async (title) => {
-    try {
-      await deleteDoc(doc(db, "Subjects", title));
-      console.log("Subject deleted successfully!");
-      fetchSubjects();
-    } catch (error) {
-      alert("Error deleting subject.");
-      console.error(error);
-    }
-  };
-
   const handleRowClick = (sub) => {
     setSubject(sub);
   };
 
+  //FETCH SUBJECTS FROM COLLECTION
   const fetchSubjects = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "Subjects"));
@@ -88,6 +80,7 @@ const AddSubject = () => {
     fetchSubjects();
   }, []);
 
+  //CLIENT-SIDE FILTERING
   const filteredSubjects = subjects.filter(sub => {
     const lowerCaseQuery = searchQuery.toLowerCase();
     return (
@@ -159,7 +152,7 @@ const AddSubject = () => {
             />
           </label>
           <label className='addSubForm'>
-            Schedule: 
+            Schedule: (Placeholder only)
             <input
               type="text"
               name="schedule"
@@ -206,6 +199,18 @@ export default AddSubject;
 
 
 /*
+
+const deleteSub = async (title) => {
+    try {
+      await deleteDoc(doc(db, "Subjects", title));
+      console.log("Subject deleted successfully!");
+      fetchSubjects();
+    } catch (error) {
+      alert("Error deleting subject.");
+      console.error(error);
+    }
+  };
+
 <button
               type="button"
               onClick={() => deleteSub(subject.title)}

@@ -21,7 +21,7 @@ const InsAccount = () => {
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
           backgroundAttachment: 'fixed',
-          padding: '20px'  
+          
         }}
       >
         <Tabs
@@ -30,8 +30,11 @@ const InsAccount = () => {
           fill
         >
           <Tab eventKey="instructorTable" title="Instructors">
-            <InsAccTable setSelectedInstructor={setSelectedInstructor} />
-            <Register selectedInstructor={selectedInstructor} />
+            <section id='schoolInstructorPage'>
+              <InsAccTable setSelectedInstructor={setSelectedInstructor} />
+              <Register selectedInstructor={selectedInstructor} />
+            </section>
+            
           </Tab>
           <Tab eventKey="addSubs" title="Subjects">
             <AddSubject />  

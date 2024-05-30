@@ -17,6 +17,7 @@ const Register = () => {
     e.preventDefault();
     if (password !== confirmPassword) {
       setErrorMessage('Passwords do not match');
+      alert('Passwords do not match');
       return;
     }
     setIsRegistering(true);
@@ -34,6 +35,7 @@ const Register = () => {
     } catch (error) {
       console.error(error);
       setErrorMessage("Error registering user");
+      alert('Error registering user');
     } finally {
       setIsRegistering(false);
     }
@@ -52,8 +54,7 @@ const Register = () => {
           <button id="gen_btn" type="submit" disabled={isRegistering} className="btn btn-primary">
           {isRegistering ? 'Adding Account...' : 'Add Account'}
           </button>
-        </div>
-        {errorMessage && <p>{errorMessage}</p>}
+        </div>        
       </form>
     </>
   );
