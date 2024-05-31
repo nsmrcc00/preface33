@@ -48,7 +48,7 @@ const InstructorsTable = ({ setSelectedInstructor }) => {
                   margin: '0px 0px 10px'
                 }}
             />
-            <table>
+            <table className='striped-table'>
                 <thead>
                     <tr>
                         <th>ID Number</th>
