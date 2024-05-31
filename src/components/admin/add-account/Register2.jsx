@@ -11,6 +11,7 @@ const Register = () => {
   const [firstName, setFirstName] = useState('');
   const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [idNumber, setIdNumber] = useState('');
   const [role, setRole] = useState('student'); // Example role, you can make this dynamic based on your UI
 
   const onSubmit = async (e) => {
@@ -31,6 +32,7 @@ const Register = () => {
       setFirstName('');
       setMiddleName('');
       setLastName('');
+      setIdNumber('');
       setErrorMessage(''); // Clear any previous error messages
     } catch (error) {
       console.error(error);
@@ -41,12 +43,15 @@ const Register = () => {
     }
   };
 
+  
+
   return (
     <>
       <form id='addInstructorInfo' onSubmit={onSubmit}>
         <input className="form-control" type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
         <input className="form-control" type="text" placeholder="Middle Name (Optional)" value={middleName} onChange={(e) => setMiddleName(e.target.value)} />
         <input className="form-control" type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+        <input className="form-control" type="text" placeholder="ID Number" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} required />
         <input className="form-control" type="email" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} required />
         <input className="form-control" type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} required />
         <input className="form-control" type="password" placeholder='Confirm Password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />

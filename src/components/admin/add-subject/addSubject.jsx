@@ -94,19 +94,23 @@ const AddSubject = () => {
   return (
     <>
       <section id='schoolSectionPage'>
-        <div>
+        <div style={{overflowX: 'auto'}}>
           <h2>Subjects List</h2>
           <input
             type="text"
             placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              margin: '0px 10px 10px 0px'
+            }}
           />
           <label>
             <input
               type="checkbox"
               checked={showArchived}
               onChange={() => setShowArchived(!showArchived)}
+              style={{marginRight:'10px'}}
             />
             Show Archived
           </label>
@@ -133,6 +137,9 @@ const AddSubject = () => {
           </table>
         </div>
         <form id='submitSub' onSubmit={addSub}>
+          <label>
+            <h2>Subject Information</h2>
+          </label>
           <label className='addSubForm'>
             Title:
             <input
