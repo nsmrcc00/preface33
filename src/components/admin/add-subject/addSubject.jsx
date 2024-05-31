@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import { db } from '../../../firebase/firebase';
-import { doc, setDoc, updateDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, getDocs, collection } from 'firebase/firestore';
 
 Modal.setAppElement('#root');
 
 const AddSubject = () => {
+  const initialTimeState = {
+    MONDAY: { startHour: '', startMin: '', endHour: '', endMin: '' },
+    TUESDAY: { startHour: '', startMin: '', endHour: '', endMin: '' },
+    WEDNESDAY: { startHour: '', startMin: '', endHour: '', endMin: '' },
+    THURSDAY: { startHour: '', startMin: '', endHour: '', endMin: '' },
+    FRIDAY: { startHour: '', startMin: '', endHour: '', endMin: '' },
+    SATURDAY: { startHour: '', startMin: '', endHour: '', endMin: '' },
+  };
+
   const [subject, setSubject] = useState({
     Schedule: {
       days: '',
@@ -18,6 +27,7 @@ const AddSubject = () => {
     archived: false,
   });
 
+  const [timeInputs, setTimeInputs] = useState(initialTimeState);
   const [subjects, setSubjects] = useState([]);
   const [showArchived, setShowArchived] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,6 +53,34 @@ const AddSubject = () => {
     }
   };
 
+  const handleTimeChange = (day, field, value) => {
+    setTimeInputs((prevInputs) => ({
+      ...prevInputs,
+      [day]: {
+        ...prevInputs[day],
+        [field]: value,
+      },
+    }));
+  };
+
+  const formatSchedule = () => {
+    let days = [];
+    let timeStrings = [];
+
+    Object.keys(timeInputs).forEach(day => {
+      const { startHour, startMin, endHour, endMin } = timeInputs[day];
+      if (startHour && startMin && endHour && endMin) {
+        days.push(day.slice(0, 3).toUpperCase());  // e.g., MONDAY -> MO
+        timeStrings.push(`${startHour.padStart(2, '0')}:${startMin.padStart(2, '0')}-${endHour.padStart(2, '0')}:${endMin.padStart(2, '0')}`);
+      }
+    });
+
+    return {
+      days: days.join(','),
+      time: timeStrings.join(','),
+    };
+  };
+
   const openModal = () => {
     setModalIsOpen(true);
   };
@@ -60,20 +98,21 @@ const AddSubject = () => {
       instructor: '',
       archived: false,
     });
+    setTimeInputs(initialTimeState);
     setIsEditMode(false);
   };
 
-  // ADD SUBJECT TO COLLECTION
   const addSub = async (e) => {
     e.preventDefault();
+    const { days, time } = formatSchedule();
     try {
       await setDoc(doc(db, "Subjects", subject.title), {
         subjectCode: subject.subjectCode,
         instructor: subject.instructor,
-        Schedule: subject.Schedule,
+        Schedule: { days, time },
         section: subject.section,
         title: subject.title,
-        archived: subject.archived
+        archived: subject.archived,
       });
       console.log("Subject added successfully!");
       closeModal();
@@ -84,17 +123,17 @@ const AddSubject = () => {
     }
   };
 
-  // UPDATE SUBJECT
   const updateSub = async (e) => {
     e.preventDefault();
+    const { days, time } = formatSchedule();
     try {
       await updateDoc(doc(db, "Subjects", subject.title), {
         subjectCode: subject.subjectCode,
         instructor: subject.instructor,
-        Schedule: subject.Schedule,
+        Schedule: { days, time },
         section: subject.section,
         title: subject.title,
-        archived: subject.archived
+        archived: subject.archived,
       });
       console.log("Subject updated successfully!");
       closeModal();
@@ -111,7 +150,6 @@ const AddSubject = () => {
     openModal();
   };
 
-  // FETCH SUBJECTS FROM COLLECTION
   const fetchSubjects = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "Subjects"));
@@ -122,12 +160,10 @@ const AddSubject = () => {
     }
   };
 
-  //REALTIME UPDATE
   useEffect(() => {
     fetchSubjects();
   }, []);
 
-  //CLIENT-SIDE FILTERING
   const filteredSubjects = subjects.filter(sub => {
     const lowerCaseQuery = searchQuery.toLowerCase();
     return (
@@ -138,23 +174,19 @@ const AddSubject = () => {
     );
   });
 
-  //INPUT VALIDATION FOR TIME
   const isNumberKey = (evt) => {
     const charCode = evt.which ? evt.which : evt.keyCode;
   
-    // Allow backspace, delete, tab, arrows, and escape
     if (charCode === 8 || charCode === 46 || charCode === 9 ||
         (charCode >= 37 && charCode <= 40) || charCode === 27) {
       return;
     }
   
-    // Allow only digits from 0 to 9
     if (charCode < 48 || charCode > 57) {
       evt.preventDefault();
       return;
     }
   
-    // Check for input length (limit to 2 digits)
     const input = evt.target;
     if (input.value.length >= 2) {
       evt.preventDefault();
@@ -296,12 +328,48 @@ const AddSubject = () => {
                     <tr key={day}>
                       <td>{day}</td>
                       <td>
-                        <input style={{width: '60px'}} type="number" min="0" max="23" maxLength={2} onKeyDown={isNumberKey}/>:
-                        <input style={{width: '60px'}} type="number" min="0" max="59" maxLength={2} onKeyDown={isNumberKey}/>
+                        <input
+                          style={{width: '60px'}}
+                          type="number"
+                          name={`${day}.startHour`}
+                          value={timeInputs[day].startHour}
+                          onChange={(e) => handleTimeChange(day, 'startHour', e.target.value)}
+                          min="0"
+                          max="23"
+                          onKeyDown={isNumberKey}
+                        />:
+                        <input
+                          style={{width: '60px'}}
+                          type="number"
+                          name={`${day}.startMin`}
+                          value={timeInputs[day].startMin}
+                          onChange={(e) => handleTimeChange(day, 'startMin', e.target.value)}
+                          min="0"
+                          max="59"
+                          onKeyDown={isNumberKey}
+                        />
                       </td>
                       <td>
-                        <input style={{width: '60px'}} type="number" min="0" max="23" maxLength={2} onKeyDown={isNumberKey}/>:
-                        <input style={{width: '60px'}} type="number" min="0" max="59" maxLength={2} onKeyDown={isNumberKey}/>
+                        <input
+                          style={{width: '60px'}}
+                          type="number"
+                          name={`${day}.endHour`}
+                          value={timeInputs[day].endHour}
+                          onChange={(e) => handleTimeChange(day, 'endHour', e.target.value)}
+                          min="0"
+                          max="23"
+                          onKeyDown={isNumberKey}
+                        />:
+                        <input
+                          style={{width: '60px'}}
+                          type="number"
+                          name={`${day}.endMin`}
+                          value={timeInputs[day].endMin}
+                          onChange={(e) => handleTimeChange(day, 'endMin', e.target.value)}
+                          min="0"
+                          max="59"
+                          onKeyDown={isNumberKey}
+                        />
                       </td>
                     </tr>
                   ))}
@@ -326,6 +394,7 @@ const AddSubject = () => {
 };
 
 export default AddSubject;
+
 
 
 
