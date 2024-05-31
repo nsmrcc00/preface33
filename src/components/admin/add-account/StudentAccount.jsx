@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Header from '../../header/Header'
@@ -7,6 +7,7 @@ import Register from './Register2';
 import StudentTable from './StudentTable';
 
 const StudentAccount = () => {
+  const [selectedAccount, setSelectedAccount] = useState(null);
 
   return (
     <>
@@ -26,10 +27,10 @@ const StudentAccount = () => {
           className="mb-3"
           fill
           >
-            <Tab className='studentCrudContent' eventKey="studentTable" title="Students">
-              <section >
-                <StudentTable/>
-                <Register/>
+            <Tab eventKey="studentTable" title="Students">
+              <section id='schoolSectionPage'>
+                <StudentTable setSelectedAccount={setSelectedAccount} />
+                <Register selectedAccount={selectedAccount} />
               </section>
             </Tab>
             <Tab className='studentCrudContent' eventKey="subjectTable" title="Subjects">

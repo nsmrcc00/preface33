@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { doCreateUserWithEmailAndPassword, doDeleteUser, doUpdateUser } from "../../../firebase/auth";
 
-const Register = ({ selectedInstructor }) => {
+const Register = ({ selectedAccount }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -18,14 +18,14 @@ const Register = ({ selectedInstructor }) => {
   const [role, setRole] = useState('instructor'); // Example role, you can make this dynamic based on your UI
 
   useEffect(() => {
-    if (selectedInstructor) {
-      setIdNumber(selectedInstructor.idNumber);
-      setEmail(selectedInstructor.email);
-      setFirstName(selectedInstructor.name.firstName);
-      setMiddleName(selectedInstructor.name.middleName);
-      setLastName(selectedInstructor.name.lastName);      
+    if (selectedAccount) {
+      setIdNumber(selectedAccount.idNumber);
+      setEmail(selectedAccount.email);
+      setFirstName(selectedAccount.name.firstName);
+      setMiddleName(selectedAccount.name.middleName);
+      setLastName(selectedAccount.name.lastName);      
     }
-  }, [selectedInstructor]);
+  }, [selectedAccount]);
 
   //Add Account
   const onSubmit = async (e) => {
@@ -36,7 +36,7 @@ const Register = ({ selectedInstructor }) => {
     }
     setIsRegistering(true);
     try {
-      await doCreateUserWithEmailAndPassword(email, password, role, firstName, middleName, lastName);
+      await doCreateUserWithEmailAndPassword(email, password, role, firstName, middleName, lastName, idNumber); // Pass idNumber here
       console.log("User registered successfully");
       // Clear the input fields
       setEmail('');
@@ -55,16 +55,16 @@ const Register = ({ selectedInstructor }) => {
       setIsRegistering(false);
     }
   };
-
+ 
   //Update Account Information
   const onUpdate = async () => {
-    if (!selectedInstructor) {
+    if (!selectedAccount) {
       setErrorMessage('No instructor selected');
       return;
     }
     setIsUpdating(true);
     try {
-      await doUpdateUser(selectedInstructor.id, email, firstName, middleName, lastName, idNumber);
+      await doUpdateUser(selectedAccount.id, email, firstName, middleName, lastName, idNumber);
       console.log("User updated successfully");
       setEmail('');
       setPassword('');
@@ -85,13 +85,13 @@ const Register = ({ selectedInstructor }) => {
 
   //Delete Account
   const onDelete = async () => {
-    if (!selectedInstructor) {
+    if (!selectedAccount) {
       setErrorMessage('No instructor selected');
       return;
     }
     setIsDeleting(true);
     try {
-      await doDeleteUser(selectedInstructor.id);
+      await doDeleteUser(selectedAccount.id);
       console.log("User deleted successfully");
       setErrorMessage('');
       setSuccessMessage('User deleted successfully');
@@ -125,15 +125,15 @@ const Register = ({ selectedInstructor }) => {
         <input className="form-control" type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} required />
         <input className="form-control" type="password" placeholder='Confirm Password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
         <div className="mb-3 text-center acc-crud">
-          <button type="submit" disabled={isRegistering} className="acc-crud-btn btn btn-primary">
+          <button type="submit" disabled={isRegistering} className="acc-crud-btn btn btn-danger">
             {isRegistering ? 'Adding Account...' : 'Add Account'}
           </button>
-          {selectedInstructor && (
+          {selectedAccount && (
             <>
-              <button type="button" onClick={onUpdate} disabled={isUpdating} className="acc-crud-btn btn btn-primary">
+              <button type="button" onClick={onUpdate} disabled={isUpdating} className="acc-crud-btn btn btn-danger">
                 {isUpdating ? 'Updating Account...' : 'Update Account'}
               </button>
-              <button type="button" onClick={onDelete} disabled={isDeleting} className="acc-crud-btn btn btn-primary">
+              <button type="button" onClick={onDelete} disabled={isDeleting} className="acc-crud-btn btn btn-danger">
                 {isDeleting ? 'Deleting Account...' : 'Delete Account'}
               </button>
             </>
