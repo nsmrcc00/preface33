@@ -4,8 +4,10 @@ import Tabs from 'react-bootstrap/Tabs';
 import Header from '../../header/Header'
 import background from "/banner_1.jpg"; 
 import Register from './Register2';
+import StudentTable from './StudentTable';
 
 const StudentAccount = () => {
+
   return (
     <>
         <Header />        
@@ -26,7 +28,7 @@ const StudentAccount = () => {
           >
             <Tab className='studentCrudContent' eventKey="studentTable" title="Students">
               <section >
-                <h2>Add Student</h2>
+                <StudentTable/>
                 <Register/>
               </section>
             </Tab>
