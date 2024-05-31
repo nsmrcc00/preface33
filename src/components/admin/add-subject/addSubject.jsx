@@ -27,12 +27,12 @@ const AddSubject = () => {
     archived: false,
   });
 
-  const [timeInputs, setTimeInputs] = useState(initialTimeState);
   const [subjects, setSubjects] = useState([]);
   const [showArchived, setShowArchived] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [timeInputs, setTimeInputs] = useState(initialTimeState);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,30 +54,31 @@ const AddSubject = () => {
   };
 
   const handleTimeChange = (day, field, value) => {
-    setTimeInputs((prevInputs) => ({
-      ...prevInputs,
+    setTimeInputs((prevTimeInputs) => ({
+      ...prevTimeInputs,
       [day]: {
-        ...prevInputs[day],
+        ...prevTimeInputs[day],
         [field]: value,
       },
     }));
   };
 
   const formatSchedule = () => {
-    let days = [];
-    let timeStrings = [];
+    const days = [];
+    const times = [];
 
-    Object.keys(timeInputs).forEach(day => {
+    Object.keys(timeInputs).forEach((day) => {
       const { startHour, startMin, endHour, endMin } = timeInputs[day];
       if (startHour && startMin && endHour && endMin) {
-        days.push(day.slice(0, 3).toUpperCase());  // e.g., MONDAY -> MO
-        timeStrings.push(`${startHour.padStart(2, '0')}:${startMin.padStart(2, '0')}-${endHour.padStart(2, '0')}:${endMin.padStart(2, '0')}`);
+        const dayAbbreviation = day.substring(0, 3).toUpperCase();
+        days.push(dayAbbreviation);
+        times.push(`${startHour.padStart(2, '0')}:${startMin.padStart(2, '0')}-${endHour.padStart(2, '0')}:${endMin.padStart(2, '0')}`);
       }
     });
 
     return {
       days: days.join(','),
-      time: timeStrings.join(','),
+      time: times.join(','),
     };
   };
 
@@ -104,15 +105,15 @@ const AddSubject = () => {
 
   const addSub = async (e) => {
     e.preventDefault();
-    const { days, time } = formatSchedule();
+    const formattedSchedule = formatSchedule();
     try {
       await setDoc(doc(db, "Subjects", subject.title), {
         subjectCode: subject.subjectCode,
         instructor: subject.instructor,
-        Schedule: { days, time },
+        Schedule: formattedSchedule,
         section: subject.section,
         title: subject.title,
-        archived: subject.archived,
+        archived: subject.archived
       });
       console.log("Subject added successfully!");
       closeModal();
@@ -125,15 +126,15 @@ const AddSubject = () => {
 
   const updateSub = async (e) => {
     e.preventDefault();
-    const { days, time } = formatSchedule();
+    const formattedSchedule = formatSchedule();
     try {
       await updateDoc(doc(db, "Subjects", subject.title), {
         subjectCode: subject.subjectCode,
         instructor: subject.instructor,
-        Schedule: { days, time },
+        Schedule: formattedSchedule,
         section: subject.section,
         title: subject.title,
-        archived: subject.archived,
+        archived: subject.archived
       });
       console.log("Subject updated successfully!");
       closeModal();
@@ -147,6 +148,22 @@ const AddSubject = () => {
   const handleRowClick = (sub) => {
     setSubject(sub);
     setIsEditMode(true);
+
+    const days = sub.Schedule.days.split(',');
+    const times = sub.Schedule.time.split(',');
+
+    const newTimeInputs = { ...initialTimeState };
+    days.forEach((day, index) => {
+      const [start, end] = times[index].split('-');
+      const [startHour, startMin] = start.split(':');
+      const [endHour, endMin] = end.split(':');
+      const dayFull = Object.keys(newTimeInputs).find(d => d.substring(0, 2) === day);
+      if (dayFull) {
+        newTimeInputs[dayFull] = { startHour, startMin, endHour, endMin };
+      }
+    });
+
+    setTimeInputs(newTimeInputs);
     openModal();
   };
 
@@ -168,11 +185,15 @@ const AddSubject = () => {
     const lowerCaseQuery = searchQuery.toLowerCase();
     return (
       (showArchived || !sub.archived) &&
-      (sub.title.toLowerCase().includes(lowerCaseQuery) ||
-        sub.instructor.toLowerCase().includes(lowerCaseQuery) ||
-        sub.schedule.toLowerCase().includes(lowerCaseQuery))
+      ((sub.title && sub.title.toLowerCase().includes(lowerCaseQuery)) ||
+        (sub.instructor && sub.instructor.toLowerCase().includes(lowerCaseQuery)) ||
+        (sub.subjectCode && sub.subjectCode.toLowerCase().includes(lowerCaseQuery)) ||
+        (sub.section && sub.section.toLowerCase().includes(lowerCaseQuery)) ||
+        (sub.Schedule && sub.Schedule.days && sub.Schedule.days.toLowerCase().includes(lowerCaseQuery)) ||
+        (sub.Schedule && sub.Schedule.time && sub.Schedule.time.toLowerCase().includes(lowerCaseQuery)))
     );
   });
+  ;
 
   const isNumberKey = (evt) => {
     const charCode = evt.which ? evt.which : evt.keyCode;
@@ -181,12 +202,12 @@ const AddSubject = () => {
         (charCode >= 37 && charCode <= 40) || charCode === 27) {
       return;
     }
-  
+
     if (charCode < 48 || charCode > 57) {
       evt.preventDefault();
       return;
     }
-  
+
     const input = evt.target;
     if (input.value.length >= 2) {
       evt.preventDefault();
@@ -225,6 +246,7 @@ const AddSubject = () => {
                 <th>Section</th>
                 <th>Days</th>
                 <th>Time</th>
+                <th>Instructor</th>
                 <th>Archived</th>
               </tr>
             </thead>
@@ -237,7 +259,8 @@ const AddSubject = () => {
                     <td>{sub.title}</td>
                     <td>{sub.section}</td> 
                     <td>{schedule.days}</td> 
-                    <td>{schedule.time}</td>              
+                    <td>{schedule.time}</td>
+                    <td>{sub.instructor}</td>              
                     <td>{sub.archived ? "Yes" : "No"}</td>
                   </tr>
                 );
@@ -305,6 +328,15 @@ const AddSubject = () => {
               />
             </label>
             <label className='addSubForm'>
+              Instructor
+              <input
+                type="text"
+                name="instructor"
+                value={subject.instructor}
+                onChange={handleChange}
+              />
+            </label>
+            <label className='addSubForm'>
               Archived:
               <select
                 name="archived"
@@ -316,65 +348,65 @@ const AddSubject = () => {
               </select>
             </label>
             <table> 
-                <thead>
-                  <tr>
-                    <th>DAY</th>
-                    <th>START TIME</th>
-                    <th>END TIME</th>
+              <thead>
+                <tr>
+                  <th>DAY</th>
+                  <th>START TIME</th>
+                  <th>END TIME</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.keys(timeInputs).map((day) => (
+                  <tr key={day}>
+                    <td>{day}</td>
+                    <td>
+                      <input
+                        style={{ width: '60px' }}
+                        type="number"
+                        min="0"
+                        max="23"
+                        maxLength={2}
+                        onKeyDown={isNumberKey}
+                        value={timeInputs[day].startHour}
+                        onChange={(e) => handleTimeChange(day, 'startHour', e.target.value)}
+                      />:
+                      <input
+                        style={{ width: '60px' }}
+                        type="number"
+                        min="0"
+                        max="59"
+                        maxLength={2}
+                        onKeyDown={isNumberKey}
+                        value={timeInputs[day].startMin}
+                        onChange={(e) => handleTimeChange(day, 'startMin', e.target.value)}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        style={{ width: '60px' }}
+                        type="number"
+                        min="0"
+                        max="23"
+                        maxLength={2}
+                        onKeyDown={isNumberKey}
+                        value={timeInputs[day].endHour}
+                        onChange={(e) => handleTimeChange(day, 'endHour', e.target.value)}
+                      />:
+                      <input
+                        style={{ width: '60px' }}
+                        type="number"
+                        min="0"
+                        max="59"
+                        maxLength={2}
+                        onKeyDown={isNumberKey}
+                        value={timeInputs[day].endMin}
+                        onChange={(e) => handleTimeChange(day, 'endMin', e.target.value)}
+                      />
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {[ 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY' ].map((day) => (
-                    <tr key={day}>
-                      <td>{day}</td>
-                      <td>
-                        <input
-                          style={{width: '60px'}}
-                          type="number"
-                          name={`${day}.startHour`}
-                          value={timeInputs[day].startHour}
-                          onChange={(e) => handleTimeChange(day, 'startHour', e.target.value)}
-                          min="0"
-                          max="23"
-                          onKeyDown={isNumberKey}
-                        />:
-                        <input
-                          style={{width: '60px'}}
-                          type="number"
-                          name={`${day}.startMin`}
-                          value={timeInputs[day].startMin}
-                          onChange={(e) => handleTimeChange(day, 'startMin', e.target.value)}
-                          min="0"
-                          max="59"
-                          onKeyDown={isNumberKey}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          style={{width: '60px'}}
-                          type="number"
-                          name={`${day}.endHour`}
-                          value={timeInputs[day].endHour}
-                          onChange={(e) => handleTimeChange(day, 'endHour', e.target.value)}
-                          min="0"
-                          max="23"
-                          onKeyDown={isNumberKey}
-                        />:
-                        <input
-                          style={{width: '60px'}}
-                          type="number"
-                          name={`${day}.endMin`}
-                          value={timeInputs[day].endMin}
-                          onChange={(e) => handleTimeChange(day, 'endMin', e.target.value)}
-                          min="0"
-                          max="59"
-                          onKeyDown={isNumberKey}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                ))}
+              </tbody>
+            </table>
             <div id="subCrudDiv">
               <button
                 type="submit"
@@ -394,6 +426,7 @@ const AddSubject = () => {
 };
 
 export default AddSubject;
+
 
 
 
