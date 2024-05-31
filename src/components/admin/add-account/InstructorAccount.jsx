@@ -8,7 +8,7 @@ import Register from './Register1';
 import InsAccTable from './InstructorTable';
 
 const InsAccount = () => {
-  const [selectedInstructor, setSelectedInstructor] = useState(null);
+  const [selectedAccount, setSelectedAccount] = useState(null);
 
   return (
     <>
@@ -31,8 +31,8 @@ const InsAccount = () => {
         >
           <Tab eventKey="instructorTable" title="Instructors">
             <section id='schoolInstructorPage'>
-              <InsAccTable setSelectedInstructor={setSelectedInstructor} />
-              <Register selectedInstructor={selectedInstructor} />
+              <InsAccTable setSelectedAccount={setSelectedAccount} />
+              <Register selectedAccount={selectedAccount} />
             </section>
             
           </Tab>

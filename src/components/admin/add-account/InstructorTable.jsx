@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase'; // Import your Firestore instance
 
-const InstructorsTable = ({ setSelectedInstructor }) => {
+const InstructorsTable = ({ setSelectedAccount }) => {
     const [instructors, setInstructors] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -58,7 +58,7 @@ const InstructorsTable = ({ setSelectedInstructor }) => {
                 </thead>
                 <tbody>
                     {filteredInstructors.map((instructor) => (
-                        <tr key={instructor.id} onClick={() => setSelectedInstructor(instructor)}>
+                        <tr key={instructor.id} onClick={() => setSelectedAccount(instructor)}>
                             <td>{instructor.idNumber}</td>
                             <td>{instructor.email}</td>
                             <td>

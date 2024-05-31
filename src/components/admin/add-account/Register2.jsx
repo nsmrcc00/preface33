@@ -36,7 +36,7 @@ const Register = ({ selectedAccount }) => {
     }
     setIsRegistering(true);
     try {
-      await doCreateUserWithEmailAndPassword(email, password, role, firstName, middleName, lastName);
+      await doCreateUserWithEmailAndPassword(email, password, role, firstName, middleName, lastName, idNumber); // Pass idNumber here
       console.log("User registered successfully");
       // Clear the input fields
       setEmail('');
@@ -55,11 +55,11 @@ const Register = ({ selectedAccount }) => {
       setIsRegistering(false);
     }
   };
-
+ 
   //Update Account Information
   const onUpdate = async () => {
     if (!selectedAccount) {
-      setErrorMessage('No instructor selected');
+      setErrorMessage('No student selected');
       return;
     }
     setIsUpdating(true);
@@ -86,7 +86,7 @@ const Register = ({ selectedAccount }) => {
   //Delete Account
   const onDelete = async () => {
     if (!selectedAccount) {
-      setErrorMessage('No instructor selected');
+      setErrorMessage('No student selected');
       return;
     }
     setIsDeleting(true);
@@ -113,9 +113,9 @@ const Register = ({ selectedAccount }) => {
 
   return (
     <>
-      <form id='addInstructorInfo' onSubmit={onSubmit}>
+      <form id='addStudentInfo' onSubmit={onSubmit}>
         <label>
-          <h2>Instructor Info</h2>
+          <h2>Student Info</h2>
         </label>
         <input className="form-control" type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
         <input className="form-control" type="text" placeholder="Middle Name (Optional)" value={middleName} onChange={(e) => setMiddleName(e.target.value)} />
@@ -125,15 +125,15 @@ const Register = ({ selectedAccount }) => {
         <input className="form-control" type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} required />
         <input className="form-control" type="password" placeholder='Confirm Password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
         <div className="mb-3 text-center acc-crud">
-          <button type="submit" disabled={isRegistering} className="acc-crud-btn btn btn-primary">
+          <button type="submit" disabled={isRegistering} className="acc-crud-btn btn btn-danger">
             {isRegistering ? 'Adding Account...' : 'Add Account'}
           </button>
           {selectedAccount && (
             <>
-              <button type="button" onClick={onUpdate} disabled={isUpdating} className="acc-crud-btn btn btn-primary">
+              <button type="button" onClick={onUpdate} disabled={isUpdating} className="acc-crud-btn btn btn-danger">
                 {isUpdating ? 'Updating Account...' : 'Update Account'}
               </button>
-              <button type="button" onClick={onDelete} disabled={isDeleting} className="acc-crud-btn btn btn-primary">
+              <button type="button" onClick={onDelete} disabled={isDeleting} className="acc-crud-btn btn btn-danger">
                 {isDeleting ? 'Deleting Account...' : 'Delete Account'}
               </button>
             </>

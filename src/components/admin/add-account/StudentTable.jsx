@@ -2,20 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase'; // Import your Firestore instance
 
-const StudentTable = ({ setSelectedInstructor }) => {
-    const [instructors, setInstructors] = useState([]);
+const StudentTable = ({ setSelectedAccount }) => {
+    const [students, setStudents] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        const instructorsCollection = collection(db, "Users");
-        const q = query(instructorsCollection, where("role", "==", "student"));
+        const studentsCollection = collection(db, "Users");
+        const q = query(studentsCollection, where("role", "==", "student"));
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const instructorsData = querySnapshot.docs.map((doc) => ({
+            const studentsData = querySnapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
             }));
-            setInstructors(instructorsData);
+            setStudents(studentsData);
             console.log("Updated Table");
         });
 
@@ -28,12 +28,12 @@ const StudentTable = ({ setSelectedInstructor }) => {
         setSearchTerm(e.target.value);
     };
 
-    // Filter instructors based on search term
-    const filteredInstructors = instructors.filter((instructor) => {
-        const fullName = `${instructor.name.firstName} ${instructor.name.middleName} ${instructor.name.lastName}`.toLowerCase();
+    // Filter students based on search term
+    const filteredStudents = students.filter((student) => {
+        const fullName = `${student.name.firstName} ${student.name.middleName} ${student.name.lastName}`.toLowerCase();
         return fullName.includes(searchTerm.toLowerCase()) ||
-               instructor.email.toLowerCase().includes(searchTerm.toLowerCase())|| 
-               instructor.idNumber.toLowerCase().includes(searchTerm.toLowerCase());//Will not work if there are no id numbers
+               student.email.toLowerCase().includes(searchTerm.toLowerCase())|| 
+               student.idNumber.toLowerCase().includes(searchTerm.toLowerCase());//Will not work if there are no id numbers
     });
 
     return (
@@ -41,7 +41,7 @@ const StudentTable = ({ setSelectedInstructor }) => {
           <h2>Accounts List</h2>
             <input
                 type="text"
-                placeholder="Search Instructors..."
+                placeholder="Search Students..."
                 value={searchTerm}
                 onChange={handleSearchChange}
                 style={{
@@ -54,16 +54,18 @@ const StudentTable = ({ setSelectedInstructor }) => {
                         <th>ID Number</th>
                         <th>Email</th>
                         <th>Name</th>
+                        <th>Section</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredInstructors.map((instructor) => (
-                        <tr key={instructor.id} onClick={() => setSelectedInstructor(instructor)}>
-                            <td>{instructor.idNumber}</td>
-                            <td>{instructor.email}</td>
+                    {filteredStudents.map((student) => (
+                        <tr key={student.id} onClick={() => setSelectedAccount(student)}>
+                            <td>{student.idNumber}</td>
+                            <td>{student.email}</td>
                             <td>
-                                {instructor.name.firstName} {instructor.name.middleName} {instructor.name.lastName}
+                                {student.name.firstName} {student.name.middleName} {student.name.lastName}
                             </td>
+                            <td>Sec(Placeholder)</td>
                         </tr>
                     ))}
                 </tbody>
