@@ -135,6 +135,23 @@
   align-items: center;
 }
 
+.acc-crud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 4px;
+}
+
+.acc-crud-btn {
+    background-color: #AD1212;
+    border-color: #AD1212;
+    font-size: 1.01rem;
+    width: 143px;
+    height: 40px;
+    text-align: center;
+}
+
+/*input type number*/
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -146,10 +163,11 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
+/*Table Style*/
 .adminTableStyle {
   text-align: left;
   padding: 10px; 
-  border-bottom: 1px solid #ddd; 
+  border: 1px solid #f2f2f2; 
 }
 
 table-container {
@@ -161,7 +179,7 @@ table {
   border-collapse: collapse;
   cursor: pointer;
 }
-
+/**/
 th, td {
   padding: 10px;
   text-align: left;  
@@ -183,7 +201,6 @@ tbody tr:hover {
 #studentCrudPage{
   width: auto;  
   min-height: 100vh;  
-
 }
 
 .studentCrudContent{
