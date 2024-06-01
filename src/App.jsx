@@ -6,8 +6,7 @@ import { AuthProvider } from './contexts/authContext';
 import { useRoutes } from "react-router-dom";
 import InsAccount from './components/admin/add-account/InstructorAccount';
 import StudentAccount from './components/admin/add-account/StudentAccount';
-
-//test
+import InstructorHome from './components/instructor/instructor-home/InstructorHome';
 
 function App() {
   const routesArray = [
@@ -30,6 +29,10 @@ function App() {
     {
       path: "/student-accounts",
       element: <StudentAccount />,
+    },
+    {
+      path: "/instructor-home",
+      element: <InstructorHome />,
     },
   ];
   let routesElement = useRoutes(routesArray);

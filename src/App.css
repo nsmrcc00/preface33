@@ -8,7 +8,7 @@
   justify-content: center;/*vertical alignment*/
   align-items: center;/*horizontal alignment*/
 }
-#inputs{
+#inputs, #addInstructorInfo, #addStudentInfo {
   width: Min(400px,90%);
   /*display: flex; these 2 lines are similar to margin:0 auto; but longer
   flex-direction: column;*/
@@ -81,11 +81,12 @@
 }
 
 /*Subject*/
-#schoolSectionPage {
+#schoolSectionPage,#schoolInstructorPage,#schoolStudentPage{
   display: flex;
   justify-content: space-evenly;
   flex-wrap: wrap;
   background-color: #fff;
+  padding: 15px 12px 50px 12px;
 }
 
 #submitSub{
@@ -116,6 +117,12 @@
   height: 34px;
 }
 
+.addSubButton {
+  margin: 0px 10px 10px 0px;
+  width: 180px;
+  height: 34px;
+}
+
 
 /*Instructor Account Table*/
 #instructorHome {
@@ -128,7 +135,100 @@
   justify-items: center;
 }
 
+#addInstructorInfo, 
+#addStudentInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
+.acc-crud,.sec-crud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 4px;
+}
+
+.acc-crud-btn,.sec-crud-btn {
+    background-color: #AD1212;
+    border-color: #AD1212;
+    font-size: 1.01rem;
+    width: 143px;
+    height: 40px;
+    text-align: center;
+}
+
+.sec-crud-btn{
+  margin-top: 10px;
+}
+
+/*input type number*/
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/*Table Style*/
+.striped-table {
+  width: 100%;
+  border-collapse: collapse;
+  cursor: pointer;
+}
+
+.striped-table th,
+.striped-table td {
+  padding: 10px;
+  text-align: left;
+}
+
+.striped-table th {
+  background-color: #AD1212;
+  color: white;
+}
+
+.striped-table tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.striped-table tbody tr:hover {
+  background-color: #ddd;
+}
+
+
+.schedule-table{
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+#studentCrudPage{
+  width: auto;  
+  min-height: 100vh;  
+}
+
+
+
+/**
+.studentCrudContent{
+  background-color: white;
+  min-height: 100vh;
+  width: 60%;
+  display: flex;
+  justify-content: center;
+}
+
+
+.adminTableStyle {
+  text-align: left;
+  padding: 10px; 
+  border: 1px solid #f2f2f2; 
+}
 
 table-container {
   margin-top: 20px;
@@ -142,8 +242,7 @@ table {
 
 th, td {
   padding: 10px;
-  text-align: left;
-  border-bottom: 1px solid #AD1212;
+  text-align: left;  
 }
 
 th {
@@ -158,21 +257,8 @@ tbody tr:nth-child(even) {
 tbody tr:hover {
   background-color: #ddd;
 }
+borderImage: 'fill 0 linear-gradient(#0003,#fff)'
 
-#studentCrudPage{
-  width: auto;  
-  min-height: 100vh;  
-
-}
-
-.studentCrudContent{
-  background-color: white;
-  min-height: 100vh;
-  width: 60%;
-  display: flex;
-  justify-content: center;
-}
-/**
 #ins-header, #ins-header-content{
   display: flex;
 }
