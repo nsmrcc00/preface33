@@ -15,8 +15,7 @@ const Register = ({ selectedAccount }) => {
   const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [idNumber, setIdNumber] = useState('');
-  const [role, setRole] = useState('instructor');
-
+  const [role, setRole] = useState('student');
   useEffect(() => {
     if (selectedAccount) {
       setIdNumber(selectedAccount.idNumber);
@@ -59,7 +58,7 @@ const Register = ({ selectedAccount }) => {
   //Update Account Information
   const onUpdate = async () => {
     if (!selectedAccount) {
-      setErrorMessage('No instructor selected');
+      setErrorMessage('No student selected');
       return;
     }
     setIsUpdating(true);
@@ -86,7 +85,7 @@ const Register = ({ selectedAccount }) => {
   //Delete Account
   const onDelete = async () => {
     if (!selectedAccount) {
-      setErrorMessage('No instructor selected');
+      setErrorMessage('No student selected');
       return;
     }
     setIsDeleting(true);
@@ -113,9 +112,9 @@ const Register = ({ selectedAccount }) => {
 
   return (
     <>
-      <form id='addInstructorInfo' onSubmit={onSubmit}>
+      <form id='addStudentInfo' onSubmit={onSubmit}>
         <label>
-          <h2>Instructor Info</h2>
+          <h2>Student Info</h2>
         </label>
         <input className="form-control" type="text" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
         <input className="form-control" type="text" placeholder="Middle Name (Optional)" value={middleName} onChange={(e) => setMiddleName(e.target.value)} />
@@ -147,16 +146,3 @@ const Register = ({ selectedAccount }) => {
 };
 
 export default Register;
-
-
-
-
-
-
-/* 
-import 'bootstrap/dist/css/bootstrap.min.css';
-
-{errorMessage && <div className="alert alert-danger" role="alert">{errorMessage}</div>}
-        {successMessage && <div className="alert alert-success" role="alert">{successMessage}</div>}
-
-*/

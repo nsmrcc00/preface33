@@ -41,7 +41,7 @@ const Login = () => {
                     placeholder='Email' 
                     value={email}
                     onChange={(e) => { setEmail(e.target.value) }}
-                ></input>
+                />
                 
                 <input
                     className="form-control" 
@@ -49,7 +49,7 @@ const Login = () => {
                     placeholder='Password'
                     value={password}
                     onChange={(e) => { setPassword(e.target.value) }}
-                ></input>
+                />
         
                 <div className="mb-3 text-center">
                     <button
