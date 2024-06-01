@@ -113,6 +113,7 @@ const AddSubject = () => {
         subjectCode: subject.subjectCode,
         instructor: {
           id: instructorData.id,
+          ref: instructorData.ref, // Add the reference here
           name: instructorData.name
         },
         Schedule: formattedSchedule,
@@ -138,6 +139,7 @@ const AddSubject = () => {
         subjectCode: subject.subjectCode,
         instructor: {
           id: instructorData.id,
+          ref: instructorData.ref, // Add the reference here
           name: instructorData.name
         },
         Schedule: formattedSchedule,
@@ -155,26 +157,34 @@ const AddSubject = () => {
   };
 
   const handleRowClick = (sub) => {
-    setSubject(sub);
+    // Ensure Schedule is properly initialized
+    const schedule = sub.Schedule || { days: '', time: '' };
+    
+    setSubject({
+      ...sub,
+      Schedule: schedule
+    });
     setIsEditMode(true);
-
-    const days = sub.Schedule.days.split(',');
-    const times = sub.Schedule.time.split(',');
-
+  
+    const days = schedule.days ? schedule.days.split(',') : [];
+    const times = schedule.time ? schedule.time.split(',') : [];
+  
     const newTimeInputs = { ...initialTimeState };
+  
     days.forEach((day, index) => {
       const [start, end] = times[index].split('-');
       const [startHour, startMin] = start.split(':');
       const [endHour, endMin] = end.split(':');
-      const dayFull = Object.keys(newTimeInputs).find(d => d.substring(0, 2) === day);
+      const dayFull = Object.keys(newTimeInputs).find(d => d.substring(0, 3).toUpperCase() === day);
       if (dayFull) {
         newTimeInputs[dayFull] = { startHour, startMin, endHour, endMin };
       }
     });
-
+  
     setTimeInputs(newTimeInputs);
     openModal();
   };
+  
 
   const fetchSubjects = async () => {
     try {
@@ -194,6 +204,7 @@ const AddSubject = () => {
           const data = doc.data();
           return {
             id: doc.id,
+            ref: doc.ref, // Add the document reference here
             name: `${data.name.firstName} ${data.name.middleName ? data.name.middleName + ' ' : ''}${data.name.lastName}`,
             role: data.role  // assuming the role field exists in the user document
           };
@@ -206,8 +217,8 @@ const AddSubject = () => {
   };
 
   useEffect(() => {
-    fetchUsers();
     fetchSubjects();
+    fetchUsers();
   }, []);
 
   const filteredSubjects = subjects.filter(sub => {
@@ -460,6 +471,7 @@ const AddSubject = () => {
 };
 
 export default AddSubject;
+
 
 
 
