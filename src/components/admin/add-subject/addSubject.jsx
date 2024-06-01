@@ -29,6 +29,7 @@ const AddSubject = () => {
 
   const [subjects, setSubjects] = useState([]);
   const [users, setUsers] = useState([]);
+  const [sections, setSections] = useState([]);
   const [showArchived, setShowArchived] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -103,8 +104,8 @@ const AddSubject = () => {
     setTimeInputs(initialTimeState);
     setIsEditMode(false);
   };
-
-  //ADD SUBJECT TO COLLECTION
+  
+//ADD SUBJECT TO COLLECTION
   const addSub = async (e) => {
     e.preventDefault();
     const formattedSchedule = formatSchedule();
@@ -131,7 +132,7 @@ const AddSubject = () => {
     }
   };
 
-  //UPDATE SUBJECT INFORMATION
+//UPDATE SUBJECT INFORMATION
   const updateSub = async (e) => {
     e.preventDefault();
     const formattedSchedule = formatSchedule();
@@ -141,7 +142,7 @@ const AddSubject = () => {
         subjectCode: subject.subjectCode,
         instructor: {
           id: instructorData.id,
-          ref: instructorData.ref, // Add the reference here
+          ref: instructorData.ref,
           name: instructorData.name
         },
         Schedule: formattedSchedule,
@@ -158,9 +159,8 @@ const AddSubject = () => {
     }
   };
 
-  //TABLE BEHAVIOR WHEN CLICKED
+//TABLE BEHAVIOR WHEN CLICKED
   const handleRowClick = (sub) => {
-    // Ensure Schedule is properly initialized
     const schedule = sub.Schedule || { days: '', time: '' };
     
     setSubject({
@@ -187,7 +187,7 @@ const AddSubject = () => {
     setTimeInputs(newTimeInputs);
     openModal();
   };
-  
+
   //FETCH SUBJECTS FROM SUBJECTS COLLECTION
   const fetchSubjects = async () => {
     try {
@@ -210,7 +210,7 @@ const AddSubject = () => {
             id: doc.id,
             ref: doc.ref,
             name: `${data.name.firstName} ${data.name.middleName ? data.name.middleName + ' ' : ''}${data.name.lastName}`,
-            role: data.role  // assuming the role field exists in the user document
+            role: data.role
           };
         })
         .filter(user => user.role === 'instructor');
@@ -220,9 +220,23 @@ const AddSubject = () => {
     }
   };
 
+  const fetchSections = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "Sections"));
+      const sectionsList = querySnapshot.docs.map(doc => ({
+        ...doc.data(),
+        ref: doc.ref//may be unnecessary
+      }));
+      setSections(sectionsList);
+    } catch (error) {
+      console.error("Error fetching sections:", error);
+    }
+  };
+
   useEffect(() => {
     fetchSubjects();
     fetchUsers();
+    fetchSections();
   }, []);
 
   //CLIENT-SIDE SEARCH
@@ -365,12 +379,18 @@ const AddSubject = () => {
             </label>
             <label className='addSubForm'>
               Section:
-              <input
-                type="text"
+              <select
                 name="section"
                 value={subject.section}
                 onChange={handleChange}
-              />
+              >
+                <option value="">Select Section</option>
+                {sections.map((section, index) => (
+                  <option key={index} value={`${section.sectionName}`}>
+                    {`${section.sectionName}`}
+                  </option>
+                ))}
+              </select>
             </label>
             <label className='addSubForm'>
               Instructor:
@@ -477,25 +497,3 @@ const AddSubject = () => {
 };
 
 export default AddSubject;
-
-/*
-
-###OLD CODE FOR DELETING SUBJECTS(NOT USABLE AT THE MOMENT)
-
-const deleteSub = async (title) => {
-    try {
-      await deleteDoc(doc(db, "Subjects", title));
-      console.log("Subject deleted successfully!");
-      fetchSubjects();
-    } catch (error) {
-      alert("Error deleting subject.");
-      console.error(error);
-    }
-  };
-
-<button
-  type="button"
-  onClick={() => deleteSub(subject.title)}
-  className="subCrudButton"
->Delete Subject</button>
-*/
