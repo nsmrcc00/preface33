@@ -330,7 +330,9 @@ const AddSubject = () => {
               padding: '20px',
               borderRadius: '10px',
               maxWidth: '80%',
+              minWidth: '420px',
               width: '100%',
+              overflowX: 'auto'
             }
           }}
         >
