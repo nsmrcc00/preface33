@@ -142,20 +142,24 @@
   align-items: center;
 }
 
-.acc-crud {
+.acc-crud,.sec-crud {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
   gap: 4px;
 }
 
-.acc-crud-btn {
+.acc-crud-btn,.sec-crud-btn {
     background-color: #AD1212;
     border-color: #AD1212;
     font-size: 1.01rem;
     width: 143px;
     height: 40px;
     text-align: center;
+}
+
+.sec-crud-btn{
+  margin-top: 10px;
 }
 
 /*input type number*/
@@ -208,6 +212,9 @@ input[type=number] {
   min-height: 100vh;  
 }
 
+
+
+/**
 .studentCrudContent{
   background-color: white;
   min-height: 100vh;
@@ -215,7 +222,8 @@ input[type=number] {
   display: flex;
   justify-content: center;
 }
-/**
+
+
 .adminTableStyle {
   text-align: left;
   padding: 10px; 
