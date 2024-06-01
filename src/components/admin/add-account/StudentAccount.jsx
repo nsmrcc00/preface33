@@ -5,6 +5,7 @@ import Header from '../../header/Header'
 import background from "/banner_1.jpg"; 
 import Register from './Register2';
 import StudentTable from './StudentTable';
+import AddSection from '../add-section/addSection';
 
 const StudentAccount = () => {
   const [selectedAccount, setSelectedAccount] = useState(null);
@@ -28,13 +29,18 @@ const StudentAccount = () => {
           fill
           >
             <Tab eventKey="studentTable" title="Students">
-              <section id='schoolSectionPage'>
+              <section id='schoolStudentPage'>
                 <StudentTable setSelectedAccount={setSelectedAccount} />
                 <Register selectedAccount={selectedAccount} />
               </section>
             </Tab>
-            <Tab className='studentCrudContent' eventKey="subjectTable" title="Subjects">
-              <section className='studentCrudContent'>
+            <Tab eventKey="sectionTable" title="Sections">
+              <section id='schoolSectionPage'>
+                <AddSection/>
+              </section>
+            </Tab>
+            <Tab eventKey="subjectTable" title="Subjects">
+              <section id='schoolSectionPage'>
                 <h1>Subjects</h1>
               </section>
             </Tab>

@@ -32,8 +32,8 @@ const InstructorsTable = ({ setSelectedAccount }) => {
     const filteredInstructors = instructors.filter((instructor) => {
         const fullName = `${instructor.name.firstName} ${instructor.name.middleName} ${instructor.name.lastName}`.toLowerCase();
         return fullName.includes(searchTerm.toLowerCase()) ||
-               instructor.email.toLowerCase().includes(searchTerm.toLowerCase())|| 
-               instructor.idNumber.toLowerCase().includes(searchTerm.toLowerCase());//Will not work if there are no id numbers
+            instructor.idNumber && instructor.email.toLowerCase().includes(searchTerm.toLowerCase())|| 
+            instructor.idNumber && instructor.idNumber.toLowerCase().includes(searchTerm.toLowerCase());
     });
 
     return (
