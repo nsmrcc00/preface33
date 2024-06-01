@@ -342,10 +342,8 @@ const AddSubject = () => {
             }
           }}
         >
-          <form id='submitSub' onSubmit={isEditMode ? updateSub : addSub}>
-            <label>
-              <h2>{isEditMode ? "Edit Subject" : "Add Subject"}</h2>
-            </label>
+          <form id='submitSub' onSubmit={isEditMode ? updateSub : addSub}>            
+            <h2>{isEditMode ? "Edit Subject" : "Add Subject"}</h2>                        
             <label className='addSubForm'>
               Title:
               <input
@@ -400,7 +398,7 @@ const AddSubject = () => {
                 <option value={true}>Yes</option>
               </select>
             </label>
-            <table>
+            <table style={{marginTop:'1.5rem'}}>
               <thead>
                 <tr>
                   <th>DAY</th>
@@ -482,7 +480,7 @@ export default AddSubject;
 
 /*
 
-###OLD CODE FOR DELETING SUBJECTS(NOT USABLE ANYMORE)
+###OLD CODE FOR DELETING SUBJECTS(NOT USABLE AT THE MOMENT)
 
 const deleteSub = async (title) => {
     try {
