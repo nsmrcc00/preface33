@@ -81,7 +81,7 @@
 }
 
 /*Subject*/
-#schoolSectionPage,#schoolInstructorPage {
+#schoolSectionPage,#schoolInstructorPage,#schoolStudentPage{
   display: flex;
   justify-content: space-evenly;
   flex-wrap: wrap;
