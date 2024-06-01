@@ -28,6 +28,7 @@ const AddSubject = () => {
   });
 
   const [subjects, setSubjects] = useState([]);
+  const [users, setUsers] = useState([]);
   const [showArchived, setShowArchived] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -106,10 +107,14 @@ const AddSubject = () => {
   const addSub = async (e) => {
     e.preventDefault();
     const formattedSchedule = formatSchedule();
+    const instructorData = users.find(user => user.id === subject.instructor);
     try {
       await setDoc(doc(db, "Subjects", subject.title), {
         subjectCode: subject.subjectCode,
-        instructor: subject.instructor,
+        instructor: {
+          id: instructorData.id,
+          name: instructorData.name
+        },
         Schedule: formattedSchedule,
         section: subject.section,
         title: subject.title,
@@ -127,10 +132,14 @@ const AddSubject = () => {
   const updateSub = async (e) => {
     e.preventDefault();
     const formattedSchedule = formatSchedule();
+    const instructorData = users.find(user => user.id === subject.instructor);
     try {
       await updateDoc(doc(db, "Subjects", subject.title), {
         subjectCode: subject.subjectCode,
-        instructor: subject.instructor,
+        instructor: {
+          id: instructorData.id,
+          name: instructorData.name
+        },
         Schedule: formattedSchedule,
         section: subject.section,
         title: subject.title,
@@ -177,7 +186,27 @@ const AddSubject = () => {
     }
   };
 
+  const fetchUsers = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "Users"));
+      const usersList = querySnapshot.docs
+        .map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: `${data.name.firstName} ${data.name.middleName ? data.name.middleName + ' ' : ''}${data.name.lastName}`,
+            role: data.role  // assuming the role field exists in the user document
+          };
+        })
+        .filter(user => user.role === 'instructor');
+      setUsers(usersList);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
   useEffect(() => {
+    fetchUsers();
     fetchSubjects();
   }, []);
 
@@ -186,20 +215,19 @@ const AddSubject = () => {
     return (
       (showArchived || !sub.archived) &&
       ((sub.title && sub.title.toLowerCase().includes(lowerCaseQuery)) ||
-        (sub.instructor && sub.instructor.toLowerCase().includes(lowerCaseQuery)) ||
+        (sub.instructor && sub.instructor.name.toLowerCase().includes(lowerCaseQuery)) ||
         (sub.subjectCode && sub.subjectCode.toLowerCase().includes(lowerCaseQuery)) ||
         (sub.section && sub.section.toLowerCase().includes(lowerCaseQuery)) ||
         (sub.Schedule && sub.Schedule.days && sub.Schedule.days.toLowerCase().includes(lowerCaseQuery)) ||
         (sub.Schedule && sub.Schedule.time && sub.Schedule.time.toLowerCase().includes(lowerCaseQuery)))
     );
   });
-  ;
 
   const isNumberKey = (evt) => {
     const charCode = evt.which ? evt.which : evt.keyCode;
-  
+
     if (charCode === 8 || charCode === 46 || charCode === 9 ||
-        (charCode >= 37 && charCode <= 40) || charCode === 27) {
+      (charCode >= 37 && charCode <= 40) || charCode === 27) {
       return;
     }
 
@@ -257,10 +285,10 @@ const AddSubject = () => {
                   <tr key={index} onClick={() => handleRowClick(sub)}>
                     <td>{sub.subjectCode}</td>
                     <td>{sub.title}</td>
-                    <td>{sub.section}</td> 
-                    <td>{schedule.days}</td> 
+                    <td>{sub.section}</td>
+                    <td>{schedule.days}</td>
                     <td>{schedule.time}</td>
-                    <td>{sub.instructor}</td>              
+                    <td>{sub.instructor.name}</td>
                     <td>{sub.archived ? "Yes" : "No"}</td>
                   </tr>
                 );
@@ -328,13 +356,19 @@ const AddSubject = () => {
               />
             </label>
             <label className='addSubForm'>
-              Instructor
-              <input
-                type="text"
+              Instructor:
+              <select
                 name="instructor"
                 value={subject.instructor}
                 onChange={handleChange}
-              />
+              >
+                <option value="">Select Instructor</option>
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.name}
+                  </option>
+                ))}
+              </select>
             </label>
             <label className='addSubForm'>
               Archived:
@@ -347,7 +381,7 @@ const AddSubject = () => {
                 <option value={true}>Yes</option>
               </select>
             </label>
-            <table> 
+            <table>
               <thead>
                 <tr>
                   <th>DAY</th>
@@ -426,6 +460,8 @@ const AddSubject = () => {
 };
 
 export default AddSubject;
+
+
 
 
 
