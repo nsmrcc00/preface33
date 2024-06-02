@@ -16,6 +16,7 @@ const Register = ({ selectedAccount }) => {
   const [lastName, setLastName] = useState('');
   const [idNumber, setIdNumber] = useState('');
   const [role, setRole] = useState('student');
+  
   useEffect(() => {
     if (selectedAccount) {
       setIdNumber(selectedAccount.idNumber);
