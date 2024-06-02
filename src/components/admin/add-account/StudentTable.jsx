@@ -33,7 +33,8 @@ const StudentTable = ({ setSelectedAccount }) => {
         const fullName = `${student.name.firstName} ${student.name.middleName} ${student.name.lastName}`.toLowerCase();
         return fullName.includes(searchTerm.toLowerCase()) ||
                student.email && student.email.toLowerCase().includes(searchTerm.toLowerCase())|| 
-               student.idNumber && student.idNumber.toLowerCase().includes(searchTerm.toLowerCase());
+               student.idNumber && student.idNumber.toLowerCase().includes(searchTerm.toLowerCase())||
+               student.section && student.section.toLowerCase().includes(searchTerm.toLowerCase());
     });
 
     return (
@@ -65,7 +66,7 @@ const StudentTable = ({ setSelectedAccount }) => {
                             <td>
                                 {student.name.firstName} {student.name.middleName} {student.name.lastName}
                             </td>
-                            <td>Sec(Placeholder)</td>
+                            <td>{student.section}</td>
                         </tr>
                     ))}
                 </tbody>
