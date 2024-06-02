@@ -41,7 +41,7 @@ const StudentAccount = () => {
             </Tab>
             <Tab eventKey="subjectTable" title="Subjects">
               <section id='schoolSectionPage'>
-                <h1>Subjects</h1>
+                <h2>Subjects</h2>
               </section>
             </Tab>
           </Tabs>
