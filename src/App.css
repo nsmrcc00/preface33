@@ -207,7 +207,7 @@ input[type=number] {
   border-collapse: collapse;
 }
 
-#studentCrudPage{
+#studentCrudPage,#instructorCrudPage{
   width: auto;  
   min-height: 100vh;  
 }
