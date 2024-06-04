@@ -16,9 +16,8 @@ const Login = () => {
             setIsSigningIn(true)
             await new Promise(resolve => setTimeout(resolve, 150));
             await doSignInWithEmailAndPassword(email, password).then((userCredential) => {
-                console.log("User logged in successfully");
-                //FOR TESTING ONLY. WILL BE REMOVED AT LAUNCH
-                console.log(userCredential);            
+                console.log("User logged in successfully");                
+                console.log(userCredential);//FOR TESTING ONLY. WILL BE REMOVED AT LAUNCH           
             }).catch((error) => {
                 console.error(error);
                 alert("Error! Please sign in with valid credentials.")

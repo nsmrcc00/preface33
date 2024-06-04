@@ -6,7 +6,7 @@ import background from "/banner_1.jpg"
 
 
 const AdminHome = () => {
-    const { userLoggedIn,currentUser } = useAuth()
+    const { userLoggedIn } = useAuth()
     const navigate = useNavigate()
     //navigate to instructor account page
     const navi1 = () => {
