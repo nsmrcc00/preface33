@@ -6,6 +6,7 @@ import background from "/banner_1.jpg";
 import Register from './Register2';
 import StudentTable from './StudentTable';
 import AddSection from '../add-section/addSection';
+import AddToClassList from '../add-to-class/AddToClassList';
 
 const StudentAccount = () => {
   const [selectedAccount, setSelectedAccount] = useState(null);
@@ -41,7 +42,7 @@ const StudentAccount = () => {
             </Tab>
             <Tab eventKey="subjectTable" title="Subjects">
               <section id='schoolSectionPage'>
-                <h2>Subjects</h2>
+                <AddToClassList/>
               </section>
             </Tab>
           </Tabs>
