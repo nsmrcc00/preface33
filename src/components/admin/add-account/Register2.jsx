@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { doCreateUserWithEmailAndPassword, doDeleteUser, doUpdateUser } from "../../../firebase/auth";
+import { db } from '../../../firebase/firebase';
+import { getDocs, collection } from 'firebase/firestore';
 
 const Register = ({ selectedAccount }) => {
   const [email, setEmail] = useState('');
@@ -16,18 +18,38 @@ const Register = ({ selectedAccount }) => {
   const [lastName, setLastName] = useState('');
   const [idNumber, setIdNumber] = useState('');
   const [role, setRole] = useState('student');
-  
+  const [section, setSection] = useState('');
+  const [sections, setSections] = useState([]);
+
   useEffect(() => {
     if (selectedAccount) {
       setIdNumber(selectedAccount.idNumber);
       setEmail(selectedAccount.email);
+      setSection(selectedAccount.section)
       setFirstName(selectedAccount.name.firstName);
       setMiddleName(selectedAccount.name.middleName);
       setLastName(selectedAccount.name.lastName);      
     }
   }, [selectedAccount]);
 
-  //Add Account
+  useEffect(() => {
+    const fetchSections = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "Sections"));
+        const sectionsList = querySnapshot.docs.map(doc => ({
+          ...doc.data(),
+          ref: doc.ref
+        }));
+        setSections(sectionsList);
+      } catch (error) {
+        console.error("Error fetching sections:", error);
+      }
+    };
+
+    fetchSections();
+  }, []);
+
+  // Add Account
   const onSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
@@ -36,7 +58,7 @@ const Register = ({ selectedAccount }) => {
     }
     setIsRegistering(true);
     try {
-      await doCreateUserWithEmailAndPassword(email, password, role, firstName, middleName, lastName, idNumber); // Pass idNumber here
+      await doCreateUserWithEmailAndPassword(email, password, role, firstName, middleName, lastName, idNumber, section); // Pass section here
       console.log("User registered successfully");
       // Clear the input fields
       setEmail('');
@@ -46,6 +68,7 @@ const Register = ({ selectedAccount }) => {
       setMiddleName('');
       setLastName('');
       setIdNumber('');
+      setSection('');
       setErrorMessage(''); // Clear any previous error messages
       setSuccessMessage('User registered successfully'); // Set success message
     } catch (error) {
@@ -55,8 +78,8 @@ const Register = ({ selectedAccount }) => {
       setIsRegistering(false);
     }
   };
- 
-  //Update Account Information
+
+  // Update Account Information
   const onUpdate = async () => {
     if (!selectedAccount) {
       setErrorMessage('No student selected');
@@ -64,7 +87,7 @@ const Register = ({ selectedAccount }) => {
     }
     setIsUpdating(true);
     try {
-      await doUpdateUser(selectedAccount.id, email, firstName, middleName, lastName, idNumber);
+      await doUpdateUser(selectedAccount.id, email, firstName, middleName, lastName, idNumber, section); // Pass section here
       console.log("User updated successfully");
       setEmail('');
       setPassword('');
@@ -73,6 +96,7 @@ const Register = ({ selectedAccount }) => {
       setMiddleName('');
       setLastName('');
       setIdNumber('');
+      setSection('');
       setErrorMessage('');
       setSuccessMessage('User updated successfully');
     } catch (error) {
@@ -83,7 +107,7 @@ const Register = ({ selectedAccount }) => {
     }
   };
 
-  //Delete Account
+  // Delete Account
   const onDelete = async () => {
     if (!selectedAccount) {
       setErrorMessage('No student selected');
@@ -103,6 +127,7 @@ const Register = ({ selectedAccount }) => {
       setMiddleName('');
       setLastName('');
       setIdNumber('');
+      setSection('');
     } catch (error) {
       console.error(error);
       setErrorMessage("Error deleting user");
@@ -124,6 +149,16 @@ const Register = ({ selectedAccount }) => {
         <input className="form-control" type="text" placeholder="ID Number" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} required />
         <input className="form-control" type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} required />
         <input className="form-control" type="password" placeholder='Confirm Password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+        
+        <select className="form-control" name="section" value={section} onChange={(e) => setSection(e.target.value)} required>
+          <option value="">Select Section</option>
+          {sections.map((section, index) => (
+            <option key={index} value={`${section.sectionName}`}>
+              {`${section.sectionName}`}
+            </option>
+          ))}
+        </select>
+
         <div className="mb-3 text-center acc-crud">
           <button type="submit" disabled={isRegistering} className="acc-crud-btn btn btn-danger">
             {isRegistering ? 'Adding Account...' : 'Add Account'}
@@ -137,10 +172,8 @@ const Register = ({ selectedAccount }) => {
                 {isDeleting ? 'Deleting Account...' : 'Delete Account'}
               </button>
             </>
-            
           )}
         </div>
-        
       </form>
     </>
   );

@@ -149,68 +149,68 @@ const AddSubject = () => {
   
   
 
-//UPDATE SUBJECT INFORMATION
-const updateSub = async (e) => {
-  e.preventDefault();
-  const formattedSchedule = formatSchedule();
-  const instructorData = users.find(user => user.id === subject.instructor);
-  try {
-    // Update subject in "Subjects" collection
-    const subjectRef = doc(db, "Subjects", subject.id);
-    await updateDoc(subjectRef, {
-      subjectCode: subject.subjectCode,
-      instructor: {
-        id: instructorData.id,
-        ref: instructorData.ref,
-        name: instructorData.name
-      },
-      Schedule: formattedSchedule,
-      section: subject.section,
-      title: subject.title,
-      archived: subject.archived
-    });
-
-    console.log("Subject updated successfully!");
-
-    // Update or add subject reference to "subjectsHandled" subcollection in the instructor's document
-    const instructorRef = doc(db, "Users", instructorData.id);
-    const subjectsHandledRef = collection(instructorRef, "subjectsHandled");
-    const querySnapshot = await getDocs(subjectsHandledRef);
-    let subjectHandledDoc = null;
-
-    querySnapshot.forEach((doc) => {
-      if (doc.data().subjectCode === subject.subjectCode && doc.data().section === subject.section) { // Include section in comparison
-        subjectHandledDoc = doc;
-      }
-    });
-
-    if (subjectHandledDoc) {
-      await updateDoc(subjectHandledDoc.ref, {
-        title: subject.title,
-        ref: subjectRef
-      });
-      console.log("Instructor's subjectsHandled subcollection updated!");
-    } else {
-      await addDoc(subjectsHandledRef, {
+  //UPDATE SUBJECT INFORMATION
+  const updateSub = async (e) => {
+    e.preventDefault();
+    const formattedSchedule = formatSchedule();
+    const instructorData = users.find(user => user.id === subject.instructor);
+    try {
+      // Update subject in "Subjects" collection
+      const subjectRef = doc(db, "Subjects", subject.id);
+      await updateDoc(subjectRef, {
         subjectCode: subject.subjectCode,
+        instructor: {
+          id: instructorData.id,
+          ref: instructorData.ref,
+          name: instructorData.name
+        },
+        Schedule: formattedSchedule,
+        section: subject.section,
         title: subject.title,
-        section: subject.section, // Include section
-        ref: subjectRef
+        archived: subject.archived
       });
-      console.log("Subject added to instructor's subjectsHandled subcollection!");
+
+      console.log("Subject updated successfully!");
+
+      // Update or add subject reference to "subjectsHandled" subcollection in the instructor's document
+      const instructorRef = doc(db, "Users", instructorData.id);
+      const subjectsHandledRef = collection(instructorRef, "subjectsHandled");
+      const querySnapshot = await getDocs(subjectsHandledRef);
+      let subjectHandledDoc = null;
+
+      querySnapshot.forEach((doc) => {
+        if (doc.data().subjectCode === subject.subjectCode && doc.data().section === subject.section) { // Include section in comparison
+          subjectHandledDoc = doc;
+        }
+      });
+
+      if (subjectHandledDoc) {
+        await updateDoc(subjectHandledDoc.ref, {
+          title: subject.title,
+          ref: subjectRef
+        });
+        console.log("Instructor's subjectsHandled subcollection updated!");
+      } else {
+        await addDoc(subjectsHandledRef, {
+          subjectCode: subject.subjectCode,
+          title: subject.title,
+          section: subject.section, // Include section
+          ref: subjectRef
+        });
+        console.log("Subject added to instructor's subjectsHandled subcollection!");
+      }
+
+      closeModal();
+      fetchSubjects();
+    } catch (error) {
+      alert("Error updating subject.");
+      console.error(error);
     }
-
-    closeModal();
-    fetchSubjects();
-  } catch (error) {
-    alert("Error updating subject.");
-    console.error(error);
-  }
-};
+  };
 
 
 
-//TABLE BEHAVIOR WHEN CLICKED
+  //TABLE BEHAVIOR WHEN CLICKED
   const handleRowClick = (sub) => {
     const schedule = sub.Schedule || { days: '', time: '' };
     
