@@ -7,8 +7,7 @@ import {
     deleteUser 
 } from "firebase/auth";
 
-
-export const doCreateUserWithEmailAndPassword = async (email, password, role, firstName, middleName, lastName, idNumber) => {
+export const doCreateUserWithEmailAndPassword = async (email, password, role, firstName, middleName, lastName, idNumber, section) => {
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   const user = userCredential.user;
 
@@ -21,15 +20,15 @@ export const doCreateUserWithEmailAndPassword = async (email, password, role, fi
       middleName: middleName,
       lastName: lastName
     },
+    section: section, // Include section here
     userId: user.uid
   });
 
   return userCredential;
 };
 
-
 export const doSignInWithEmailAndPassword = (email, password) => {
-    return signInWithEmailAndPassword(auth, email, password)
+    return signInWithEmailAndPassword(auth, email, password);
 };
 
 export const doSignOut = () => {
@@ -60,21 +59,23 @@ export const doDeleteUser = async (userId) => {
     }
   };
 
-export const doUpdateUser = async (userId, email, firstName, middleName, lastName, idNumber) => {
-const userDocRef = doc(db, "Users", userId);
+export const doUpdateUser = async (userId, email, firstName, middleName, lastName, idNumber, section) => {
+  const userDocRef = doc(db, "Users", userId);
 
-await updateDoc(userDocRef, {
-    email: email,
-    idNumber: idNumber,
-    name: {
-    firstName: firstName,
-    middleName: middleName,
-    lastName: lastName
-    }
-});
+  await updateDoc(userDocRef, {
+      email: email,
+      idNumber: idNumber,
+      name: {
+      firstName: firstName,
+      middleName: middleName,
+      lastName: lastName
+      },
+      section: section // Include section here
+  });
 
-return true;
+  return true;
 };
+
 /*
 export const doDeleteUser = async (userId) => {
   const user = auth.currentUser;
