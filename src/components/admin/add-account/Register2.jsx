@@ -32,6 +32,7 @@ const Register = ({ selectedAccount }) => {
     }
   }, [selectedAccount]);
 
+  //Fetch Sections from Collections
   useEffect(() => {
     const fetchSections = async () => {
       try {
