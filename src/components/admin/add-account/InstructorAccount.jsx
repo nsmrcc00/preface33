@@ -14,7 +14,7 @@ const InsAccount = () => {
     <>
       <Header />
       <main
-        id="instructorHome"
+        id="instructorCrudPage"
         style={{
           backgroundImage: `url(${background})`,
           backgroundPosition: 'center center',
@@ -33,8 +33,7 @@ const InsAccount = () => {
             <section id='schoolInstructorPage'>
               <InsAccTable setSelectedAccount={setSelectedAccount} />
               <Register selectedAccount={selectedAccount} />
-            </section>
-            
+            </section>            
           </Tab>
           <Tab eventKey="addSubs" title="Subjects">
             <AddSubject />  
