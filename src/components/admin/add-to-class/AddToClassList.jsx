@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { db } from '../../../firebase/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, writeBatch, getDoc, collectionGroup } from 'firebase/firestore';
 import Modal from 'react-modal';
 import useSortableData from '../../table-sort/TableSort';
 
@@ -12,7 +12,9 @@ const AddToClassList = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [students, setStudents] = useState([]);
+  const [classList, setClassList] = useState([]);
   const [studentSearchTerm, setStudentSearchTerm] = useState('');
+  const [selectAllChecked, setSelectAllChecked] = useState(false);
 
   useEffect(() => {
     const fetchSubjects = async () => {
@@ -22,7 +24,8 @@ const AddToClassList = () => {
         id: doc.id,
         subjectCode: doc.data().subjectCode,
         title: doc.data().title,
-        instructorName: doc.data().instructor.name
+        instructorName: doc.data().instructor.name,
+        section: doc.data().section
       }));
       setSubjects(subjectsList);
     };
@@ -34,7 +37,8 @@ const AddToClassList = () => {
         id: doc.id,
         idNumber: doc.data().idNumber,
         name: doc.data().name,
-        section: doc.data().section
+        section: doc.data().section,
+        checked: false // Add a checked property to each student object
       }));
       setStudents(studentsList);
     };
@@ -43,12 +47,39 @@ const AddToClassList = () => {
     fetchStudents();
   }, []);
 
+  const fetchClassList = async (subjectId) => {
+    const classListRef = collection(db, 'Subjects', subjectId, 'classList');
+    const classListSnapshot = await getDocs(classListRef);
+    const classListData = classListSnapshot.docs.map(doc => ({
+      id: doc.id,
+      idNumber: doc.data().idNumber,
+      name: doc.data().name,
+      section: doc.data().section,
+    }));
+    setClassList(classListData);
+  };
+
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
 
   const handleStudentSearchChange = (event) => {
     setStudentSearchTerm(event.target.value);
+  };
+
+  const toggleSelectAll = () => {
+    setSelectAllChecked(!selectAllChecked);
+    setStudents(students.map(student => ({
+      ...student,
+      checked: !selectAllChecked
+    })));
+  };
+
+  const toggleIndividualCheckbox = (id) => {
+    setStudents(students.map(student => ({
+      ...student,
+      checked: student.id === id ? !student.checked : student.checked
+    })));
   };
 
   const filteredSubjects = subjects.filter(subject =>
@@ -68,14 +99,16 @@ const AddToClassList = () => {
   const { items: sortedSubjects, requestSort: requestSortSubjects, sortConfig: sortConfigSubjects } = useSortableData(filteredSubjects);
   const { items: sortedStudents, requestSort: requestSortStudents, sortConfig: sortConfigStudents } = useSortableData(filteredStudents);
 
-  const openModal = (subject) => {
+  const openModal = async (subject) => {
     setSelectedSubject(subject);
     setModalIsOpen(true);
+    await fetchClassList(subject.id);
   };
 
   const closeModal = () => {
     setModalIsOpen(false);
     setSelectedSubject(null);
+    setClassList([]);
   };
 
   const getClassNamesFor = (name, sortConfig) => {
@@ -83,6 +116,41 @@ const AddToClassList = () => {
       return;
     }
     return sortConfig.key === name ? sortConfig.direction : undefined;
+  };
+
+  const handleAddToClassList = async () => {
+    if (selectedSubject) {
+      const selectedStudents = students.filter(student => student.checked);
+      const batch = writeBatch(db);
+
+      selectedStudents.forEach(student => {
+        const classListRef = doc(collection(db, 'Subjects', selectedSubject.id, 'classList'));
+        batch.set(classListRef, {
+          name: `${student.name.firstName} ${student.name.middleName} ${student.name.lastName}`,
+          idNumber: student.idNumber,
+          section: student.section,
+          uid: student.id,
+          ref: doc(db, 'Users', student.id)
+        });
+      });
+
+      try {
+        await batch.commit();
+        await fetchClassList(selectedSubject.id); // Refresh the class list
+        alert('Students successfully added to class list');
+        // Clear the checkboxes
+        setStudents(students.map(student => ({
+          ...student,
+          checked: false
+        })));
+        setSelectAllChecked(false);
+      } catch (error) {
+        console.error('Error adding students to class list: ', error);
+        alert('Error adding students to class list');
+      }
+
+      closeModal();
+    }
   };
 
   return (
@@ -104,6 +172,7 @@ const AddToClassList = () => {
               <th onClick={() => requestSortSubjects('subjectCode')} className={getClassNamesFor('subjectCode', sortConfigSubjects)}>Subject Code</th>
               <th onClick={() => requestSortSubjects('title')} className={getClassNamesFor('title', sortConfigSubjects)}>Subject</th>
               <th onClick={() => requestSortSubjects('instructorName')} className={getClassNamesFor('instructorName', sortConfigSubjects)}>Instructor</th>
+              <th onClick={() => requestSortSubjects('section')} className={getClassNamesFor('section', sortConfigSubjects)}>Section</th>
             </tr>
           </thead>
           <tbody>
@@ -112,6 +181,7 @@ const AddToClassList = () => {
                 <td>{subject.subjectCode}</td>
                 <td>{subject.title}</td>
                 <td>{subject.instructorName}</td>
+                <td>{subject.section}</td>
               </tr>
             ))}
           </tbody>
@@ -142,10 +212,14 @@ const AddToClassList = () => {
       >
         {selectedSubject && (
           <div>
-            <h2 style={{marginBottom: '10px'}}>{selectedSubject.title}</h2>
-            <p><strong>Subject Code:</strong> {selectedSubject.subjectCode}</p>
-            <p><strong>Instructor:</strong> {selectedSubject.instructorName}</p>
-            {/* Add more subject details as needed */}
+            
+            <div className='subjectInfo'>
+              <h2>{selectedSubject.title}</h2>
+              <p><strong>Subject Code:</strong> {selectedSubject.subjectCode}</p>
+              <p><strong>Section:</strong> {selectedSubject.section}</p>
+              <p><strong>Instructor:</strong> {selectedSubject.instructorName}</p>
+            </div>            
+            
             <label><strong>Class List</strong></label>
             <input
               type="text"
@@ -153,7 +227,7 @@ const AddToClassList = () => {
               style={{
                 margin: '0px 0px 10px 10px'
               }}
-            />  
+            />
             <table id='classListTable' className='striped-table'>
               <thead>
                 <tr>
@@ -164,12 +238,14 @@ const AddToClassList = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>Placeholder</td>
-                  <td>Placeholder</td>
-                  <td>Placeholder</td>
-                  <td>Placeholder</td>
-                </tr>
+                {classList.map(student => (
+                  <tr key={student.id}>
+                    <td>{student.idNumber}</td>
+                    <td>{student.name}</td>
+                    <td>{student.section}</td>
+                    <td><button className='classListButton'>REMOVE</button></td>
+                  </tr>
+                ))}
               </tbody>
             </table>
 
@@ -182,11 +258,11 @@ const AddToClassList = () => {
               style={{
                 margin: '10px 0px 10px 10px'
               }}
-            />            
+            />
             <table id='studentListTable' className='striped-table'>
               <thead>
                 <tr>
-                  <th><input type='checkbox'/></th>
+                  <th><input type='checkbox' checked={selectAllChecked} onChange={toggleSelectAll} /></th>
                   <th onClick={() => requestSortStudents('idNumber')} className={getClassNamesFor('idNumber', sortConfigStudents)}>ID Number</th>
                   <th onClick={() => requestSortStudents('name.firstName')} className={getClassNamesFor('name.firstName', sortConfigStudents)}>Name</th>
                   <th onClick={() => requestSortStudents('section')} className={getClassNamesFor('section', sortConfigStudents)}>Section</th>
@@ -195,7 +271,7 @@ const AddToClassList = () => {
               <tbody>
                 {sortedStudents.map(student => (
                   <tr key={student.id}>
-                    <td><input type='checkbox'/></td>
+                    <td><input type='checkbox' checked={student.checked} onChange={() => toggleIndividualCheckbox(student.id)} /></td>
                     <td>{student.idNumber}</td>
                     <td>{student.name.firstName} {student.name.middleName} {student.name.lastName}</td>
                     <td>{student.section}</td>
@@ -203,7 +279,8 @@ const AddToClassList = () => {
                 ))}
               </tbody>
             </table>
-            <button onClick={closeModal}>Close</button>
+            <button className="studentListButton" onClick={handleAddToClassList}>Add to Class List</button>
+            <button className="studentListButton" onClick={closeModal}>Close</button>
           </div>
         )}
       </Modal>
@@ -212,6 +289,3 @@ const AddToClassList = () => {
 }
 
 export default AddToClassList;
-
-
-

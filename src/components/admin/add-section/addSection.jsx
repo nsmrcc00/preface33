@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { db } from '../../../firebase/firebase';
-import { doc, addDoc, updateDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
+import { doc, addDoc, updateDoc, /*deleteDoc,*/ getDocs, collection } from 'firebase/firestore';
+import useSortableData from '../../table-sort/TableSort';
 
 const AddSection = () => {
   const [section, setSection] = useState({
@@ -94,6 +95,14 @@ const AddSection = () => {
     );
   });
 
+  const { items: sortedSections, requestSort, sortConfig } = useSortableData(filteredSections);
+
+  const getClassNamesFor = (name) => {
+      if (!sortConfig) {
+          return;
+      }
+      return sortConfig.key === name ? sortConfig.direction : undefined;
+  };
   return (
     <>
       <div style={{ overflowX: 'auto' }}>
@@ -110,12 +119,12 @@ const AddSection = () => {
         <table className='striped-table'>
           <thead>
             <tr>
-              <th>Section</th>
-              <th>Year Level</th>
+              <th onClick={() => requestSort('section')} className={getClassNamesFor('section')}>Section</th>
+              <th onClick={() => requestSort('yearLevel')} className={getClassNamesFor('yearLevel')}>Year Level</th>
             </tr>
           </thead>
           <tbody>
-            {filteredSections.map((sec, index) => (
+            {sortedSections.map((sec, index) => (
               <tr key={index} onClick={() => handleRowClick(sec, sec.id)}>
                 <td>{sec.sectionName}</td>
                 <td>{sec.yearLevel}</td>
