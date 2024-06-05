@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import Container from 'react-bootstrap/Container';
 import Navbar from 'react-bootstrap/Navbar';
 import { useAuth } from '../../contexts/authContext'
@@ -15,6 +15,20 @@ function InstructorHeader() {
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
+
+    useEffect(() => {
+        const handleBeforeUnload = async () => {
+            if (userLoggedIn) {
+                await doSignOut();
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [userLoggedIn]);
 
     //navigate to instructor account page
     const navi1 = () => {
