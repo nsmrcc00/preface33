@@ -212,7 +212,28 @@ input[type=number] {
   min-height: 100vh;  
 }
 
+.classListButton,.studentListButton {
+  width: 180px;
+  height: 34px;
+}
 
+.subjectInfo {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-between;
+}
+
+.subjectInfo p,h2 {
+  
+  /* Adjust width as needed for two columns */
+  width: 50%;
+  /* Add margin for spacing between columns */
+  margin: 5px 5px 5px 0px;
+}
+
+.studentListButton {
+  margin: 10px 10px 10px 0px;
+}
 
 /**
 .studentCrudContent{
