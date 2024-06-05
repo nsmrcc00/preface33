@@ -8,7 +8,7 @@ const Login = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [isSigningIn, setIsSigningIn] = useState(false)
-    const [errorMessage, setErrorMessage] = useState('')//NEED TO ADD ERROR CHECKING AND VALIDATION
+    //const [errorMessage, setErrorMessage] = useState('')//NEED TO ADD ERROR CHECKING AND VALIDATION
 
     const logIn = async (e) => {
         e.preventDefault();
