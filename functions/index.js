@@ -1,19 +1,48 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
 
-const {onRequest} = require("firebase-functions/v2/https");
-const logger = require("firebase-functions/logger");
+admin.initializeApp();
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+exports.createUser = functions.https.onCall(async (data, context) => {
+  const {
+    email,
+    password,
+    role,
+    firstName,
+    middleName,
+    lastName,
+    idNumber,
+    section,
+  } = data;
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+  try {
+    // Create user with email and password
+    const userRecord = await admin.auth().createUser({
+      email: email,
+      password: password,
+    });
+
+    // Set custom claims
+    await admin.auth().setCustomUserClaims(userRecord.uid, {role: role});
+
+    // Add user details to Firestore
+    const userDoc = admin.firestore().doc(`Users/${userRecord.uid}`);
+    await userDoc.set({
+      email: email,
+      idNumber: idNumber,
+      role: role,
+      name: {
+        firstName: firstName,
+        middleName: middleName,
+        lastName: lastName,
+      },
+      section: section,
+      userId: userRecord.uid,
+    });
+
+    return {status: "success", uid: userRecord.uid};
+  } catch (error) {
+    console.error("Error creating new user:", error);
+    return {status: "error", message: error.message};
+  }
+});
