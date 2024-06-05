@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase'; // Import your Firestore instance
+import useSortableData from '../../table-sort/TableSort';
 
 const InstructorsTable = ({ setSelectedAccount }) => {
     const [instructors, setInstructors] = useState([]);
@@ -36,6 +37,15 @@ const InstructorsTable = ({ setSelectedAccount }) => {
             instructor.idNumber && instructor.idNumber.toLowerCase().includes(searchTerm.toLowerCase());
     });
 
+    const { items: sortedInstructors, requestSort, sortConfig } = useSortableData(filteredInstructors);
+
+    const getClassNamesFor = (name) => {
+        if (!sortConfig) {
+            return;
+        }
+        return sortConfig.key === name ? sortConfig.direction : undefined;
+    };
+
     return (
         <div style={{overflowX: 'auto'}}>
           <h2>Accounts List</h2>
@@ -51,13 +61,13 @@ const InstructorsTable = ({ setSelectedAccount }) => {
             <table className='striped-table'>
                 <thead>
                     <tr>
-                        <th>ID Number</th>
-                        <th>Email</th>
-                        <th>Name</th>
+                        <th onClick={() => requestSort('idNumber')} className={getClassNamesFor('idNumber')}>ID Number</th>
+                        <th onClick={() => requestSort('email')} className={getClassNamesFor('email')}>Email</th>
+                        <th onClick={() => requestSort('name.firstName')} className={getClassNamesFor('name.firstName')}>Name</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredInstructors.map((instructor) => (
+                    {sortedInstructors.map((instructor) => (
                         <tr key={instructor.id} onClick={() => setSelectedAccount(instructor)}>
                             <td>{instructor.idNumber}</td>
                             <td>{instructor.email}</td>
