@@ -56,6 +56,7 @@ const StudentTable = ({ setSelectedAccount }) => {
                         <th>Email</th>
                         <th>Name</th>
                         <th>Section</th>
+                        <th>MAC Address</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -67,6 +68,7 @@ const StudentTable = ({ setSelectedAccount }) => {
                                 {student.name.firstName} {student.name.middleName} {student.name.lastName}
                             </td>
                             <td>{student.section}</td>
+                            <td></td>
                         </tr>
                     ))}
                 </tbody>
