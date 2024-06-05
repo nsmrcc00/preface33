@@ -238,10 +238,10 @@ const AddToClassList = () => {
           <div>
 
             <div className='subjectInfo'>
-              <h2>{selectedSubject.title}</h2>
-              <p><strong>Subject Code:</strong> {selectedSubject.subjectCode}</p>
-              <p><strong>Section:</strong> {selectedSubject.section}</p>
-              <p><strong>Instructor:</strong> {selectedSubject.instructorName}</p>
+              <h2 className='subjectInfoContent'>{selectedSubject.title}</h2>
+              <p className='subjectInfoContent'><strong>Subject Code:</strong> {selectedSubject.subjectCode}</p>
+              <p className='subjectInfoContent'><strong>Section:</strong> {selectedSubject.section}</p>
+              <p className='subjectInfoContent'><strong>Instructor:</strong> {selectedSubject.instructorName}</p>
             </div>
 
             <label><strong>Class List</strong></label>
