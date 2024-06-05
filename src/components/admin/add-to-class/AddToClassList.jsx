@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { db } from '../../../firebase/firebase';
-import { collection, query, where, getDocs, doc, writeBatch, getDoc, collectionGroup } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, writeBatch, deleteDoc } from 'firebase/firestore';
 import Modal from 'react-modal';
 import useSortableData from '../../table-sort/TableSort';
 
@@ -153,6 +153,30 @@ const AddToClassList = () => {
     }
   };
 
+  const handleRemoveFromClassList = async (documentId) => {
+    try {
+      await deleteDoc(doc(db, 'Subjects', selectedSubject.id, 'classList', documentId));
+      await refreshClassList(selectedSubject.id); // Refresh the class list
+      alert('Student removed from class list');
+    } catch (error) {
+      console.error('Error removing student from class list: ', error);
+      alert('Error removing student from class list');
+    }
+  };
+
+  const refreshClassList = async (subjectId) => {
+    const classListRef = collection(db, 'Subjects', subjectId, 'classList');
+    const classListSnapshot = await getDocs(classListRef);
+    const classListData = classListSnapshot.docs.map(doc => ({
+      id: doc.id,
+      idNumber: doc.data().idNumber,
+      name: doc.data().name,
+      section: doc.data().section,
+    }));
+    setClassList(classListData);
+  };
+  
+
   return (
     <>
       <div>
@@ -212,14 +236,14 @@ const AddToClassList = () => {
       >
         {selectedSubject && (
           <div>
-            
+
             <div className='subjectInfo'>
               <h2>{selectedSubject.title}</h2>
               <p><strong>Subject Code:</strong> {selectedSubject.subjectCode}</p>
               <p><strong>Section:</strong> {selectedSubject.section}</p>
               <p><strong>Instructor:</strong> {selectedSubject.instructorName}</p>
-            </div>            
-            
+            </div>
+
             <label><strong>Class List</strong></label>
             <input
               type="text"
@@ -243,7 +267,7 @@ const AddToClassList = () => {
                     <td>{student.idNumber}</td>
                     <td>{student.name}</td>
                     <td>{student.section}</td>
-                    <td><button className='classListButton'>REMOVE</button></td>
+                    <td><button className='classListButton' onClick={() => handleRemoveFromClassList(student.id)}>REMOVE</button></td>
                   </tr>
                 ))}
               </tbody>
