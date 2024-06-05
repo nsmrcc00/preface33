@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import { db } from '../../../firebase/firebase';
-import { doc, setDoc, updateDoc, getDocs, collection } from 'firebase/firestore';
+import { doc, addDoc, /*setDoc,*/ updateDoc, getDocs, collection } from 'firebase/firestore';
 
 Modal.setAppElement('#root');
 
@@ -29,6 +29,7 @@ const AddSubject = () => {
 
   const [subjects, setSubjects] = useState([]);
   const [users, setUsers] = useState([]);
+  const [sections, setSections] = useState([]);
   const [showArchived, setShowArchived] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -103,14 +104,15 @@ const AddSubject = () => {
     setTimeInputs(initialTimeState);
     setIsEditMode(false);
   };
-
+  
   //ADD SUBJECT TO COLLECTION
   const addSub = async (e) => {
     e.preventDefault();
     const formattedSchedule = formatSchedule();
     const instructorData = users.find(user => user.id === subject.instructor);
     try {
-      await setDoc(doc(db, "Subjects", subject.title), {
+      // Add subject to "Subjects" collection
+      const newSubjectRef = await addDoc(collection(db, "Subjects"), {
         subjectCode: subject.subjectCode,
         instructor: {
           id: instructorData.id,
@@ -122,7 +124,21 @@ const AddSubject = () => {
         title: subject.title,
         archived: subject.archived
       });
+  
       console.log("Subject added successfully!");
+  
+      // Add subject reference to "subjectsHandled" subcollection in the instructor's document
+      const instructorRef = doc(db, "Users", instructorData.id);
+      const subjectsHandledRef = collection(instructorRef, "subjectsHandled");
+      await addDoc(subjectsHandledRef, {
+        subjectCode: subject.subjectCode,
+        title: subject.title,
+        section: subject.section,
+        ref: newSubjectRef
+      });
+  
+      console.log("Subject added to instructor's subjectsHandled subcollection!");
+  
       closeModal();
       fetchSubjects();
     } catch (error) {
@@ -130,6 +146,8 @@ const AddSubject = () => {
       console.error(error);
     }
   };
+  
+  
 
   //UPDATE SUBJECT INFORMATION
   const updateSub = async (e) => {
@@ -137,11 +155,13 @@ const AddSubject = () => {
     const formattedSchedule = formatSchedule();
     const instructorData = users.find(user => user.id === subject.instructor);
     try {
-      await updateDoc(doc(db, "Subjects", subject.title), {
+      // Update subject in "Subjects" collection
+      const subjectRef = doc(db, "Subjects", subject.id);
+      await updateDoc(subjectRef, {
         subjectCode: subject.subjectCode,
         instructor: {
           id: instructorData.id,
-          ref: instructorData.ref, // Add the reference here
+          ref: instructorData.ref,
           name: instructorData.name
         },
         Schedule: formattedSchedule,
@@ -149,7 +169,37 @@ const AddSubject = () => {
         title: subject.title,
         archived: subject.archived
       });
+
       console.log("Subject updated successfully!");
+
+      // Update or add subject reference to "subjectsHandled" subcollection in the instructor's document
+      const instructorRef = doc(db, "Users", instructorData.id);
+      const subjectsHandledRef = collection(instructorRef, "subjectsHandled");
+      const querySnapshot = await getDocs(subjectsHandledRef);
+      let subjectHandledDoc = null;
+
+      querySnapshot.forEach((doc) => {
+        if (doc.data().subjectCode === subject.subjectCode && doc.data().section === subject.section) { // Include section in comparison
+          subjectHandledDoc = doc;
+        }
+      });
+
+      if (subjectHandledDoc) {
+        await updateDoc(subjectHandledDoc.ref, {
+          title: subject.title,
+          ref: subjectRef
+        });
+        console.log("Instructor's subjectsHandled subcollection updated!");
+      } else {
+        await addDoc(subjectsHandledRef, {
+          subjectCode: subject.subjectCode,
+          title: subject.title,
+          section: subject.section, // Include section
+          ref: subjectRef
+        });
+        console.log("Subject added to instructor's subjectsHandled subcollection!");
+      }
+
       closeModal();
       fetchSubjects();
     } catch (error) {
@@ -158,22 +208,24 @@ const AddSubject = () => {
     }
   };
 
+
+
   //TABLE BEHAVIOR WHEN CLICKED
   const handleRowClick = (sub) => {
-    // Ensure Schedule is properly initialized
     const schedule = sub.Schedule || { days: '', time: '' };
     
     setSubject({
       ...sub,
-      Schedule: schedule
+      Schedule: schedule,
+      id: sub.id // Ensure ID is set
     });
     setIsEditMode(true);
-  
+
     const days = schedule.days ? schedule.days.split(',') : [];
     const times = schedule.time ? schedule.time.split(',') : [];
-  
+
     const newTimeInputs = { ...initialTimeState };
-  
+
     days.forEach((day, index) => {
       const [start, end] = times[index].split('-');
       const [startHour, startMin] = start.split(':');
@@ -183,16 +235,19 @@ const AddSubject = () => {
         newTimeInputs[dayFull] = { startHour, startMin, endHour, endMin };
       }
     });
-  
+
     setTimeInputs(newTimeInputs);
     openModal();
   };
-  
+
   //FETCH SUBJECTS FROM SUBJECTS COLLECTION
   const fetchSubjects = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "Subjects"));
-      const subjectsList = querySnapshot.docs.map(doc => doc.data());
+      const subjectsList = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
       setSubjects(subjectsList);
     } catch (error) {
       console.error("Error fetching subjects:", error);
@@ -210,7 +265,7 @@ const AddSubject = () => {
             id: doc.id,
             ref: doc.ref,
             name: `${data.name.firstName} ${data.name.middleName ? data.name.middleName + ' ' : ''}${data.name.lastName}`,
-            role: data.role  // assuming the role field exists in the user document
+            role: data.role
           };
         })
         .filter(user => user.role === 'instructor');
@@ -220,9 +275,23 @@ const AddSubject = () => {
     }
   };
 
+  const fetchSections = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "Sections"));
+      const sectionsList = querySnapshot.docs.map(doc => ({
+        ...doc.data(),
+        ref: doc.ref//may be unnecessary
+      }));
+      setSections(sectionsList);
+    } catch (error) {
+      console.error("Error fetching sections:", error);
+    }
+  };
+
   useEffect(() => {
     fetchSubjects();
     fetchUsers();
+    fetchSections();
   }, []);
 
   //CLIENT-SIDE SEARCH
@@ -351,7 +420,6 @@ const AddSubject = () => {
                 name="title"
                 value={subject.title}
                 onChange={handleChange}
-                disabled={isEditMode}
               />
             </label>
             <label className='addSubForm'>
@@ -365,12 +433,18 @@ const AddSubject = () => {
             </label>
             <label className='addSubForm'>
               Section:
-              <input
-                type="text"
+              <select
                 name="section"
                 value={subject.section}
                 onChange={handleChange}
-              />
+              >
+                <option value="">Select Section</option>
+                {sections.map((section, index) => (
+                  <option key={index} value={`${section.sectionName}`}>
+                    {`${section.sectionName}`}
+                  </option>
+                ))}
+              </select>
             </label>
             <label className='addSubForm'>
               Instructor:
@@ -477,25 +551,3 @@ const AddSubject = () => {
 };
 
 export default AddSubject;
-
-/*
-
-###OLD CODE FOR DELETING SUBJECTS(NOT USABLE AT THE MOMENT)
-
-const deleteSub = async (title) => {
-    try {
-      await deleteDoc(doc(db, "Subjects", title));
-      console.log("Subject deleted successfully!");
-      fetchSubjects();
-    } catch (error) {
-      alert("Error deleting subject.");
-      console.error(error);
-    }
-  };
-
-<button
-  type="button"
-  onClick={() => deleteSub(subject.title)}
-  className="subCrudButton"
->Delete Subject</button>
-*/
