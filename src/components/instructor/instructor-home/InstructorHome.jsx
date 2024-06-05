@@ -1,4 +1,3 @@
-import React from 'react'
 import InstructorHeader from '../../header/InstructorHeader'
 import background from "/banner_1.jpg"
 

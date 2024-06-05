@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import { db } from '../../../firebase/firebase';
-import { doc, addDoc, setDoc, updateDoc, getDocs, collection } from 'firebase/firestore';
+import { doc, addDoc, /*setDoc,*/ updateDoc, getDocs, collection } from 'firebase/firestore';
 
 Modal.setAppElement('#root');
 
