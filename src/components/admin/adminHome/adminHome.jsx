@@ -1,4 +1,4 @@
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../contexts/authContext'
 import { doSignOut } from '../../../firebase/auth'
 import Header from '../../header/Header'

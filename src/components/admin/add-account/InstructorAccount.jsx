@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Header from '../../header/Header'; 
@@ -27,7 +27,7 @@ const InsAccount = () => {
         <Tabs
           defaultActiveKey="instructorTable"
           className="mb-3"
-          fill
+          justify
         >
           <Tab eventKey="instructorTable" title="Instructors">
             <section id='schoolInstructorPage'>

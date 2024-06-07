@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase'; // Import your Firestore instance
 import useSortableData from '../../table-sort/TableSort';
@@ -47,7 +47,7 @@ const InstructorsTable = ({ setSelectedAccount }) => {
     };
 
     return (
-        <div style={{overflowX: 'auto'}}>
+        <div className='table-container'>
           <h2>Accounts List</h2>
             <input
                 type="text"

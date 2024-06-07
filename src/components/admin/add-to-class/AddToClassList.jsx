@@ -179,7 +179,7 @@ const AddToClassList = () => {
 
   return (
     <>
-      <div>
+      <div className='table-container'>
         <h2>Subjects</h2>
         <input
           type="text"
@@ -226,11 +226,9 @@ const AddToClassList = () => {
             transform: 'translate(-50%, -50%)',
             padding: '20px',
             borderRadius: '10px',
-            maxWidth: '80%',
-            minWidth: '420px',
-            width: '100%',
+            width: 'max(80%, 400px)',          
             overflowX: 'auto',
-            overflowY: 'auto',
+            overflowY: 'auto',            
           }
         }}
       >
@@ -247,7 +245,7 @@ const AddToClassList = () => {
             <label><strong>Class List</strong></label>
             <input
               type="text"
-              placeholder="Search Students..."
+              placeholder="Search Class List..."
               style={{
                 margin: '0px 0px 10px 10px'
               }}
@@ -276,7 +274,7 @@ const AddToClassList = () => {
             <label><strong>Student List</strong></label>
             <input
               type="text"
-              placeholder="Search Students..."
+              placeholder="Search Student List..."
               value={studentSearchTerm}
               onChange={handleStudentSearchChange}
               style={{

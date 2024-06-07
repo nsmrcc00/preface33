@@ -27,7 +27,7 @@ const StudentAccount = () => {
           <Tabs
           defaultActiveKey="studentTable"
           className="mb-3"
-          fill
+          justify
           >
             <Tab eventKey="studentTable" title="Students">
               <section id='schoolStudentPage'>

@@ -48,7 +48,7 @@ const StudentTable = ({ setSelectedAccount }) => {
     };
 
     return (
-        <div style={{ overflowX: 'auto' }}>
+        <div className='table-container'>
             <h2>Accounts List</h2>
             <input
                 type="text"

@@ -24,7 +24,6 @@
 #login_heading{
     font-family: 'Katahdin Round', sans-serif;
     color: #AD1212;   
-
 }
 
 #gen_btn{
@@ -79,6 +78,17 @@
   color: #fff;
   cursor: pointer;
 }
+
+/*TABS*/
+.nav-item {
+  background-color: #fff;
+}
+
+.nav-item:hover {
+  background-color: #ddd;
+}
+
+
 
 /*Subject*/
 #schoolSectionPage,#schoolInstructorPage,#schoolStudentPage{
@@ -145,7 +155,8 @@
 .acc-crud,.sec-crud {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-around;
+  justify-content: center;
+  width: 320px;
   gap: 4px;
 }
 
@@ -175,11 +186,18 @@ input[type=number] {
   appearance: textfield;
 }
 
+/*TableContainer*/
+.table-container {
+  width: min(100%,80%);
+  overflow-x: auto;
+}
+
 /*Table Style*/
 .striped-table {
   width: 100%;
   border-collapse: collapse;
   cursor: pointer;
+  border: 1px solid #ddd;
 }
 
 .striped-table th,
@@ -201,10 +219,13 @@ input[type=number] {
   background-color: #ddd;
 }
 
-
 .schedule-table{
-  border: 1px solid black;
+  text-align: left;
+  margin-top: 1.5rem;
+  border: 1px solid #ddd;
   border-collapse: collapse;
+  width: 380px;
+  padding: 10px;
 }
 
 #studentCrudPage,#instructorCrudPage{

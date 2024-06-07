@@ -105,7 +105,7 @@ const AddSection = () => {
   };
   return (
     <>
-      <div style={{ overflowX: 'auto' }}>
+      <div className='table-container'>
         <h2>Section List</h2>
         <input
           type="text"
