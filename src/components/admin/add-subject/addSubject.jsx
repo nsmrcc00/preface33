@@ -331,7 +331,7 @@ const AddSubject = () => {
   return (
     <>
       <section id='schoolSectionPage'>
-        <div style={{ overflowX: 'auto' }}>
+        <div className='table-container'>
           <h2>Subjects List</h2>
           <input
             type="text"
@@ -404,9 +404,7 @@ const AddSubject = () => {
               transform: 'translate(-50%, -50%)',
               padding: '20px',
               borderRadius: '10px',
-              maxWidth: '80%',
-              minWidth: '420px',
-              width: '100%',
+              width: 'max(80%, 400px)',
               overflowX: 'auto'
             }
           }}
@@ -472,7 +470,7 @@ const AddSubject = () => {
                 <option value={true}>Yes</option>
               </select>
             </label>
-            <table style={{marginTop:'1.5rem'}}>
+            <table className='schedule-table'>
               <thead>
                 <tr>
                   <th>DAY</th>
