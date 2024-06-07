@@ -223,11 +223,8 @@ input[type=number] {
   align-content: space-between;
 }
 
-.subjectInfo p,h2 {
-  
-  /* Adjust width as needed for two columns */
+.subjectInfoContent {
   width: 50%;
-  /* Add margin for spacing between columns */
   margin: 5px 5px 5px 0px;
 }
 
@@ -305,8 +302,6 @@ borderImage: 'fill 0 linear-gradient(#0003,#fff)'
 <div id='ins-header'>
   <div id='ins-header-content'>INSTRUCTOR ACCOUNTS</div>
 </div>
-
-
 
 
 /
