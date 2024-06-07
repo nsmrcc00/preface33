@@ -1,12 +1,12 @@
-import React from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../../contexts/authContext'
+import { doSignOut } from '../../../firebase/auth'
 import Header from '../../header/Header'
 import background from "/banner_1.jpg"
 
 
 const AdminHome = () => {
-    const { userLoggedIn,currentUser } = useAuth()
+    const { userLoggedIn } = useAuth()
     const navigate = useNavigate()
     //navigate to instructor account page
     const navi1 = () => {

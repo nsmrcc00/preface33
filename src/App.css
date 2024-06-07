@@ -1,22 +1,29 @@
+/*Login Page*/
 #login-page {
-  width: 100%;
-  min-height: 100svh;
+  width: auto;
+  min-height: 100vh;
   background-color: #DFCD8E;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: center;/*vertical alignment*/
+  align-items: center;/*horizontal alignment*/
+}
+#inputs, #addInstructorInfo, #addStudentInfo {
+  width: Min(400px,90%);
+  /*display: flex; these 2 lines are similar to margin:0 auto; but longer
+  flex-direction: column;*/
+  align-items: center;
 }
 
 .form-control{
-  width: 320px;
+  width: Min(320px,80%);
   margin: 0 auto;
   margin-bottom: 1rem; 
 }
 
 #login_heading{
     font-family: 'Katahdin Round', sans-serif;
-    color: #AD1212;
-    
+    color: #AD1212;   
 
 }
 
@@ -26,6 +33,7 @@
     font-size: 1.25rem;
 }
 
+/*Header Component*/
 #heading{
   background-color: #AD1212;
   color: white;
@@ -36,20 +44,20 @@
   font-size: 1.1rem;
 }
 
-#adminHome{
-  width: 100%;
-  height: 100vh;
+/*Admin Dashboard*/
+#adminHome,#instructorHome{
+  width: auto;  
+  min-height: 100vh;
   background-color: #DFCD8E;
   display: flex;
   justify-content: center;
-  align-items: center;
+  /*align-items: center;*/  
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-
-#adminHome-sec{
+#adminHome-sec,#instructorHome-sec{
   height: 600px;
-  max-width: 80%;  
+  max-width: 100%;  
   display: flex;
   justify-content: space-evenly;
   flex-wrap: wrap;
@@ -59,13 +67,11 @@
   background-color: #DFCD8E;
 }
 
-.admin-dash-div{
+.admin-dash-div,.subject-dash-div{
   border-radius: 25px;
   width: 360px;
   height: 240px;
-  margin: 48px;
-  margin-left: 24px;
-  margin-right: 24px;
+  margin: 48px 24px 0px;
   background-color: #AD1212;
   display: flex;
   align-items: center;
@@ -74,33 +80,228 @@
   cursor: pointer;
 }
 
-#instructor-acc-div{
-  order: 1;  
-
+/*Subject*/
+#schoolSectionPage,#schoolInstructorPage,#schoolStudentPage{
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  background-color: #fff;
+  padding: 15px 12px 50px 12px;
 }
 
-#student-acc-div{
-  order: 2; 
+#submitSub{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: space-evenly;
   
 }
 
-
-/*margin-bottom: 1.5rem;
-position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-
-    html {
-  font-size: 62.5%;
+.addSubForm{
+  display: flex;
+  flex-direction: column;
+  width: 250px;  
 }
 
-body{
-  font-size: 1.6rem;
+#subCrudDiv{
+  display: flex;
+  margin-top: 10px;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+}
+.subCrudButton {
+  margin: 8px;
+  width: 180px;
+  height: 34px;
 }
 
-h2{
-  font-size: 2.4rem;
+.addSubButton {
+  margin: 0px 10px 10px 0px;
+  width: 180px;
+  height: 34px;
 }
 
-*/
+
+/*Instructor Account Table*/
+#instructorHome {
+  width: auto;  
+  min-height: 100vh;  
+}
+
+#instructorsTable {  
+  display: grid;
+  justify-items: center;
+}
+
+#addInstructorInfo, 
+#addStudentInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.acc-crud,.sec-crud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 4px;
+}
+
+.acc-crud-btn,.sec-crud-btn {
+    background-color: #AD1212;
+    border-color: #AD1212;
+    font-size: 1.01rem;
+    width: 143px;
+    height: 40px;
+    text-align: center;
+}
+
+.sec-crud-btn{
+  margin-top: 10px;
+}
+
+/*input type number*/
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/*Table Style*/
+.striped-table {
+  width: 100%;
+  border-collapse: collapse;
+  cursor: pointer;
+}
+
+.striped-table th,
+.striped-table td {
+  padding: 10px;
+  text-align: left;
+}
+
+.striped-table th {
+  background-color: #AD1212;
+  color: white;
+}
+
+.striped-table tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.striped-table tbody tr:hover {
+  background-color: #ddd;
+}
+
+
+.schedule-table{
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+#studentCrudPage,#instructorCrudPage{
+  width: auto;  
+  min-height: 100vh;  
+}
+
+.classListButton,.studentListButton {
+  width: 180px;
+  height: 34px;
+}
+
+.subjectInfo {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-between;
+}
+
+.subjectInfoContent {
+  width: 50%;
+  margin: 5px 5px 5px 0px;
+}
+
+.studentListButton {
+  margin: 10px 10px 10px 0px;
+}
+
+/**
+.studentCrudContent{
+  background-color: white;
+  min-height: 100vh;
+  width: 60%;
+  display: flex;
+  justify-content: center;
+}
+
+
+.adminTableStyle {
+  text-align: left;
+  padding: 10px; 
+  border: 1px solid #f2f2f2; 
+}
+
+table-container {
+  margin-top: 20px;
+  overflow-x: auto; 
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  cursor: pointer;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;  
+}
+
+th {
+  background-color: #AD1212;
+  color: white;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+tbody tr:hover {
+  background-color: #ddd;
+}
+borderImage: 'fill 0 linear-gradient(#0003,#fff)'
+
+#ins-header, #ins-header-content{
+  display: flex;
+}
+#ins-header{  
+  flex-direction: column;
+  justify-content: end;
+  height: 200px;
+  width: 65%;
+  background-color: #AD1212;
+  border-radius: 20px;
+}
+
+#ins-header-content{
+  height: 75px;
+  width: 100%;
+  background-color: white;
+  justify-content: center;
+  align-items: center;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+<div id='ins-header'>
+  <div id='ins-header-content'>INSTRUCTOR ACCOUNTS</div>
+</div>
+
+
+/
