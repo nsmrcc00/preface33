@@ -1,4 +1,4 @@
-const Unathorized = () => {
+const Unauthorized = () => {
   return (
     <>
         <main>
@@ -22,4 +22,4 @@ const Unathorized = () => {
   )
 }
 
-export default Unathorized
+export default Unauthorized
