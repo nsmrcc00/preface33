@@ -8,7 +8,7 @@ import Offcanvas from 'react-bootstrap/Offcanvas';
 import { Stack } from 'react-bootstrap';
 import ListGroup from 'react-bootstrap/ListGroup';
 
-function Header() {
+function InstructorHeader() {
     const navigate = useNavigate()
     const { userLoggedIn,currentUser } = useAuth()
     const [show, setShow] = useState(false);
@@ -55,7 +55,7 @@ function Header() {
     //navigate to home
     const navi3 = () => {
         if (userLoggedIn == true) {
-            navigate('/admin-home')
+            navigate('/instructor-home')
         }
     }
     
@@ -91,10 +91,10 @@ function Header() {
                 Signed in as: {currentUser.displayName ? currentUser.displayName : currentUser.email}
                 <ListGroup>
                     <ListGroup.Item action onClick={navi1}>                        
-                        Instructor Accounts
+                        Placeholder for Subject
                     </ListGroup.Item>
                     <ListGroup.Item action onClick={navi2}>
-                        Student Accounts
+                        Placeholder for Subject
                     </ListGroup.Item>
                 </ListGroup> 
                 <button 
@@ -117,4 +117,4 @@ function Header() {
   )
 }
 
-export default Header
+export default InstructorHeader
