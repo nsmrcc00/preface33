@@ -257,6 +257,12 @@ input[type=number] {
   margin: 10px 10px 10px 0px;
 }
 
+
+.instructorPage { 
+  display: flex;
+  flex-wrap: wrap;
+}
+
 /**
 .studentCrudContent{
   background-color: white;

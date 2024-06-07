@@ -16,7 +16,7 @@ const InstructorHome = () => {
           backgroundRepeat: 'no-repeat',
           backgroundAttachment: 'fixed',                         
       }}>
-      <section id='adminHome-sec'>
+      <section className='instructorPage'>
           <div id="instructor-acc-div"className="subject-dash-div">
               <h2>Subject 1</h2>                           
           </div>
@@ -31,9 +31,31 @@ const InstructorHome = () => {
 
           <div id="student-acc-div" className="subject-dash-div">
               <h2>Subject 4</h2>
+          </div>
+
+          <div id="instructor-acc-div"className="subject-dash-div">
+              <h2>Subject 5</h2>                           
+          </div>
+
+          <div id="student-acc-div" className="subject-dash-div">
+              <h2>Subject 6</h2>
+          </div>
+
+          <div id="student-acc-div" className="subject-dash-div">
+              <h2>Subject 7</h2>
+          </div>
+
+          <div id="student-acc-div" className="subject-dash-div">
+              <h2>Subject 8</h2>
           </div>       
                             
       </section>
+      <aside style={{backgroundColor: 'white', width: '30%'}}>
+        <h2>Notifications</h2>
+        <div>PLACEHOLDER</div>
+        <div>PLACEHOLDER</div>
+        <div>PLACEHOLDER</div>
+      </aside>
     </main>
     
     </>    

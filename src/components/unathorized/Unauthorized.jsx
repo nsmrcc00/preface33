@@ -17,7 +17,7 @@ const Unauthorized = () => {
     return () => {
         window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-}, [userLoggedIn]);
+  }, [userLoggedIn]);
 
   return (
     <>
