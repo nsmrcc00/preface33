@@ -1,55 +1,59 @@
-import { useState } from 'react'
-import { Navigate, Link } from 'react-router-dom'
-import { useAuth } from "../../contexts/authContext"
-import { doSignInWithEmailAndPassword } from "../../firebase/auth"
+import { useState } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from "../../contexts/authContext";
+import { doSignInWithEmailAndPassword } from "../../firebase/auth";
 
 const Login = () => {
-    const { userLoggedIn } = useAuth()
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [isSigningIn, setIsSigningIn] = useState(false)
-    //const [errorMessage, setErrorMessage] = useState('')//NEED TO ADD ERROR CHECKING AND VALIDATION
+    const { userLoggedIn, role } = useAuth();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isSigningIn, setIsSigningIn] = useState(false);
 
     const logIn = async (e) => {
         e.preventDefault();
-        if(!isSigningIn){
-            setIsSigningIn(true)
-            await new Promise(resolve => setTimeout(resolve, 150));
-            await doSignInWithEmailAndPassword(email, password).then((userCredential) => {
-                console.log("User logged in successfully");                
-                console.log(userCredential);//FOR TESTING ONLY. WILL BE REMOVED AT LAUNCH           
-            }).catch((error) => {
+        if (!isSigningIn) {
+            setIsSigningIn(true);
+            try {
+                await doSignInWithEmailAndPassword(email, password);
+                console.log("User logged in successfully");
+            } catch (error) {
                 console.error(error);
-                alert("Error! Please sign in with valid credentials.")
-            })
-            setIsSigningIn(false); // Reset signing in state after attempt
+                alert("Error! Please sign in with valid credentials.");
+            }
+            setIsSigningIn(false);
+        }
+    };
+
+    if (userLoggedIn) {
+        if (role === "admin") {
+            return <Navigate to="/admin-home" replace={true} />;
+        } else if (role === "instructor") {
+            return <Navigate to="/instructor-home" replace={true} />;
+        } else {
+            return <Navigate to="/unauthorized" replace={true} />;
         }
     }
 
     return (
         <main id="login-page">
-            {userLoggedIn && (<Navigate to={'/admin-home'} replace={true} />)}
-
             <div className="mb-3 text-center">
-                    <h1 id="login_heading">PREFACE</h1>
+                <h1 id="login_heading">PREFACE</h1>
             </div>
             <form id="inputs" onSubmit={logIn}>
                 <input
-                    className="form-control" 
-                    type="email" 
-                    placeholder='Email' 
+                    className="form-control"
+                    type="email"
+                    placeholder='Email'
                     value={email}
                     onChange={(e) => { setEmail(e.target.value) }}
                 />
-                
                 <input
-                    className="form-control" 
-                    type="password" 
+                    className="form-control"
+                    type="password"
                     placeholder='Password'
                     value={password}
                     onChange={(e) => { setPassword(e.target.value) }}
                 />
-        
                 <div className="mb-3 text-center">
                     <button
                         id="gen_btn"
@@ -60,10 +64,9 @@ const Login = () => {
                         {isSigningIn ? 'Signing In...' : 'Sign In'}
                     </button>
                 </div>
-                
-            </form>  
+            </form>
         </main>
-    )
-}
+    );
+};
 
-export default Login
+export default Login;

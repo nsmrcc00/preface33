@@ -1,4 +1,24 @@
+import { useEffect } from "react"
+import { doSignOut } from "../../firebase/auth";
+import { useAuth } from "../../contexts/authContext";
+
 const Unauthorized = () => {
+
+  const { userLoggedIn } = useAuth()
+  useEffect(() => {
+    const handleBeforeUnload = async () => {
+        if (userLoggedIn) {
+            await doSignOut();
+        }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+}, [userLoggedIn]);
+
   return (
     <>
         <main>

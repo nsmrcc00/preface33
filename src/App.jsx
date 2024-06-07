@@ -1,51 +1,69 @@
-import React from 'react'
-import Login from './components/login/Login'
-import AdminHome from './components/admin/adminHome/adminHome';
-import './App.css'
+import './App.css';
+import { useRoutes, Navigate } from "react-router-dom";
 import { AuthProvider } from './contexts/authContext';
-import { useRoutes } from "react-router-dom";
+import Login from './components/login/Login';
+import AdminHome from './components/admin/adminHome/adminHome';
+import InstructorHome from './components/instructor/instructor-home/InstructorHome';
+import Unauthorized from './components/unathorized/Unauthorized';
+import ProtectedRoute from './components/protectedroute/ProtectedRoute';
 import InsAccount from './components/admin/add-account/InstructorAccount';
 import StudentAccount from './components/admin/add-account/StudentAccount';
-import InstructorHome from './components/instructor/instructor-home/InstructorHome';
-import Unathorized from './components/unathorized/Unathorized';
 
-function App() {
-  const routesArray = [
-    {
-      path: "*",
-      element: <Login />,
-    },
-    {
-      path: "/login",
-      element: <Login />,
-    },
-    {
-      path: "/admin-home",
-      element: <AdminHome />,
-    },
-    {
-      path: "/instructor-accounts",
-      element: <InsAccount />,
-    },
-    {
-      path: "/student-accounts",
-      element: <StudentAccount />,
-    },
-    {
-      path: "/instructor-home",
-      element: <InstructorHome />,
-    },
-    {
-      path: "/unathorized",
-      element: <Unathorized />,
-    },
-  ];
-  let routesElement = useRoutes(routesArray);
-  return (
-    <AuthProvider>
-      <div>{routesElement}</div>
-    </AuthProvider>
-  );
-}
+const App = () => {
+    const routesArray = [
+        {
+            path: "/login",
+            element: <Login />,
+        },
+        {
+            path: "/unauthorized",
+            element: <Unauthorized />,
+        },
+        {
+            path: "/admin-home",
+            element: (
+                <ProtectedRoute role="admin">
+                    <AdminHome />
+                </ProtectedRoute>
+            ),
+        },
+        {
+            path: "/instructor-accounts",
+            element: (
+                <ProtectedRoute role="admin">
+                    <InsAccount />
+                </ProtectedRoute>
+            ),
+        },
+        {
+            path: "/student-accounts",
+            element: (
+                <ProtectedRoute role="admin">
+                    <StudentAccount />
+                </ProtectedRoute>
+            ),
+        },
+        {
+            path: "/instructor-home",
+            element: (
+                <ProtectedRoute role="instructor">
+                    <InstructorHome />
+                </ProtectedRoute>
+            ),
+        },
+        {
+            path: "*",
+            element: <Navigate to="/login" />,
+        },
+    ];
+
+    let routesElement = useRoutes(routesArray);
+
+    return (
+        <AuthProvider>
+            {routesElement}
+        </AuthProvider>
+    );
+};
 
 export default App;

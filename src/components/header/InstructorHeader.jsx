@@ -2,7 +2,7 @@ import { useState,useEffect } from 'react';
 import Container from 'react-bootstrap/Container';
 import Navbar from 'react-bootstrap/Navbar';
 import { useAuth } from '../../contexts/authContext'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { doSignOut } from '../../firebase/auth'
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import { Stack } from 'react-bootstrap';
@@ -12,23 +12,34 @@ function InstructorHeader() {
     const navigate = useNavigate()
     const { userLoggedIn,currentUser } = useAuth()
     const [show, setShow] = useState(false);
+    const [unloading, setUnloading] = useState(false);
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
     useEffect(() => {
-        const handleBeforeUnload = async () => {
+        const handleBeforeUnload = async (event) => {
             if (userLoggedIn) {
+                setUnloading(true);
                 await doSignOut();
             }
         };
 
-        window.addEventListener('beforeunload', handleBeforeUnload);
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'hidden' && !unloading) {
+                window.addEventListener('beforeunload', handleBeforeUnload);
+            } else {
+                window.removeEventListener('beforeunload', handleBeforeUnload);
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
 
         return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, [userLoggedIn]);
+    }, [userLoggedIn, unloading]);
 
     //navigate to instructor account page
     const navi1 = () => {
