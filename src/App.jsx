@@ -8,6 +8,7 @@ import Unauthorized from './components/unathorized/Unauthorized';
 import ProtectedRoute from './components/protectedroute/ProtectedRoute';
 import InsAccount from './components/admin/add-account/InstructorAccount';
 import StudentAccount from './components/admin/add-account/StudentAccount';
+import SubjectHome from './components/instructor/subject/SubjectHome';
 
 const App = () => {
     const routesArray = [
@@ -48,6 +49,14 @@ const App = () => {
             element: (
                 <ProtectedRoute role="instructor">
                     <InstructorHome />
+                </ProtectedRoute>
+            ),
+        },
+        {
+            path: "/subject",
+            element: (
+                <ProtectedRoute role="instructor">
+                    <SubjectHome />
                 </ProtectedRoute>
             ),
         },
