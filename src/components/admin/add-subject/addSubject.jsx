@@ -1,29 +1,35 @@
-import { useState, useEffect } from 'react';
-import Modal from 'react-modal';
-import { db } from '../../../firebase/firebase';
-import { doc, addDoc, /*setDoc,*/ updateDoc, getDocs, collection } from 'firebase/firestore';
+import { useState, useEffect } from "react";
+import Modal from "react-modal";
+import { db } from "../../../firebase/firebase";
+import {
+  doc,
+  addDoc,
+  updateDoc,
+  getDocs,
+  collection,
+} from "firebase/firestore";
 
-Modal.setAppElement('#root');
+Modal.setAppElement("#root");
 
 const AddSubject = () => {
   const initialTimeState = {
-    MONDAY: { startHour: '', startMin: '', endHour: '', endMin: '' },
-    TUESDAY: { startHour: '', startMin: '', endHour: '', endMin: '' },
-    WEDNESDAY: { startHour: '', startMin: '', endHour: '', endMin: '' },
-    THURSDAY: { startHour: '', startMin: '', endHour: '', endMin: '' },
-    FRIDAY: { startHour: '', startMin: '', endHour: '', endMin: '' },
-    SATURDAY: { startHour: '', startMin: '', endHour: '', endMin: '' },
+    MONDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
+    TUESDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
+    WEDNESDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
+    THURSDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
+    FRIDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
+    SATURDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
   };
 
   const [subject, setSubject] = useState({
     Schedule: {
-      days: '',
-      time: '',
+      days: "",
+      time: "",
     },
-    section: '',
-    subjectCode: '',
-    title: '',
-    instructor: '',
+    section: "",
+    subjectCode: "",
+    title: "",
+    instructor: "",
     archived: false,
   });
 
@@ -74,13 +80,18 @@ const AddSubject = () => {
       if (startHour && startMin && endHour && endMin) {
         const dayAbbreviation = day.substring(0, 3).toUpperCase();
         days.push(dayAbbreviation);
-        times.push(`${startHour.padStart(2, '0')}:${startMin.padStart(2, '0')}-${endHour.padStart(2, '0')}:${endMin.padStart(2, '0')}`);
+        times.push(
+          `${startHour.padStart(2, "0")}:${startMin.padStart(
+            2,
+            "0"
+          )}-${endHour.padStart(2, "0")}:${endMin.padStart(2, "0")}`
+        );
       }
     });
 
     return {
-      days: days.join(','),
-      time: times.join(','),
+      days: days.join(","),
+      time: times.join(","),
     };
   };
 
@@ -92,24 +103,24 @@ const AddSubject = () => {
     setModalIsOpen(false);
     setSubject({
       Schedule: {
-        days: '',
-        time: '',
+        days: "",
+        time: "",
       },
-      section: '',
-      subjectCode: '',
-      title: '',
-      instructor: '',
+      section: "",
+      subjectCode: "",
+      title: "",
+      instructor: "",
       archived: false,
     });
     setTimeInputs(initialTimeState);
     setIsEditMode(false);
   };
-  
-  //ADD SUBJECT TO COLLECTION
+
+  // Add Subject to Collection
   const addSub = async (e) => {
     e.preventDefault();
     const formattedSchedule = formatSchedule();
-    const instructorData = users.find(user => user.id === subject.instructor);
+    const instructorData = users.find((user) => user.id === subject.instructor);
     try {
       // Add subject to "Subjects" collection
       const newSubjectRef = await addDoc(collection(db, "Subjects"), {
@@ -117,16 +128,16 @@ const AddSubject = () => {
         instructor: {
           id: instructorData.id,
           ref: instructorData.ref,
-          name: instructorData.name
+          name: instructorData.name,
         },
         Schedule: formattedSchedule,
         section: subject.section,
         title: subject.title,
-        archived: subject.archived
+        archived: subject.archived,
       });
-  
+
       console.log("Subject added successfully!");
-  
+
       // Add subject reference to "subjectsHandled" subcollection in the instructor's document
       const instructorRef = doc(db, "Users", instructorData.id);
       const subjectsHandledRef = collection(instructorRef, "subjectsHandled");
@@ -134,11 +145,13 @@ const AddSubject = () => {
         subjectCode: subject.subjectCode,
         title: subject.title,
         section: subject.section,
-        ref: newSubjectRef
+        ref: newSubjectRef,
       });
-  
-      console.log("Subject added to instructor's subjectsHandled subcollection!");
-  
+
+      console.log(
+        "Subject added to instructor's subjectsHandled subcollection!"
+      );
+
       closeModal();
       fetchSubjects();
     } catch (error) {
@@ -146,14 +159,12 @@ const AddSubject = () => {
       console.error(error);
     }
   };
-  
-  
 
-  //UPDATE SUBJECT INFORMATION
+  // Update Subject Information
   const updateSub = async (e) => {
     e.preventDefault();
     const formattedSchedule = formatSchedule();
-    const instructorData = users.find(user => user.id === subject.instructor);
+    const instructorData = users.find((user) => user.id === subject.instructor);
     try {
       // Update subject in "Subjects" collection
       const subjectRef = doc(db, "Subjects", subject.id);
@@ -162,12 +173,12 @@ const AddSubject = () => {
         instructor: {
           id: instructorData.id,
           ref: instructorData.ref,
-          name: instructorData.name
+          name: instructorData.name,
         },
         Schedule: formattedSchedule,
         section: subject.section,
         title: subject.title,
-        archived: subject.archived
+        archived: subject.archived,
       });
 
       console.log("Subject updated successfully!");
@@ -179,7 +190,11 @@ const AddSubject = () => {
       let subjectHandledDoc = null;
 
       querySnapshot.forEach((doc) => {
-        if (doc.data().subjectCode === subject.subjectCode && doc.data().section === subject.section) { // Include section in comparison
+        if (
+          doc.data().subjectCode === subject.subjectCode &&
+          doc.data().section === subject.section
+        ) {
+          // Include section in comparison
           subjectHandledDoc = doc;
         }
       });
@@ -187,7 +202,7 @@ const AddSubject = () => {
       if (subjectHandledDoc) {
         await updateDoc(subjectHandledDoc.ref, {
           title: subject.title,
-          ref: subjectRef
+          ref: subjectRef,
         });
         console.log("Instructor's subjectsHandled subcollection updated!");
       } else {
@@ -195,9 +210,11 @@ const AddSubject = () => {
           subjectCode: subject.subjectCode,
           title: subject.title,
           section: subject.section, // Include section
-          ref: subjectRef
+          ref: subjectRef,
         });
-        console.log("Subject added to instructor's subjectsHandled subcollection!");
+        console.log(
+          "Subject added to instructor's subjectsHandled subcollection!"
+        );
       }
 
       closeModal();
@@ -208,29 +225,29 @@ const AddSubject = () => {
     }
   };
 
-
-
-  //TABLE BEHAVIOR WHEN CLICKED
+  // Table behavior when clicked
   const handleRowClick = (sub) => {
-    const schedule = sub.Schedule || { days: '', time: '' };
-    
+    const schedule = sub.Schedule || { days: "", time: "" };
+
     setSubject({
       ...sub,
       Schedule: schedule,
-      id: sub.id // Ensure ID is set
+      id: sub.id, // Ensure ID is set
     });
     setIsEditMode(true);
 
-    const days = schedule.days ? schedule.days.split(',') : [];
-    const times = schedule.time ? schedule.time.split(',') : [];
+    const days = schedule.days ? schedule.days.split(",") : [];
+    const times = schedule.time ? schedule.time.split(",") : [];
 
     const newTimeInputs = { ...initialTimeState };
 
     days.forEach((day, index) => {
-      const [start, end] = times[index].split('-');
-      const [startHour, startMin] = start.split(':');
-      const [endHour, endMin] = end.split(':');
-      const dayFull = Object.keys(newTimeInputs).find(d => d.substring(0, 3).toUpperCase() === day);
+      const [start, end] = times[index].split("-");
+      const [startHour, startMin] = start.split(":");
+      const [endHour, endMin] = end.split(":");
+      const dayFull = Object.keys(newTimeInputs).find(
+        (d) => d.substring(0, 3).toUpperCase() === day
+      );
       if (dayFull) {
         newTimeInputs[dayFull] = { startHour, startMin, endHour, endMin };
       }
@@ -240,51 +257,74 @@ const AddSubject = () => {
     openModal();
   };
 
-  //FETCH SUBJECTS FROM SUBJECTS COLLECTION
+  // Cache data in local state
+  const [cachedSubjects, setCachedSubjects] = useState([]);
+  const [cachedUsers, setCachedUsers] = useState([]);
+  const [cachedSections, setCachedSections] = useState([]);
+
+  // Fetch subjects from "Subjects" collection
   const fetchSubjects = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "Subjects"));
-      const subjectsList = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setSubjects(subjectsList);
-    } catch (error) {
-      console.error("Error fetching subjects:", error);
+    if (cachedSubjects.length > 0) {
+      setSubjects(cachedSubjects);
+    } else {
+      try {
+        const querySnapshot = await getDocs(collection(db, "Subjects"));
+        const subjectsList = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setSubjects(subjectsList);
+        setCachedSubjects(subjectsList);
+      } catch (error) {
+        console.error("Error fetching subjects:", error);
+      }
     }
   };
 
-  //FETCH INSTRUCTORS FROM USERS COLLECTION
+  // Fetch instructors from "Users" collection
   const fetchUsers = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "Users"));
-      const usersList = querySnapshot.docs
-        .map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            ref: doc.ref,
-            name: `${data.name.firstName} ${data.name.middleName ? data.name.middleName + ' ' : ''}${data.name.lastName}`,
-            role: data.role
-          };
-        })
-        .filter(user => user.role === 'instructor');
-      setUsers(usersList);
-    } catch (error) {
-      console.error("Error fetching users:", error);
+    if (cachedUsers.length > 0) {
+      setUsers(cachedUsers);
+    } else {
+      try {
+        const querySnapshot = await getDocs(collection(db, "Users"));
+        const usersList = querySnapshot.docs
+          .map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              ref: doc.ref,
+              name: `${data.name.firstName} ${
+                data.name.middleName ? data.name.middleName + " " : ""
+              }${data.name.lastName}`,
+              role: data.role,
+            };
+          })
+          .filter((user) => user.role === "instructor");
+        setUsers(usersList);
+        setCachedUsers(usersList);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
     }
   };
 
+  // Fetch sections from "Sections" collection
   const fetchSections = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "Sections"));
-      const sectionsList = querySnapshot.docs.map(doc => ({
-        ...doc.data(),
-        ref: doc.ref//may be unnecessary
-      }));
-      setSections(sectionsList);
-    } catch (error) {
-      console.error("Error fetching sections:", error);
+    if (cachedSections.length > 0) {
+      setSections(cachedSections);
+    } else {
+      try {
+        const querySnapshot = await getDocs(collection(db, "Sections"));
+        const sectionsList = querySnapshot.docs.map((doc) => ({
+          ...doc.data(),
+          ref: doc.ref, //may be unnecessary
+        }));
+        setSections(sectionsList);
+        setCachedSections(sectionsList);
+      } catch (error) {
+        console.error("Error fetching sections:", error);
+      }
     }
   };
 
@@ -294,26 +334,37 @@ const AddSubject = () => {
     fetchSections();
   }, []);
 
-  //CLIENT-SIDE SEARCH
-  const filteredSubjects = subjects.filter(sub => {
+  // Client-side search
+  const filteredSubjects = subjects.filter((sub) => {
     const lowerCaseQuery = searchQuery.toLowerCase();
     return (
       (showArchived || !sub.archived) &&
       ((sub.title && sub.title.toLowerCase().includes(lowerCaseQuery)) ||
-        (sub.instructor && sub.instructor.name.toLowerCase().includes(lowerCaseQuery)) ||
-        (sub.subjectCode && sub.subjectCode.toLowerCase().includes(lowerCaseQuery)) ||
+        (sub.instructor &&
+          sub.instructor.name.toLowerCase().includes(lowerCaseQuery)) ||
+        (sub.subjectCode &&
+          sub.subjectCode.toLowerCase().includes(lowerCaseQuery)) ||
         (sub.section && sub.section.toLowerCase().includes(lowerCaseQuery)) ||
-        (sub.Schedule && sub.Schedule.days && sub.Schedule.days.toLowerCase().includes(lowerCaseQuery)) ||
-        (sub.Schedule && sub.Schedule.time && sub.Schedule.time.toLowerCase().includes(lowerCaseQuery)))
+        (sub.Schedule &&
+          sub.Schedule.days &&
+          sub.Schedule.days.toLowerCase().includes(lowerCaseQuery)) ||
+        (sub.Schedule &&
+          sub.Schedule.time &&
+          sub.Schedule.time.toLowerCase().includes(lowerCaseQuery)))
     );
   });
 
-  //INPUT VALIDATION FOR SCHEDULE
+  // Input validation for schedule
   const isNumberKey = (evt) => {
     const charCode = evt.which ? evt.which : evt.keyCode;
 
-    if (charCode === 8 || charCode === 46 || charCode === 9 ||
-      (charCode >= 37 && charCode <= 40) || charCode === 27) {
+    if (
+      charCode === 8 ||
+      charCode === 46 ||
+      charCode === 9 ||
+      (charCode >= 37 && charCode <= 40) ||
+      charCode === 27
+    ) {
       return;
     }
 
@@ -330,8 +381,8 @@ const AddSubject = () => {
 
   return (
     <>
-      <section id='schoolSectionPage'>
-        <div className='table-container'>
+      <section id="schoolSectionPage">
+        <div className="table-container">
           <h2>Subjects List</h2>
           <input
             type="text"
@@ -339,7 +390,7 @@ const AddSubject = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
-              margin: '0px 10px 10px 0px'
+              margin: "0px 10px 10px 0px",
             }}
           />
           <label>
@@ -347,12 +398,12 @@ const AddSubject = () => {
               type="checkbox"
               checked={showArchived}
               onChange={() => setShowArchived(!showArchived)}
-              style={{ marginRight: '10px' }}
+              style={{ marginRight: "10px" }}
             />
             Show Archived
           </label>
 
-          <table className='striped-table'>
+          <table className="striped-table">
             <thead>
               <tr>
                 <th>Subject Code</th>
@@ -366,7 +417,7 @@ const AddSubject = () => {
             </thead>
             <tbody>
               {filteredSubjects.map((sub, index) => {
-                const schedule = sub.Schedule || { days: '', time: '' };
+                const schedule = sub.Schedule || { days: "", time: "" };
                 return (
                   <tr key={index} onClick={() => handleRowClick(sub)}>
                     <td>{sub.subjectCode}</td>
@@ -384,7 +435,7 @@ const AddSubject = () => {
           <button
             onClick={openModal}
             className="addSubButton"
-            style={{ marginTop: '10px' }}
+            style={{ marginTop: "10px" }}
           >
             Add Subject
           </button>
@@ -396,22 +447,22 @@ const AddSubject = () => {
           contentLabel={isEditMode ? "Edit Subject" : "Add Subject"}
           style={{
             content: {
-              top: '50%',
-              left: '50%',
-              right: 'auto',
-              bottom: 'auto',
-              marginRight: '-50%',
-              transform: 'translate(-50%, -50%)',
-              padding: '20px',
-              borderRadius: '10px',
-              width: 'max(80%, 400px)',
-              overflowX: 'auto'
-            }
+              top: "50%",
+              left: "50%",
+              right: "auto",
+              bottom: "auto",
+              marginRight: "-50%",
+              transform: "translate(-50%, -50%)",
+              padding: "20px",
+              borderRadius: "10px",
+              width: "max(80%, 400px)",
+              overflowX: "auto",
+            },
           }}
         >
-          <form id='submitSub' onSubmit={isEditMode ? updateSub : addSub}>            
-            <h2>{isEditMode ? "Edit Subject" : "Add Subject"}</h2>                        
-            <label className='addSubForm'>
+          <form id="submitSub" onSubmit={isEditMode ? updateSub : addSub}>
+            <h2>{isEditMode ? "Edit Subject" : "Add Subject"}</h2>
+            <label className="addSubForm">
               Title:
               <input
                 type="text"
@@ -420,7 +471,7 @@ const AddSubject = () => {
                 onChange={handleChange}
               />
             </label>
-            <label className='addSubForm'>
+            <label className="addSubForm">
               Subject Code:
               <input
                 type="text"
@@ -429,7 +480,7 @@ const AddSubject = () => {
                 onChange={handleChange}
               />
             </label>
-            <label className='addSubForm'>
+            <label className="addSubForm">
               Section:
               <select
                 name="section"
@@ -444,7 +495,7 @@ const AddSubject = () => {
                 ))}
               </select>
             </label>
-            <label className='addSubForm'>
+            <label className="addSubForm">
               Instructor:
               <select
                 name="instructor"
@@ -452,14 +503,14 @@ const AddSubject = () => {
                 onChange={handleChange}
               >
                 <option value="">Select Instructor</option>
-                {users.map(user => (
+                {users.map((user) => (
                   <option key={user.id} value={user.id}>
                     {user.name}
                   </option>
                 ))}
               </select>
             </label>
-            <label className='addSubForm'>
+            <label className="addSubForm">
               Archived:
               <select
                 name="archived"
@@ -470,7 +521,7 @@ const AddSubject = () => {
                 <option value={true}>Yes</option>
               </select>
             </label>
-            <table className='schedule-table'>
+            <table className="schedule-table">
               <thead>
                 <tr>
                   <th>DAY</th>
@@ -484,46 +535,56 @@ const AddSubject = () => {
                     <td>{day}</td>
                     <td>
                       <input
-                        style={{ width: '60px' }}
+                        style={{ width: "60px" }}
                         type="number"
                         min="0"
                         max="23"
                         maxLength={2}
                         onKeyDown={isNumberKey}
                         value={timeInputs[day].startHour}
-                        onChange={(e) => handleTimeChange(day, 'startHour', e.target.value)}
-                      />:
+                        onChange={(e) =>
+                          handleTimeChange(day, "startHour", e.target.value)
+                        }
+                      />
+                      :
                       <input
-                        style={{ width: '60px' }}
+                        style={{ width: "60px" }}
                         type="number"
                         min="0"
                         max="59"
                         maxLength={2}
                         onKeyDown={isNumberKey}
                         value={timeInputs[day].startMin}
-                        onChange={(e) => handleTimeChange(day, 'startMin', e.target.value)}
+                        onChange={(e) =>
+                          handleTimeChange(day, "startMin", e.target.value)
+                        }
                       />
                     </td>
                     <td>
                       <input
-                        style={{ width: '60px' }}
+                        style={{ width: "60px" }}
                         type="number"
                         min="0"
                         max="23"
                         maxLength={2}
                         onKeyDown={isNumberKey}
                         value={timeInputs[day].endHour}
-                        onChange={(e) => handleTimeChange(day, 'endHour', e.target.value)}
-                      />:
+                        onChange={(e) =>
+                          handleTimeChange(day, "endHour", e.target.value)
+                        }
+                      />
+                      :
                       <input
-                        style={{ width: '60px' }}
+                        style={{ width: "60px" }}
                         type="number"
                         min="0"
                         max="59"
                         maxLength={2}
                         onKeyDown={isNumberKey}
                         value={timeInputs[day].endMin}
-                        onChange={(e) => handleTimeChange(day, 'endMin', e.target.value)}
+                        onChange={(e) =>
+                          handleTimeChange(day, "endMin", e.target.value)
+                        }
                       />
                     </td>
                   </tr>
@@ -531,15 +592,16 @@ const AddSubject = () => {
               </tbody>
             </table>
             <div id="subCrudDiv">
-              <button
-                type="submit"
-                className="subCrudButton"
-              >{isEditMode ? 'Update Subject' : 'Add Subject'}</button>
+              <button type="submit" className="subCrudButton">
+                {isEditMode ? "Update Subject" : "Add Subject"}
+              </button>
               <button
                 type="button"
                 onClick={closeModal}
                 className="subCrudButton"
-              >Cancel</button>
+              >
+                Cancel
+              </button>
             </div>
           </form>
         </Modal>

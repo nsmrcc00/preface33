@@ -27,7 +27,7 @@ const Register = ({ selectedAccount }) => {
     }
   }, [selectedAccount]);
 
-  //Add Account
+  // Add Account
   const onSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
@@ -38,14 +38,7 @@ const Register = ({ selectedAccount }) => {
     try {
       await doCreateUserWithEmailAndPassword(email, password, role, firstName, middleName, lastName, idNumber); // Pass idNumber here
       console.log("User registered successfully");
-      // Clear the input fields
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-      setFirstName('');
-      setMiddleName('');
-      setLastName('');
-      setIdNumber('');
+      clearForm(); // Clear the input fields
       setErrorMessage(''); // Clear any previous error messages
       setSuccessMessage('User registered successfully'); // Set success message
     } catch (error) {
@@ -56,7 +49,7 @@ const Register = ({ selectedAccount }) => {
     }
   };
  
-  //Update Account Information
+  // Update Account Information
   const onUpdate = async () => {
     if (!selectedAccount) {
       setErrorMessage('No instructor selected');
@@ -66,13 +59,7 @@ const Register = ({ selectedAccount }) => {
     try {
       await doUpdateUser(selectedAccount.id, email, firstName, middleName, lastName, idNumber);
       console.log("User updated successfully");
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-      setFirstName('');
-      setMiddleName('');
-      setLastName('');
-      setIdNumber('');
+      clearForm(); // Clear the input fields
       setErrorMessage('');
       setSuccessMessage('User updated successfully');
     } catch (error) {
@@ -83,32 +70,44 @@ const Register = ({ selectedAccount }) => {
     }
   };
 
-  //Delete Account
+  // Delete Account
   const onDelete = async () => {
     if (!selectedAccount) {
       setErrorMessage('No instructor selected');
       return;
     }
+
+    const confirmDelete = window.confirm(`Are you sure you want to delete the account for ${selectedAccount.name.firstName} ${selectedAccount.name.lastName}?`);
+    if (!confirmDelete) {
+      return;
+    }
+
     setIsDeleting(true);
     try {
       await doDeleteUser(selectedAccount.id);
       console.log("User deleted successfully");
       setErrorMessage('');
       setSuccessMessage('User deleted successfully');
-      // Clear the input fields
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-      setFirstName('');
-      setMiddleName('');
-      setLastName('');
-      setIdNumber('');
+      clearForm(); // Clear the input fields
     } catch (error) {
       console.error(error);
       setErrorMessage("Error deleting user");
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  // Clear all input fields
+  const clearForm = () => {
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setFirstName('');
+    setMiddleName('');
+    setLastName('');
+    setIdNumber('');
+    setErrorMessage('');
+    setSuccessMessage('');
   };
 
   return (
@@ -137,26 +136,16 @@ const Register = ({ selectedAccount }) => {
                 {isDeleting ? 'Deleting Account...' : 'Delete Account'}
               </button>
             </>
-            
           )}
+          <button type="button" onClick={clearForm} className="acc-crud-btn btn btn-danger">
+            Clear Form
+          </button>
         </div>
-        
       </form>
+      {errorMessage && <div className="alert alert-danger" role="alert">{errorMessage}</div>}
+      {successMessage && <div className="alert alert-success" role="alert">{successMessage}</div>}
     </>
   );
 };
 
 export default Register;
-
-
-
-
-
-
-/* 
-import 'bootstrap/dist/css/bootstrap.min.css';
-
-{errorMessage && <div className="alert alert-danger" role="alert">{errorMessage}</div>}
-        {successMessage && <div className="alert alert-success" role="alert">{successMessage}</div>}
-
-*/

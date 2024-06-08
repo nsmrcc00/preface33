@@ -61,15 +61,7 @@ const Register = ({ selectedAccount }) => {
     try {
       await doCreateUserWithEmailAndPassword(email, password, role, firstName, middleName, lastName, idNumber, section); // Pass section here
       console.log("User registered successfully");
-      // Clear the input fields
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-      setFirstName('');
-      setMiddleName('');
-      setLastName('');
-      setIdNumber('');
-      setSection('');
+      clearForm(); // Clear the input fields
       setErrorMessage(''); // Clear any previous error messages
       setSuccessMessage('User registered successfully'); // Set success message
     } catch (error) {
@@ -90,14 +82,7 @@ const Register = ({ selectedAccount }) => {
     try {
       await doUpdateUser(selectedAccount.id, email, firstName, middleName, lastName, idNumber, section); // Pass section here
       console.log("User updated successfully");
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-      setFirstName('');
-      setMiddleName('');
-      setLastName('');
-      setIdNumber('');
-      setSection('');
+      clearForm(); // Clear the input fields
       setErrorMessage('');
       setSuccessMessage('User updated successfully');
     } catch (error) {
@@ -114,27 +99,38 @@ const Register = ({ selectedAccount }) => {
       setErrorMessage('No student selected');
       return;
     }
+
+    const confirmDelete = window.confirm(`Are you sure you want to delete the account for ${selectedAccount.name.firstName} ${selectedAccount.name.lastName}?`);
+    if (!confirmDelete) {
+      return;
+    }
+
     setIsDeleting(true);
     try {
       await doDeleteUser(selectedAccount.id);
       console.log("User deleted successfully");
       setErrorMessage('');
       setSuccessMessage('User deleted successfully');
-      // Clear the input fields
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-      setFirstName('');
-      setMiddleName('');
-      setLastName('');
-      setIdNumber('');
-      setSection('');
+      clearForm(); // Clear the input fields
     } catch (error) {
       console.error(error);
       setErrorMessage("Error deleting user");
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  // Clear all input fields
+  const clearForm = () => {
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setFirstName('');
+    setMiddleName('');
+    setLastName('');
+    setIdNumber('');
+    setErrorMessage('');
+    setSuccessMessage('');
   };
 
   return (

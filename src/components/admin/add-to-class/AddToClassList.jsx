@@ -121,9 +121,17 @@ const AddToClassList = () => {
   const handleAddToClassList = async () => {
     if (selectedSubject) {
       const selectedStudents = students.filter(student => student.checked);
+      const existingStudentIds = classList.map(student => student.idNumber);
+      const studentsToAdd = selectedStudents.filter(student => !existingStudentIds.includes(student.idNumber));
+
+      if (studentsToAdd.length === 0) {
+        alert('Error! Student/s already added to the class list');
+        return;
+      }
+
       const batch = writeBatch(db);
 
-      selectedStudents.forEach(student => {
+      studentsToAdd.forEach(student => {
         const classListRef = doc(collection(db, 'Subjects', selectedSubject.id, 'classList'));
         batch.set(classListRef, {
           name: `${student.name.firstName} ${student.name.middleName} ${student.name.lastName}`,
@@ -226,15 +234,16 @@ const AddToClassList = () => {
             transform: 'translate(-50%, -50%)',
             padding: '20px',
             borderRadius: '10px',
-            width: 'max(80%, 400px)',          
-            overflowX: 'auto',
-            overflowY: 'auto',            
+            width: 'max(80%, 400px)',
+            maxHeight: '80vh'                              
           }
         }}
       >
         {selectedSubject && (
-          <div>
-
+          <div style={{
+            overflowX: 'auto',
+            overflowY: 'auto',  
+          }}>
             <div className='subjectInfo'>
               <h2 className='subjectInfoContent'>{selectedSubject.title}</h2>
               <p className='subjectInfoContent'><strong>Subject Code:</strong> {selectedSubject.subjectCode}</p>
