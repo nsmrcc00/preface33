@@ -1,17 +1,20 @@
-import InstructorHeader from "../../header/InstructorHeader"
-import Modal from "react-modal"
-import { useState } from "react";
+import InstructorHeader from "../../header/InstructorHeader";
+import Modal from "react-modal";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../../contexts/authContext";
 import { doSignOut } from "../../../firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../../firebase/firebase';
 
 Modal.setAppElement("#root");
 
-
 const SubjectHome = () => {
   const navigate = useNavigate();
-  const { userLoggedIn } = useAuth();
+  const { subjectId } = useParams();
+  const { userLoggedIn, currentUser } = useAuth();
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [subject, setSubject] = useState(null);
 
   const openModal = () => {
     setModalIsOpen(true);
@@ -30,6 +33,22 @@ const SubjectHome = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchSubject = async () => {
+      if (currentUser) {
+        const userDoc = doc(db, 'Users', currentUser.uid);
+        const subjectDoc = doc(userDoc, 'subjectsHandled', subjectId);
+        const subjectSnapshot = await getDoc(subjectDoc);
+        
+        if (subjectSnapshot.exists()) {
+          setSubject(subjectSnapshot.data());
+        }
+      }
+    };
+
+    fetchSubject();
+  }, [currentUser, subjectId]);
+
   return (
     <>
       <header>
@@ -37,8 +56,12 @@ const SubjectHome = () => {
       </header>
       <main>
         <section>
-          <h1>Subject Name - Section</h1>
-          <button onClick={openModal}>Button (Kunyari sa calendar pumindot)</button>
+          {subject && (
+            <>
+              <h1>{subject.title} - {subject.section}</h1>
+              <button onClick={openModal}>Button (Kunyari sa calendar pumindot)</button>
+            </>
+          )}
         </section>      
       </main>
       <Modal
@@ -61,7 +84,7 @@ const SubjectHome = () => {
         }}
       >
         <div className="table-container">
-            <h2>Subject Name Class List</h2>
+            <h2>{subject ? subject.title : "Loading..."} Class List</h2>
             <input
             type="text"
             placeholder="Search"          
@@ -100,7 +123,7 @@ const SubjectHome = () => {
           </div>
       </Modal>      
     </>
-  )
-}
+  );
+};
 
-export default SubjectHome
+export default SubjectHome;

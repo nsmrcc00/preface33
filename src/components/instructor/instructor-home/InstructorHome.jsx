@@ -11,38 +11,33 @@ const InstructorHome = () => {
   const [subjects, setSubjects] = useState([]);
   const navigate = useNavigate();
 
-  const navi1 = () => {
-    if (userLoggedIn === true) {
-      navigate('/subject');
-    } else {
-      doSignOut();
-      navigate('/login');
-    }
-  };
-
   useEffect(() => {
     const fetchSubjects = async () => {
       if (currentUser) {
-        const cachedSubjects = localStorage.getItem('cachedSubjects');
-        const cacheExpiration = localStorage.getItem('cacheExpiration');
-        
-        if (cachedSubjects && cacheExpiration && new Date() < new Date(cacheExpiration)) {
-          setSubjects(JSON.parse(cachedSubjects));
-        } else {
+        try {
           const userDoc = doc(db, 'Users', currentUser.uid);
           const subjectsCollection = collection(userDoc, 'subjectsHandled');
           const subjectsSnapshot = await getDocs(subjectsCollection);
-          const subjectsList = subjectsSnapshot.docs.map(doc => doc.data());
+          const subjectsList = subjectsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           
           setSubjects(subjectsList);
-          localStorage.setItem('cachedSubjects', JSON.stringify(subjectsList));
-          localStorage.setItem('cacheExpiration', new Date(new Date().getTime() + 60 * 60 * 1000)); // Cache for 1 hour
+        } catch (error) {
+          console.error("Error fetching subjects:", error);
         }
       }
     };
 
     fetchSubjects();
   }, [currentUser]);
+
+  const handleSubjectClick = (subjectId) => {
+    if (userLoggedIn) {
+      navigate(`/subject/${subjectId}`);
+    } else {
+      doSignOut();
+      navigate('/login');
+    }
+  };
 
   return (
     <>
@@ -51,8 +46,8 @@ const InstructorHome = () => {
       </header>
       <main className='subjectsPage'>
         <section className='instructorPage'>
-          {subjects.map((subject, index) => (
-            <div className="subject-dash-div" key={index} onClick={navi1}>
+          {subjects.map((subject) => (
+            <div className="subject-dash-div" key={subject.id} onClick={() => handleSubjectClick(subject.id)}>
               <p>{subject.title}</p>
               <p>Code: {subject.subjectCode}</p>
               <p>Section: {subject.section}</p>

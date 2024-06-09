@@ -54,7 +54,7 @@ const App = () => {
             ),
         },
         {
-            path: "/subject",
+            path: "/subject/:subjectId",
             element: (
                 <ProtectedRoute role="instructor">
                     <SubjectHome />

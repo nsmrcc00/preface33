@@ -20,35 +20,35 @@ function InstructorHeader() {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    const navi1 = () => {
+    const navi1 = (subjectId) => {
         if (userLoggedIn === true) {
-          navigate('/subject');
+          navigate(`/subject/${subjectId}`);
         } else {
           doSignOut();
           navigate('/login');
         }
-      };
+    };
 
     useEffect(() => {
         const fetchSubjects = async () => {
             if (currentUser) {
-                const cachedSubjects = localStorage.getItem('instructorSubjects');
-                const cacheExpiration = localStorage.getItem('instructorSubjectsExpiration');
-                
-                if (cachedSubjects && cacheExpiration && new Date() < new Date(cacheExpiration)) {
-                    setSubjects(JSON.parse(cachedSubjects));
-                } else {
+                try {
                     const userDoc = doc(db, 'Users', currentUser.uid);
                     const subjectsCollection = collection(userDoc, 'subjectsHandled');
                     const subjectsSnapshot = await getDocs(subjectsCollection);
-                    const subjectsList = subjectsSnapshot.docs.map(doc => ({
-                        title: doc.data().title,
-                        section: doc.data().section
-                    }));
+                    const subjectsList = subjectsSnapshot.docs.map((doc) => {
+                        console.log("Document data:", doc.data()); // Log document data
+                        return {
+                            id: doc.id, // Firestore document ID
+                            title: doc.data().title,
+                            section: doc.data().section
+                        };
+                    });
                     
+                    console.log("Fetched subjects list:", subjectsList); // Log the fetched subjects list
                     setSubjects(subjectsList);
-                    localStorage.setItem('instructorSubjects', JSON.stringify(subjectsList));
-                    localStorage.setItem('instructorSubjectsExpiration', new Date(new Date().getTime() + 60 * 60 * 1000)); // Cache for 1 hour
+                } catch (error) {
+                    console.error("Error fetching subjects:", error);
                 }
             }
         };
@@ -92,12 +92,12 @@ function InstructorHeader() {
                 <Navbar id="heading">
                     <Container fluid>                    
                         <Navbar.Brand href="#" onClick={handleShow}>
-                            <img src='hamburger.svg' alt="Menu"/>
+                            <img src='/hamburger.svg' alt="Menu"/>
                         </Navbar.Brand>            
                         <Navbar.Collapse className="justify-content-end">               
                             <Navbar.Brand href="#">
                                 <img 
-                                    src='preface.png' 
+                                    src='/preface.png' 
                                     alt="PreFace" 
                                     width="135" 
                                     height="30"
@@ -116,11 +116,14 @@ function InstructorHeader() {
                     <Stack gap={2} className="col-md mx-auto">
                         Signed in as: {currentUser.displayName ? currentUser.displayName : currentUser.email}
                         <ListGroup>
-                            {subjects.map((subject, index) => (
-                                <ListGroup.Item key={index} action onClick={navi1}>
-                                    {subject.title} - {subject.section}
-                                </ListGroup.Item>
-                            ))}
+                            {subjects.map((subject) => {
+                                console.log(`Rendering subject with ID: ${subject.id}`); // Debugging log
+                                return (
+                                    <ListGroup.Item key={subject.id} action onClick={() => navi1(subject.id)}>
+                                        {subject.title} - {subject.section}
+                                    </ListGroup.Item>
+                                );
+                            })}
                         </ListGroup> 
                         <button 
                             id="gen_btn" 

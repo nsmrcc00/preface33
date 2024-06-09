@@ -74,12 +74,12 @@ function Header() {
                 <Navbar id="heading">
                     <Container fluid>
                         <Navbar.Brand href="#" onClick={handleShow}>
-                            <img src='hamburger.svg' />
+                            <img src='/hamburger.svg' />
                         </Navbar.Brand>
                         <Navbar.Collapse className="justify-content-end">
                             <Navbar.Brand href="#">
                                 <img 
-                                    src='preface.png' 
+                                    src='/preface.png' 
                                     alt="PreFace" 
                                     width="135" 
                                     height="30"
