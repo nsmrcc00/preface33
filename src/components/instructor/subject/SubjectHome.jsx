@@ -102,8 +102,8 @@ const SubjectHome = () => {
       <header>
         <InstructorHeader />
       </header>
-      <main>
-        <section id="schoolSectionPage">
+      <main className="subject-home">
+        <section className="subject-home-container">
           {subject && (
             <>
               <h1>
