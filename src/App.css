@@ -2,6 +2,31 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
+
+
+.rbc-today {
+  background-color: #AD1212 !important;
+}
+.rbc-day-bg,.rbc-date-cell {
+  cursor: pointer;
+}
+.rbc-date-cell.rbc-off-range-bg,.rbc-off-range-bg {
+  cursor:default;
+}
+
+ /*  
+    position: relative !important;
+  display: none !important;
+  
+  .rbc-button-link {
+
+  z-index: -10000 !important;
+ 
+.ReactModal__Content {
+  z-index: 10000 !important;
+}
+}*/
+
 /*Login Page*/
 #login-page {
   width: auto;
@@ -301,6 +326,8 @@ input[type=number] {
   border: 1px solid #ddd;
 }
 
+
+
 @media only screen and (max-width: 600px) {
   .instructorPage {
     justify-content: center;
@@ -316,6 +343,7 @@ input[type=number] {
     margin-top: 1rem;
   }
 }
+
 
 /**
 .studentCrudContent{

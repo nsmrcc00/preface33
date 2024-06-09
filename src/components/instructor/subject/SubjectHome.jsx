@@ -6,6 +6,7 @@ import { doSignOut } from "../../../firebase/auth";
 import { useNavigate, useParams } from "react-router-dom";
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
+import SubCalendar from "./SubCalendar";
 
 Modal.setAppElement("#root");
 
@@ -59,6 +60,7 @@ const SubjectHome = () => {
           {subject && (
             <>
               <h1>{subject.title} - {subject.section}</h1>
+              <SubCalendar/>
               <button onClick={openModal}>Button (Kunyari sa calendar pumindot)</button>
             </>
           )}
