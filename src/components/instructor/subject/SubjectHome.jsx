@@ -74,14 +74,26 @@ const SubjectHome = () => {
                 <tr>
                   <th>Name</th>
                   <th>Section</th>
+                  <th>Time IN</th>
+                  <th>Time OUT</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                <tr onClick={navi2}>
+                <tr>
+                  <td onClick={navi2}>Student Name</td>
                   <td></td>
                   <td></td>
                   <td></td>
+                  <td>
+                    <select>
+                      <option>--</option>
+                      <option>Present</option>
+                      <option>Late</option>
+                      <option>Absent</option>
+                      <option>Excused</option>
+                    </select>
+                  </td>
                 </tr>
               </tbody>
             </table>

@@ -20,6 +20,7 @@ const Register = ({ selectedAccount }) => {
   const [role, /*setRole*/] = useState('student');
   const [section, setSection] = useState('');
   const [sections, setSections] = useState([]);
+  const [macAddress, setMacAddress] = useState('');
 
   useEffect(() => {
     if (selectedAccount) {
@@ -28,7 +29,8 @@ const Register = ({ selectedAccount }) => {
       setSection(selectedAccount.section)
       setFirstName(selectedAccount.name.firstName);
       setMiddleName(selectedAccount.name.middleName);
-      setLastName(selectedAccount.name.lastName);      
+      setLastName(selectedAccount.name.lastName); 
+      setMacAddress(selectedAccount.macAddress);     
     }
   }, [selectedAccount]);
 
@@ -59,7 +61,7 @@ const Register = ({ selectedAccount }) => {
     }
     setIsRegistering(true);
     try {
-      await doCreateUserWithEmailAndPassword(email, password, role, firstName, middleName, lastName, idNumber, section); // Pass section here
+      await doCreateUserWithEmailAndPassword(email, password, role, firstName, middleName, lastName, idNumber, section, macAddress); // Pass section here
       console.log("User registered successfully");
       clearForm(); // Clear the input fields
       setErrorMessage(''); // Clear any previous error messages
@@ -80,7 +82,7 @@ const Register = ({ selectedAccount }) => {
     }
     setIsUpdating(true);
     try {
-      await doUpdateUser(selectedAccount.id, email, firstName, middleName, lastName, idNumber, section); // Pass section here
+      await doUpdateUser(selectedAccount.id, email, firstName, middleName, lastName, idNumber, section, macAddress); // Pass section here
       console.log("User updated successfully");
       clearForm(); // Clear the input fields
       setErrorMessage('');
@@ -129,6 +131,8 @@ const Register = ({ selectedAccount }) => {
     setMiddleName('');
     setLastName('');
     setIdNumber('');
+    setMacAddress('');
+    setSection('');
     setErrorMessage('');
     setSuccessMessage('');
   };
@@ -144,6 +148,9 @@ const Register = ({ selectedAccount }) => {
         <input className="form-control" type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
         <input className="form-control" type="email" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} required />
         <input className="form-control" type="text" placeholder="ID Number" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} required />
+        {selectedAccount && (
+          <input className="form-control" type="text" placeholder="MAC Address" value={macAddress} onChange={(e) => setMacAddress(e.target.value)} required />
+        )}
         <input className="form-control" type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} required />
         <input className="form-control" type="password" placeholder='Confirm Password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
         

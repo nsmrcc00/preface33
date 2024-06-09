@@ -7,7 +7,7 @@ import {
     deleteUser 
 } from "firebase/auth";
 
-export const doCreateUserWithEmailAndPassword = async (email, password, role, firstName, middleName, lastName, idNumber, section) => {
+export const doCreateUserWithEmailAndPassword = async (email, password, role, firstName, middleName, lastName, idNumber, section, macAddress) => {
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   const user = userCredential.user;
 
@@ -21,6 +21,7 @@ export const doCreateUserWithEmailAndPassword = async (email, password, role, fi
       lastName: lastName
     },
     section: section, // Include section here
+    macAddress: macAddress,
     userId: user.uid
   });
 
@@ -59,7 +60,7 @@ export const doDeleteUser = async (userId) => {
     }
   };
 
-export const doUpdateUser = async (userId, email, firstName, middleName, lastName, idNumber, section) => {
+export const doUpdateUser = async (userId, email, firstName, middleName, lastName, idNumber, section, macAddress) => {
   const userDocRef = doc(db, "Users", userId);
 
   await updateDoc(userDocRef, {
@@ -70,6 +71,7 @@ export const doUpdateUser = async (userId, email, firstName, middleName, lastNam
       middleName: middleName,
       lastName: lastName
       },
+      macAddress: macAddress,
       section: section // Include section here
   });
 
