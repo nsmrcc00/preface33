@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../../contexts/authContext";
 import { doSignOut } from "../../../firebase/auth";
 import { useNavigate, useParams } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
@@ -29,19 +29,17 @@ const SubjectHome = () => {
   const { userLoggedIn, currentUser } = useAuth();
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [subject, setSubject] = useState(null);
+  const [classList, setClassList] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [view, setView] = useState("month"); // Manage the view state
   const calendarRef = useRef(null);
 
   useEffect(() => {
-    // Toggle class on the body or another appropriate parent element
     if (modalIsOpen) {
       document.body.classList.add("hide-rbc-button-link");
     } else {
       document.body.classList.remove("hide-rbc-button-link");
     }
-
-    // Cleanup function to remove the class if the component unmounts
     return () => {
       document.body.classList.remove("hide-rbc-button-link");
     };
@@ -58,7 +56,6 @@ const SubjectHome = () => {
   };
 
   const afterOpenModal = () => {
-    // Transfer focus to the modal
     const modalElement = document.querySelector(".ReactModal__Content");
     if (modalElement) {
       modalElement.focus();
@@ -66,7 +63,6 @@ const SubjectHome = () => {
   };
 
   const afterCloseModal = () => {
-    // Restore focus to the calendar
     if (calendarRef.current) {
       calendarRef.current.focus();
     }
@@ -89,7 +85,20 @@ const SubjectHome = () => {
         const subjectSnapshot = await getDoc(subjectDoc);
 
         if (subjectSnapshot.exists()) {
-          setSubject(subjectSnapshot.data());
+          const subjectData = subjectSnapshot.data();
+          setSubject(subjectData);
+
+          // Fetch class list from Subjects collection if the title and section match
+          const subjectsCollection = collection(db, "Subjects");
+          const q = query(subjectsCollection, where("title", "==", subjectData.title), where("section", "==", subjectData.section));
+          const querySnapshot = await getDocs(q);
+
+          querySnapshot.forEach(async (doc) => {
+            const classListCollection = collection(doc.ref, "classList");
+            const classListSnapshot = await getDocs(classListCollection);
+            const classListData = classListSnapshot.docs.map(doc => doc.data());
+            setClassList(classListData);
+          });
         }
       }
     };
@@ -172,24 +181,26 @@ const SubjectHome = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Student Name</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>
-                  <select>
-                    <option>--</option>
-                    <option>Present</option>
-                    <option>Late</option>
-                    <option>Absent</option>
-                    <option>Excused</option>
-                  </select>
-                </td>
-                <td>
-                  <button onClick={navi2}>View Profile</button>
-                </td>
-              </tr>
+              {classList.map((student, index) => (
+                <tr key={index}>
+                  <td>{student.name}</td>
+                  <td>{student.section}</td>
+                  <td></td>
+                  <td></td>
+                  <td>
+                    <select>
+                      <option>--</option>
+                      <option>Present</option>
+                      <option>Late</option>
+                      <option>Absent</option>
+                      <option>Excused</option>
+                    </select>
+                  </td>
+                  <td>
+                    <button onClick={navi2}>View Profile</button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
