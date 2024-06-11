@@ -62,7 +62,7 @@ const App = () => {
             ),
         },
         {
-            path: "/student-profile",
+            path: "/student-profile/:studentId",
             element: (
                 <ProtectedRoute role="instructor">
                     <StudentProfile />

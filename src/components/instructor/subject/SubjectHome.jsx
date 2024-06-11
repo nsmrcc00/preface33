@@ -68,9 +68,9 @@ const SubjectHome = () => {
     }
   };
 
-  const navi2 = () => {
+  const navi2 = (studentId) => {
     if (userLoggedIn === true) {
-      navigate("/student-profile");
+      navigate(`/student-profile/${studentId}`);
     } else {
       doSignOut();
       navigate("/login");
@@ -88,7 +88,7 @@ const SubjectHome = () => {
       const classListSnapshot = await getDocs(classListRef);
 
       for (const studentDoc of classListSnapshot.docs) {
-        const studentData = studentDoc.data();
+        const studentData = { id: studentDoc.id, ...studentDoc.data() };
         const attendanceLedgerRef = collection(studentDoc.ref, "attendanceLedger");
         const attendanceDocId = moment(selectedDate).format("MMMM D, YYYY");
         const attendanceDocRef = doc(attendanceLedgerRef, attendanceDocId);
@@ -229,7 +229,7 @@ const SubjectHome = () => {
                     </select>
                   </td>
                   <td>
-                    <button onClick={navi2}>View Profile</button>
+                    <button onClick={() => navi2(student.id)}>View Profile</button>
                   </td>
                 </tr>
               ))}

@@ -24,21 +24,6 @@ const StudentProfile = () => {
                   <td>a</td>
                   <td>a</td>
                 </tr>
-                <tr>
-                  <td>a</td>
-                  <td>a</td>
-                  <td>a</td>
-                </tr>
-                <tr>
-                  <td>a</td>
-                  <td>a</td>
-                  <td>a</td>
-                </tr>
-                <tr>
-                  <td>a</td>
-                  <td>a</td>
-                  <td>a</td>
-                </tr>
               </tbody>
             </table>
             <p>Total number of absences: </p>
