@@ -31,7 +31,7 @@ const SubjectHome = () => {
   const [subject, setSubject] = useState(null);
   const [classList, setClassList] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [view, setView] = useState("month"); // Manage the view state
+  const [view, setView] = useState("month");
   const calendarRef = useRef(null);
 
   useEffect(() => {
@@ -77,6 +77,48 @@ const SubjectHome = () => {
     }
   };
 
+  const fetchClassList = async (subjectTitle, subjectSection) => {
+    const subjectsRef = collection(db, "Subjects");
+    const q = query(subjectsRef, where("title", "==", subjectTitle), where("section", "==", subjectSection));
+    const querySnapshot = await getDocs(q);
+    const classListData = [];
+
+    for (const subjectDoc of querySnapshot.docs) {
+      const classListRef = collection(subjectDoc.ref, "classList");
+      const classListSnapshot = await getDocs(classListRef);
+
+      for (const studentDoc of classListSnapshot.docs) {
+        const studentData = studentDoc.data();
+        const attendanceLedgerRef = collection(studentDoc.ref, "attendanceLedger");
+        const attendanceDocId = moment(selectedDate).format("MMMM D, YYYY");
+        const attendanceDocRef = doc(attendanceLedgerRef, attendanceDocId);
+        const attendanceDocSnapshot = await getDoc(attendanceDocRef);
+
+        if (attendanceDocSnapshot.exists()) {
+          const attendanceData = attendanceDocSnapshot.data();
+          studentData.attendance = {
+            in: attendanceData.attendanceIn?.In || false,
+            inTimestamp: attendanceData.attendanceIn?.timestamp || null,
+            out: attendanceData.attendanceOut?.Out || false,
+            outTimestamp: attendanceData.attendanceOut?.timestamp || null,
+            status: attendanceData.status || "--"
+          };
+        } else {
+          studentData.attendance = {
+            in: false,
+            inTimestamp: null,
+            out: false,
+            outTimestamp: null,
+            status: "--"
+          };
+        }
+
+        classListData.push(studentData);
+      }
+    }
+    setClassList(classListData);
+  };
+
   useEffect(() => {
     const fetchSubject = async () => {
       if (currentUser) {
@@ -88,23 +130,13 @@ const SubjectHome = () => {
           const subjectData = subjectSnapshot.data();
           setSubject(subjectData);
 
-          // Fetch class list from Subjects collection if the title and section match
-          const subjectsCollection = collection(db, "Subjects");
-          const q = query(subjectsCollection, where("title", "==", subjectData.title), where("section", "==", subjectData.section));
-          const querySnapshot = await getDocs(q);
-
-          querySnapshot.forEach(async (doc) => {
-            const classListCollection = collection(doc.ref, "classList");
-            const classListSnapshot = await getDocs(classListCollection);
-            const classListData = classListSnapshot.docs.map(doc => doc.data());
-            setClassList(classListData);
-          });
+          await fetchClassList(subjectData.title, subjectData.section);
         }
       }
     };
 
     fetchSubject();
-  }, [currentUser, subjectId]);
+  }, [currentUser, subjectId, selectedDate]);
 
   return (
     <>
@@ -126,10 +158,10 @@ const SubjectHome = () => {
                     startAccessor="start"
                     endAccessor="end"
                     defaultDate={moment().toDate()}
-                    view={view} // Set the view state
-                    onView={() => setView("month")} // Prevent view changes
-                    selectable // Allow selecting a slot
-                    onSelectSlot={handleSelectSlot} // Handle slot selection
+                    view={view}
+                    onView={() => setView("month")}
+                    selectable
+                    onSelectSlot={handleSelectSlot}
                     components={{
                       toolbar: CustomToolbar,
                     }}
@@ -185,10 +217,10 @@ const SubjectHome = () => {
                 <tr key={index}>
                   <td>{student.name}</td>
                   <td>{student.section}</td>
-                  <td></td>
-                  <td></td>
+                  <td>{student.attendance.in ? moment(student.attendance.inTimestamp.toDate()).format("hh:mm A") : "--"}</td>
+                  <td>{student.attendance.out ? moment(student.attendance.outTimestamp.toDate()).format("hh:mm A") : "--"}</td>
                   <td>
-                    <select>
+                    <select value={student.attendance.status} readOnly>
                       <option>--</option>
                       <option>Present</option>
                       <option>Late</option>

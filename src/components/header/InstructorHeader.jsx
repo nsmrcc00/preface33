@@ -23,6 +23,7 @@ function InstructorHeader() {
     const navi1 = (subjectId) => {
         if (userLoggedIn === true) {
           navigate(`/subject/${subjectId}`);
+          handleClose();
         } else {
           doSignOut();
           navigate('/login');
@@ -116,6 +117,7 @@ function InstructorHeader() {
                     <Stack gap={2} className="col-md mx-auto">
                         Signed in as: {currentUser.displayName ? currentUser.displayName : currentUser.email}
                         <ListGroup>
+                          <ListGroup.Item action onClick={navi3}>Home</ListGroup.Item>
                             {subjects.map((subject) => {
                                 console.log(`Rendering subject with ID: ${subject.id}`); // Debugging log
                                 return (

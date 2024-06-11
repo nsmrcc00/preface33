@@ -318,7 +318,7 @@ input[type=number] {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  width: 90%; /* Adjust width to fit alongside the notifications */
+  width: 100%; /*width: 90%; Adjust width to fit alongside the notifications */
   
   box-sizing: border-box;
   height: 50%;
@@ -340,10 +340,12 @@ input[type=number] {
 }
 
 .instructorNotifications {
+  display: none; /*hidden until I find a way to make it work*/
   background-color: white;
   width: 10%;
   box-sizing: border-box;
   border: 1px solid #ddd;
+  overflow-x: auto;
 }
 
 
