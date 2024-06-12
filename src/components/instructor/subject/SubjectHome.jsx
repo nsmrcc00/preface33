@@ -4,7 +4,14 @@ import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../../contexts/authContext";
 import { doSignOut } from "../../../firebase/auth";
 import { useNavigate, useParams } from "react-router-dom";
-import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
@@ -15,11 +22,20 @@ const localizer = momentLocalizer(moment);
 Modal.setAppElement("#root");
 
 const CustomToolbar = ({ label, onNavigate }) => (
-  <div className="calendar-toolbar">    
+  <div className="calendar-toolbar">
     <h3 className="toolbar-label">{label}</h3>
-    <button className="calendar-toolbar-btn" onClick={() => onNavigate("TODAY")}>Today</button>
-    <button className="calendar-toolbar-btn" onClick={() => onNavigate("PREV")}>Previous</button>
-    <button className="calendar-toolbar-btn" onClick={() => onNavigate("NEXT")}>Next</button>
+    <button
+      className="calendar-toolbar-btn"
+      onClick={() => onNavigate("TODAY")}
+    >
+      Today
+    </button>
+    <button className="calendar-toolbar-btn" onClick={() => onNavigate("PREV")}>
+      Previous
+    </button>
+    <button className="calendar-toolbar-btn" onClick={() => onNavigate("NEXT")}>
+      Next
+    </button>
   </div>
 );
 
@@ -30,6 +46,8 @@ const SubjectHome = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [subject, setSubject] = useState(null);
   const [classList, setClassList] = useState([]);
+  const [filteredClassList, setFilteredClassList] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [view, setView] = useState("month");
   const calendarRef = useRef(null);
@@ -76,26 +94,36 @@ const SubjectHome = () => {
       navigate("/login");
     }
   };
-  
 
   const fetchClassList = async (subjectTitle, subjectSection) => {
     const subjectsRef = collection(db, "Subjects");
-    const q = query(subjectsRef, where("title", "==", subjectTitle), where("section", "==", subjectSection));
+    const q = query(
+      subjectsRef,
+      where("title", "==", subjectTitle),
+      where("section", "==", subjectSection)
+    );
     const querySnapshot = await getDocs(q);
     const classListData = [];
-  
+
     for (const subjectDoc of querySnapshot.docs) {
-      const subjectDocId = subjectDoc.id;  // Get the document ID
+      const subjectDocId = subjectDoc.id;
       const classListRef = collection(subjectDoc.ref, "classList");
       const classListSnapshot = await getDocs(classListRef);
-  
+
       for (const studentDoc of classListSnapshot.docs) {
-        const studentData = { id: studentDoc.id, ...studentDoc.data(), subjectDocId };  // Add subjectDocId to studentData
-        const attendanceLedgerRef = collection(studentDoc.ref, "attendanceLedger");
+        const studentData = {
+          id: studentDoc.id,
+          ...studentDoc.data(),
+          subjectDocId,
+        };
+        const attendanceLedgerRef = collection(
+          studentDoc.ref,
+          "attendanceLedger"
+        );
         const attendanceDocId = moment(selectedDate).format("MMMM D, YYYY");
         const attendanceDocRef = doc(attendanceLedgerRef, attendanceDocId);
         const attendanceDocSnapshot = await getDoc(attendanceDocRef);
-  
+
         if (attendanceDocSnapshot.exists()) {
           const attendanceData = attendanceDocSnapshot.data();
           studentData.attendance = {
@@ -103,7 +131,7 @@ const SubjectHome = () => {
             inTimestamp: attendanceData.attendanceIn?.timestamp || null,
             out: attendanceData.attendanceOut?.Out || false,
             outTimestamp: attendanceData.attendanceOut?.timestamp || null,
-            status: attendanceData.status || "--"
+            status: attendanceData.status || "--",
           };
         } else {
           studentData.attendance = {
@@ -111,16 +139,16 @@ const SubjectHome = () => {
             inTimestamp: null,
             out: false,
             outTimestamp: null,
-            status: "--"
+            status: "--",
           };
         }
-  
+
         classListData.push(studentData);
       }
     }
     setClassList(classListData);
+    setFilteredClassList(classListData);
   };
-  
 
   useEffect(() => {
     const fetchSubject = async () => {
@@ -140,6 +168,23 @@ const SubjectHome = () => {
 
     fetchSubject();
   }, [currentUser, subjectId, selectedDate]);
+
+  const handleSearch = (event) => {
+    const query = event.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    if (query === "") {
+      setFilteredClassList(classList);
+    } else {
+      const filteredList = classList.filter(
+        (student) =>
+          student.name.toLowerCase().includes(query) ||
+          student.section.toLowerCase().includes(query) ||
+          student.attendance.status.toLowerCase().includes(query)
+      );
+      setFilteredClassList(filteredList);
+    }
+  };
 
   return (
     <>
@@ -196,14 +241,20 @@ const SubjectHome = () => {
           },
         }}
       >
-        <div className="table-container">          
+        <div className="table-container">
           <h2>{subject ? subject.title : "Loading..."} Class List</h2>
           <p>Selected Date: {moment(selectedDate).format("MMMM Do YYYY")}</p>
           <div>
-            <input type="text" placeholder="Search" className="calendar-modal" />
+            <input
+              type="text"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={handleSearch}
+              className="calendar-modal"
+            />
             <button className="calendar-modal">Start Attendance In</button>
             <button className="calendar-modal">Start Attendance Out</button>
-          </div>          
+          </div>
           <table className="striped-table">
             <thead>
               <tr>
@@ -216,12 +267,24 @@ const SubjectHome = () => {
               </tr>
             </thead>
             <tbody>
-              {classList.map((student, index) => (
+              {filteredClassList.map((student, index) => (
                 <tr key={index}>
                   <td>{student.name}</td>
                   <td>{student.section}</td>
-                  <td>{student.attendance.in ? moment(student.attendance.inTimestamp.toDate()).format("hh:mm A") : "--"}</td>
-                  <td>{student.attendance.out ? moment(student.attendance.outTimestamp.toDate()).format("hh:mm A") : "--"}</td>
+                  <td>
+                    {student.attendance.in
+                      ? moment(student.attendance.inTimestamp.toDate()).format(
+                          "hh:mm A"
+                        )
+                      : "--"}
+                  </td>
+                  <td>
+                    {student.attendance.out
+                      ? moment(student.attendance.outTimestamp.toDate()).format(
+                          "hh:mm A"
+                        )
+                      : "--"}
+                  </td>
                   <td>
                     <select value={student.attendance.status} readOnly>
                       <option>--</option>
@@ -232,7 +295,11 @@ const SubjectHome = () => {
                     </select>
                   </td>
                   <td>
-                    <button onClick={() => navi2(student.id, student.subjectDocId)}>View Profile</button>
+                    <button
+                      onClick={() => navi2(student.id, student.subjectDocId)}
+                    >
+                      View Profile
+                    </button>
                   </td>
                 </tr>
               ))}

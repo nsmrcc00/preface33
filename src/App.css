@@ -367,20 +367,16 @@ input[type=number] {
 }
 
 
-/**
-/*  
-    position: relative !important;
-  display: none !important;
+/*
+position: relative !important;
+display: none !important;
   
-  .rbc-button-link {
-
+.rbc-button-link {
   z-index: -10000 !important;
- 
+}
 .ReactModal__Content {
   z-index: 10000 !important;
 }
-}*/
-/*
 
 .studentCrudContent{
   background-color: white;
@@ -451,6 +447,5 @@ borderImage: 'fill 0 linear-gradient(#0003,#fff)'
 <div id='ins-header'>
   <div id='ins-header-content'>INSTRUCTOR ACCOUNTS</div>
 </div>
-
 
 */
