@@ -14,18 +14,24 @@ const InstructorHome = () => {
   useEffect(() => {
     const fetchSubjects = async () => {
       if (currentUser) {
-        try {
-          const userDoc = doc(db, "Users", currentUser.uid);
-          const subjectsCollection = collection(userDoc, "subjectsHandled");
-          const subjectsSnapshot = await getDocs(subjectsCollection);
-          const subjectsList = subjectsSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
+        const cachedSubjects = localStorage.getItem('subjectDashDivs');
+        if (cachedSubjects) {
+          setSubjects(JSON.parse(cachedSubjects));
+        } else {
+          try {
+            const userDoc = doc(db, "Users", currentUser.uid);
+            const subjectsCollection = collection(userDoc, "subjectsHandled");
+            const subjectsSnapshot = await getDocs(subjectsCollection);
+            const subjectsList = subjectsSnapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
 
-          setSubjects(subjectsList);
-        } catch (error) {
-          console.error("Error fetching subjects:", error);
+            localStorage.setItem('subjectDashDivs', JSON.stringify(subjectsList));
+            setSubjects(subjectsList);
+          } catch (error) {
+            console.error("Error fetching subjects:", error);
+          }
         }
       }
     };
