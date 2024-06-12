@@ -1,31 +1,21 @@
 import { doc, setDoc, deleteDoc, updateDoc } from "firebase/firestore";
-import { auth, db } from "./firebase";
+import { httpsCallable } from "firebase/functions";
+import { auth, db, functions } from "./firebase";
 import {
-  createUserWithEmailAndPassword,
+  /*createUserWithEmailAndPassword,*/
   signInWithEmailAndPassword,
   updatePassword,
   deleteUser
 } from "firebase/auth";
 
 export const doCreateUserWithEmailAndPassword = async (email, password, role, firstName, middleName, lastName, idNumber, section, macAddress) => {
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  const user = userCredential.user;
+  const createUser = httpsCallable(functions, 'createUser');
 
-  await setDoc(doc(db, "Users", user.uid), {
-    email: email,
-    idNumber: idNumber,
-    role: role,
-    name: {
-      firstName: firstName,
-      middleName: middleName,
-      lastName: lastName
-    },
-    section: section,
-    macAddress: macAddress,
-    userId: user.uid
+  const result = await createUser({
+    email, password, role, firstName, middleName, lastName, idNumber, section, macAddress
   });
 
-  return userCredential;
+  return result.data;
 };
 
 export const doSignInWithEmailAndPassword = (email, password) => {

@@ -142,8 +142,6 @@ const Register = ({ selectedAccount }) => {
           </button>
         </div>
       </form>
-      {errorMessage && <div className="alert alert-danger" role="alert">{errorMessage}</div>}
-      {successMessage && <div className="alert alert-success" role="alert">{successMessage}</div>}
     </>
   );
 };
