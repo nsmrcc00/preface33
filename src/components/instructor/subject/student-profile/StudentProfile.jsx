@@ -77,9 +77,21 @@ const StudentProfile = () => {
                   </tr>
                 ))}
               </tbody>
-            </table>
-            <p>Total number of absences: {attendanceData.filter(entry => entry.status === 'Absent').length}</p>
+            </table>                                   
           </div>
+          
+        </section>
+        <section className="subject-home-container">
+          <div id="attendanceTotal" className="table-container">
+            <div className="attendanceTotalContent">
+              <p>Total days attended:</p>
+              <p>{attendanceData.filter(entry => entry.status === 'Present').length}</p>
+            </div>
+            <div className="attendanceTotalContent">
+              <p>Total number of absences:</p>
+              <p>{attendanceData.filter(entry => entry.status === 'Absent').length}</p>
+            </div>
+          </div>          
         </section>
       </main>
     </>

@@ -46,7 +46,19 @@ body {
   align-items: center;
 }
 
+#attendanceTotal {
+  margin-top: 1rem;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  padding: 10px;
+}
 
+.attendanceTotalContent{
+  display: flex;
+  justify-content: start;
+  gap: 1rem;
+  
+}
 /*Login Page*/
 #login-page {
   width: auto;
@@ -356,7 +368,8 @@ input[type=number] {
   }
   .instructorNotifications {
     display: none;
-  }  
+  }
+  
 } 
 
 
@@ -364,6 +377,9 @@ input[type=number] {
   #addInstructorInfo,#addStudentInfo {  
     margin-top: 1rem;
   }
+  .attendanceTotalContent{
+    justify-content: space-between;
+  }  
 }
 
 
