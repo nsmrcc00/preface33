@@ -1,6 +1,58 @@
 import InstructorHeader from "../../../header/InstructorHeader";
+import { useParams, useLocation } from "react-router-dom";
+import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+import { db } from "../../../../firebase/firebase";
+import { useState, useEffect } from "react";
+import moment from "moment";
 
 const StudentProfile = () => {
+  const { studentId } = useParams();
+  const location = useLocation();
+  const { subjectDocId } = location.state || {}; // Provide a default value
+  const [studentData, setStudentData] = useState(null);
+  const [attendanceData, setAttendanceData] = useState([]);
+
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      try {
+        if (!subjectDocId) {
+          console.error("subjectDocId is missing");
+          return;
+        }
+
+        console.log('Fetching student data for studentId:', studentId);
+        const studentDoc = doc(db, "Subjects", subjectDocId, "classList", studentId);
+        const studentSnapshot = await getDoc(studentDoc);
+        if (studentSnapshot.exists()) {
+          const studentData = studentSnapshot.data();
+          console.log('Fetched student data:', studentData);
+          setStudentData(studentData);
+
+          // Fetch attendance data
+          const attendanceLedgerRef = collection(studentDoc, "attendanceLedger");
+          const attendanceLedgerSnapshot = await getDocs(attendanceLedgerRef);
+          const attendanceList = attendanceLedgerSnapshot.docs.map(doc => ({
+            date: doc.id,
+            status: doc.data().status
+          }));
+
+          console.log('Fetched attendance data:', attendanceList);
+          setAttendanceData(attendanceList);
+        } else {
+          console.log('Student data not found');
+        }
+      } catch (error) {
+        console.error("Error fetching student data:", error);
+      }
+    };
+
+    fetchStudentData();
+  }, [studentId, subjectDocId]);
+
+  if (!studentData) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <>
       <header>
@@ -9,24 +61,24 @@ const StudentProfile = () => {
       <main className="subject-home">
         <section className="subject-home-container">
           <div className="table-container">
-            <h3>Student Name's Attendance</h3>
+            <h3>{studentData.name}'s Attendance</h3>
             <table className="striped-table">
               <thead>
                 <tr>
                   <th>Date</th>
-                  <th>Time</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>a</td>
-                  <td>a</td>
-                  <td>a</td>
-                </tr>
+                {attendanceData.map((entry, index) => (
+                  <tr key={index}>
+                    <td>{moment(entry.date, "MMMM D, YYYY").format("MMMM D, YYYY")}</td>
+                    <td>{entry.status}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
-            <p>Total number of absences: </p>
+            <p>Total number of absences: {attendanceData.filter(entry => entry.status === 'Absent').length}</p>
           </div>
         </section>
       </main>

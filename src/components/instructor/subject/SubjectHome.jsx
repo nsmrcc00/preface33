@@ -68,32 +68,34 @@ const SubjectHome = () => {
     }
   };
 
-  const navi2 = (studentId) => {
+  const navi2 = (studentId, subjectDocId) => {
     if (userLoggedIn === true) {
-      navigate(`/student-profile/${studentId}`);
+      navigate(`/student-profile/${studentId}`, { state: { subjectDocId } });
     } else {
       doSignOut();
       navigate("/login");
     }
   };
+  
 
   const fetchClassList = async (subjectTitle, subjectSection) => {
     const subjectsRef = collection(db, "Subjects");
     const q = query(subjectsRef, where("title", "==", subjectTitle), where("section", "==", subjectSection));
     const querySnapshot = await getDocs(q);
     const classListData = [];
-
+  
     for (const subjectDoc of querySnapshot.docs) {
+      const subjectDocId = subjectDoc.id;  // Get the document ID
       const classListRef = collection(subjectDoc.ref, "classList");
       const classListSnapshot = await getDocs(classListRef);
-
+  
       for (const studentDoc of classListSnapshot.docs) {
-        const studentData = { id: studentDoc.id, ...studentDoc.data() };
+        const studentData = { id: studentDoc.id, ...studentDoc.data(), subjectDocId };  // Add subjectDocId to studentData
         const attendanceLedgerRef = collection(studentDoc.ref, "attendanceLedger");
         const attendanceDocId = moment(selectedDate).format("MMMM D, YYYY");
         const attendanceDocRef = doc(attendanceLedgerRef, attendanceDocId);
         const attendanceDocSnapshot = await getDoc(attendanceDocRef);
-
+  
         if (attendanceDocSnapshot.exists()) {
           const attendanceData = attendanceDocSnapshot.data();
           studentData.attendance = {
@@ -112,12 +114,13 @@ const SubjectHome = () => {
             status: "--"
           };
         }
-
+  
         classListData.push(studentData);
       }
     }
     setClassList(classListData);
   };
+  
 
   useEffect(() => {
     const fetchSubject = async () => {
@@ -229,7 +232,7 @@ const SubjectHome = () => {
                     </select>
                   </td>
                   <td>
-                    <button onClick={() => navi2(student.id)}>View Profile</button>
+                    <button onClick={() => navi2(student.id, student.subjectDocId)}>View Profile</button>
                   </td>
                 </tr>
               ))}
