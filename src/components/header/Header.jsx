@@ -73,11 +73,11 @@ function Header() {
             <header>
                 <Navbar id="heading">
                     <Container fluid>
-                        <Navbar.Brand href="#" onClick={handleShow}>
+                        <Navbar.Brand onClick={handleShow} style={{ cursor: 'pointer' }}>
                             <img src='/hamburger.svg' />
                         </Navbar.Brand>
                         <Navbar.Collapse className="justify-content-end">
-                            <Navbar.Brand href="#">
+                            <Navbar.Brand style={{ cursor: 'pointer' }}>
                                 <img 
                                     src='/preface.png' 
                                     alt="PreFace" 

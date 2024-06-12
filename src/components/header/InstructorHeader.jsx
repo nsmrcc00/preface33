@@ -83,20 +83,21 @@ function InstructorHeader() {
 
     const navi3 = () => {
         if (userLoggedIn === true) {
-            navigate('/instructor-home');
+          navigate('/instructor-home', { state: {} }); // Ensure state is not null
         }
-    };
+      };
+      
 
     return (
         <>
             <header>
                 <Navbar id="heading">
                     <Container fluid>                    
-                        <Navbar.Brand href="#" onClick={handleShow}>
+                        <Navbar.Brand onClick={handleShow} style={{ cursor: 'pointer' }}>
                             <img src='/hamburger.svg' alt="Menu"/>
                         </Navbar.Brand>            
                         <Navbar.Collapse className="justify-content-end">               
-                            <Navbar.Brand href="#">
+                            <Navbar.Brand style={{ cursor: 'pointer' }}>
                                 <img 
                                     src='/preface.png' 
                                     alt="PreFace" 
