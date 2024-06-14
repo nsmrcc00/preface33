@@ -11,6 +11,7 @@ import {
   query,
   where,
   getDocs,
+  setDoc,
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -64,16 +65,19 @@ const SubjectHome = () => {
   }, [modalIsOpen]);
 
   const handleSelectSlot = ({ start }) => {
+    console.log("Slot selected:", start);
     setSelectedDate(start);
     setModalIsOpen(true);
   };
 
   const closeModal = () => {
+    console.log("Modal closed");
     setModalIsOpen(false);
     setSelectedDate(null);
   };
 
   const afterOpenModal = () => {
+    console.log("Modal opened");
     const modalElement = document.querySelector(".ReactModal__Content");
     if (modalElement) {
       modalElement.focus();
@@ -81,12 +85,14 @@ const SubjectHome = () => {
   };
 
   const afterCloseModal = () => {
+    console.log("Modal after close");
     if (calendarRef.current) {
       calendarRef.current.focus();
     }
   };
 
   const navi2 = (studentId, subjectDocId) => {
+    console.log("Navigating to student profile:", studentId);
     if (userLoggedIn === true) {
       navigate(`/student-profile/${studentId}`, { state: { subjectDocId } });
     } else {
@@ -96,6 +102,7 @@ const SubjectHome = () => {
   };
 
   const fetchClassList = async (subjectTitle, subjectSection) => {
+    console.log("Fetching class list for:", subjectTitle, subjectSection);
     const subjectsRef = collection(db, "Subjects");
     const q = query(
       subjectsRef,
@@ -146,12 +153,14 @@ const SubjectHome = () => {
         classListData.push(studentData);
       }
     }
+    console.log("Class list data:", classListData);
     setClassList(classListData);
     setFilteredClassList(classListData);
   };
 
   useEffect(() => {
     const fetchSubject = async () => {
+      console.log("Fetching subject");
       if (currentUser) {
         const userDoc = doc(db, "Users", currentUser.uid);
         const subjectDoc = doc(userDoc, "subjectsHandled", subjectId);
@@ -171,6 +180,7 @@ const SubjectHome = () => {
 
   const handleSearch = (event) => {
     const query = event.target.value.toLowerCase();
+    console.log("Search query:", query);
     setSearchQuery(query);
 
     if (query === "") {
@@ -184,6 +194,75 @@ const SubjectHome = () => {
       );
       setFilteredClassList(filteredList);
     }
+  };
+
+  const handleStartAttendanceIn = async () => {
+    if (!selectedDate) {
+      console.log("No selected date");
+      return;
+    }
+
+    const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
+    console.log("Starting attendance in for date:", formattedDate);
+
+    for (const student of classList) {
+      console.log("Processing student:", student.id);
+      const attendanceLedgerRef = collection(
+        doc(db, "Subjects", student.subjectDocId),
+        "classList",
+        student.id,
+        "attendanceLedger"
+      );
+      const attendanceDocRef = doc(attendanceLedgerRef, formattedDate);
+
+      await setDoc(attendanceDocRef, {
+        attendanceIn: {
+          In: null,
+          timestamp: null,
+        },
+      });
+      console.log("Attendance in recorded for student:", student.id);
+    }
+
+    // Optionally, you could fetch the class list again to update the UI.
+    // await fetchClassList(subject.title, subject.section);
+  };
+
+  const handleStartAttendanceOut = async () => {
+    if (!selectedDate) {
+      console.log("No selected date");
+      return;
+    }
+
+    const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
+    console.log("Starting attendance out for date:", formattedDate);
+
+    for (const student of classList) {
+      console.log("Processing student:", student.id);
+      const attendanceLedgerRef = collection(
+        doc(db, "Subjects", student.subjectDocId),
+        "classList",
+        student.id,
+        "attendanceLedger"
+      );
+      const attendanceDocRef = doc(attendanceLedgerRef, formattedDate);
+
+      // Update the document with attendanceOut field, if it already exists
+      await setDoc(
+        attendanceDocRef,
+        {
+          attendanceOut: {
+            Out: null,
+            timestamp: null,
+          },
+        },
+        { merge: true } // Merge to ensure we don't overwrite existing fields
+      );
+      console.log("Attendance out recorded for student:", student.id);
+    }
+
+    // Optionally, you could fetch the class list again to update the UI.
+    // await fetchClassList(subject.title, subject.section);
   };
 
   return (
@@ -252,8 +331,18 @@ const SubjectHome = () => {
               onChange={handleSearch}
               className="calendar-modal"
             />
-            <button className="calendar-modal">Start Attendance In</button>
-            <button className="calendar-modal">Start Attendance Out</button>
+            <button
+              className="calendar-modal"
+              onClick={handleStartAttendanceIn}
+            >
+              Start Attendance In
+            </button>
+            <button
+              className="calendar-modal"
+              onClick={handleStartAttendanceOut}
+            >
+              Start Attendance Out
+            </button>
           </div>
           <table className="striped-table">
             <thead>

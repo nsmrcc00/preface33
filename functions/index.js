@@ -38,6 +38,7 @@ exports.createUser = functions.https.onCall(async (data, context) => {
       },
       section: section,
       userId: userRecord.uid,
+      fcmToken: "",
     });
 
     return {status: "success", uid: userRecord.uid};
