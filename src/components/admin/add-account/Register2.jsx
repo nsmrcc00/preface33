@@ -30,7 +30,7 @@ const Register = ({ selectedAccount }) => {
       setFirstName(selectedAccount.name.firstName);
       setMiddleName(selectedAccount.name.middleName);
       setLastName(selectedAccount.name.lastName); 
-      setMacAddress(selectedAccount.macAddress);     
+      setMacAddress(selectedAccount.macAddress || '');     
     }
   }, [selectedAccount]);
 
@@ -82,7 +82,8 @@ const Register = ({ selectedAccount }) => {
     }
     setIsUpdating(true);
     try {
-      await doUpdateUser(selectedAccount.id, email, firstName, middleName, lastName, idNumber, section, macAddress); // Pass section here
+      const macAddr = macAddress || '';  // Ensure macAddress is not undefined
+      await doUpdateUser(selectedAccount.id, email, firstName, middleName, lastName, idNumber, section, macAddr);
       console.log("User updated successfully");
       clearForm(); // Clear the input fields
       setErrorMessage('');
