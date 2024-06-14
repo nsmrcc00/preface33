@@ -10,12 +10,17 @@ import InsAccount from "./components/admin/add-account/InstructorAccount";
 import StudentAccount from "./components/admin/add-account/StudentAccount";
 import SubjectHome from "./components/instructor/subject/SubjectHome";
 import StudentProfile from "./components/instructor/subject/student-profile/StudentProfile";
+import ChangePassword from "./components/login/ChangePassword";
 
 const App = () => {
   const routesArray = [
     {
       path: "/login",
       element: <Login />,
+    },
+    {
+      path: "/change-password",
+      element: <ChangePassword />,
     },
     {
       path: "/unauthorized",

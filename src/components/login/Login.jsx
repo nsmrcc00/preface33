@@ -1,21 +1,37 @@
-import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/authContext";
 import { doSignInWithEmailAndPassword } from "../../firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
 
 const Login = () => {
-  const { userLoggedIn, role } = useAuth();
+  const { userLoggedIn, role, isPasswordChangeRequired, isUnauthorized } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const navigate = useNavigate();
 
   const logIn = async (e) => {
     e.preventDefault();
     if (!isSigningIn) {
       setIsSigningIn(true);
       try {
-        await doSignInWithEmailAndPassword(email, password);
-        console.log("User logged in successfully");
+        const userCredential = await doSignInWithEmailAndPassword(email, password);
+        const userId = userCredential.user.uid;
+        const userDoc = await getDoc(doc(db, "Users", userId));
+
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          if (userData.role !== "admin" && userData.role !== "instructor") {
+            navigate("/unauthorized"); // Redirect unauthorized users
+          } else if (!userData.Passchange) {
+            navigate("/change-password"); // Redirect to change password page
+          }
+        } else {
+          console.error("No such user document!");
+          alert("Error! User document not found.");
+        }
       } catch (error) {
         console.error(error);
         alert("Error! Please sign in with valid credentials.");
@@ -25,6 +41,12 @@ const Login = () => {
   };
 
   if (userLoggedIn) {
+    if (isUnauthorized) {
+      return <Navigate to="/unauthorized" replace={true} />;
+    }
+    if (isPasswordChangeRequired) {
+      return <Navigate to="/change-password" replace={true} />;
+    }
     if (role === "admin") {
       return <Navigate to="/admin-home" replace={true} />;
     } else if (role === "instructor") {
@@ -45,18 +67,14 @@ const Login = () => {
           type="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => {
-            setEmail(e.target.value);
-          }}
+          onChange={(e) => setEmail(e.target.value)}
         />
         <input
           className="form-control"
           type="password"
           placeholder="Password"
           value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-          }}
+          onChange={(e) => setPassword(e.target.value)}
         />
         <div className="mb-3 text-center">
           <button

@@ -1,4 +1,3 @@
-// context.jsx
 import React, { useContext, useEffect, useState } from "react";
 import { auth, db } from "../../firebase/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -15,6 +14,8 @@ export function AuthProvider({ children }) {
   const [userLoggedIn, setUserLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState(null);
+  const [isPasswordChangeRequired, setIsPasswordChangeRequired] = useState(false);
+  const [isUnauthorized, setIsUnauthorized] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -22,21 +23,40 @@ export function AuthProvider({ children }) {
         try {
           const userDoc = await getDoc(doc(db, "Users", user.uid));
           if (userDoc.exists()) {
-            setRole(userDoc.data().role);
+            const userData = userDoc.data();
+            const userRole = userData.role;
+
+            setRole(userRole);
+            if (userRole !== "admin" && userRole !== "instructor") {
+              setIsUnauthorized(true);
+            } else {
+              setIsUnauthorized(false);
+              if (!userData.Passchange) {
+                setIsPasswordChangeRequired(true);
+              } else {
+                setIsPasswordChangeRequired(false);
+              }
+            }
           } else {
             // Handle case where user document does not exist
             setRole(null);
+            setIsUnauthorized(true);
+            setIsPasswordChangeRequired(false);
           }
           setCurrentUser(user);
           setUserLoggedIn(true);
         } catch (error) {
           console.error("Error fetching user role:", error);
           setRole(null);
+          setIsUnauthorized(true);
+          setIsPasswordChangeRequired(false);
         }
       } else {
         setCurrentUser(null);
         setUserLoggedIn(false);
         setRole(null);
+        setIsUnauthorized(false);
+        setIsPasswordChangeRequired(false);
       }
       setLoading(false);
     });
@@ -47,6 +67,9 @@ export function AuthProvider({ children }) {
     userLoggedIn,
     currentUser,
     role,
+    isPasswordChangeRequired,
+    setIsPasswordChangeRequired, // Expose this function
+    isUnauthorized,
   };
 
   return (
