@@ -11,6 +11,8 @@ If you use [VS Code](https://code.visualstudio.com/), I suggest grabbing these e
 - [vscode-icons](https://marketplace.visualstudio.com/items?itemName=vscode-icons-team.vscode-icons)
 - [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) (this is optional since React/Vite already has a feature similar to this)
 
-After cloning run `npm install` on your terminal to install the dependencies.
+After cloning run `npm install` on your terminal to install the dependencies. Also do same in the functions directory.
 
-Then `npm run dev` to start the app.
+Then run `npm run dev` to start the app.
+
+There is already a cloud function running to allow user account creation, to modify and deploy cloud functions run `firebase deploy --only functions`.
