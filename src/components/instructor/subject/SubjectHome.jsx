@@ -219,6 +219,7 @@ const SubjectHome = () => {
         attendanceIn: {
           In: null,
           timestamp: null,
+          accessible: true,
         },
       });
       console.log("Attendance in recorded for student:", student.id);
@@ -254,6 +255,7 @@ const SubjectHome = () => {
           attendanceOut: {
             Out: null,
             timestamp: null,
+            accessible: true,
           },
         },
         { merge: true } // Merge to ensure we don't overwrite existing fields

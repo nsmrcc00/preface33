@@ -85,7 +85,7 @@ const StudentProfile = () => {
           <div id="attendanceTotal" className="table-container">
             <div className="attendanceTotalContent">
               <p>Total days attended:</p>
-              <p>{attendanceData.filter(entry => entry.status === 'Present').length}</p>
+              <p>{attendanceData.filter(entry => entry.status === 'Present' || entry.status === 'Late').length}</p>
             </div>
             <div className="attendanceTotalContent">
               <p>Total number of absences:</p>

@@ -158,7 +158,9 @@ const AddSubject = () => {
       if (subjectHandledDoc) {
         console.log(`Updating existing subjectHandled document with ID: ${subjectHandledDoc.id}`);
         await updateDoc(subjectHandledDoc.ref, {
+          subjectCode: subjectData.subjectCode,
           title: subjectData.title,
+          section: subjectData.section,
           ref: subjectData.ref,
           archived: subjectData.archived,
           year: subjectData.year,
@@ -354,7 +356,7 @@ const AddSubject = () => {
     fetchSubjects();
     fetchUsers();
     fetchSections();
-  }, [subjects]);
+  }, []);
 
   // Client-side search
   const filteredSubjects = subjects.filter((sub) => {
