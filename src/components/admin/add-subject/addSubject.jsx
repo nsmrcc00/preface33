@@ -31,6 +31,8 @@ const AddSubject = () => {
     subjectCode: "",
     title: "",
     instructor: "",
+    year: "",
+    term: "",
     archived: false,
   });
 
@@ -42,6 +44,9 @@ const AddSubject = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [timeInputs, setTimeInputs] = useState(initialTimeState);
+  const [filterYear, setFilterYear] = useState("");
+  const [filterTerm, setFilterTerm] = useState("");
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -111,10 +116,22 @@ const AddSubject = () => {
       subjectCode: "",
       title: "",
       instructor: "",
+      year: "",
+      term: "",
       archived: false,
     });
     setTimeInputs(initialTimeState);
     setIsEditMode(false);
+  };
+
+  const validateFields = (data) => {
+    const validData = {};
+    Object.keys(data).forEach(key => {
+      if (data[key] !== undefined) {
+        validData[key] = data[key];
+      }
+    });
+    return validData;
   };
 
   const addOrUpdateInstructorSubcollection = async (instructorId, subjectData) => {
@@ -130,12 +147,22 @@ const AddSubject = () => {
         }
       });
   
+      const validatedSubjectData = validateFields({
+        title: subjectData.title,
+        ref: subjectData.ref,
+        archived: subjectData.archived,
+        year: subjectData.year,
+        term: subjectData.term,
+      });
+
       if (subjectHandledDoc) {
         console.log(`Updating existing subjectHandled document with ID: ${subjectHandledDoc.id}`);
         await updateDoc(subjectHandledDoc.ref, {
           title: subjectData.title,
           ref: subjectData.ref,
-          archived: subjectData.archived
+          archived: subjectData.archived,
+          year: subjectData.year,
+          term: subjectData.term,
         });
       } else {
         console.log(`Adding new subjectHandled document with ID: ${subjectData.id}`);
@@ -145,7 +172,9 @@ const AddSubject = () => {
           title: subjectData.title,
           section: subjectData.section,
           ref: subjectData.ref,
-          archived: subjectData.archived
+          archived: subjectData.archived,
+          year: subjectData.year,
+          term: subjectData.term,
         });
       }
       console.log("Instructor's subjectsHandled subcollection updated successfully!");
@@ -164,6 +193,8 @@ const AddSubject = () => {
     Schedule: formattedSchedule,
     section: subject.section,
     title: subject.title,
+    year: subject.year,
+    term: subject.term,
     archived: subject.archived,
     ref
   });
@@ -201,8 +232,9 @@ const AddSubject = () => {
     updatedSubject.id = subject.id;
   
     try {
-      await updateDoc(updatedSubject.ref, updatedSubject);
-      await addOrUpdateInstructorSubcollection(instructorData.id, updatedSubject);
+      const validatedSubject = validateFields(updatedSubject);
+      await updateDoc(updatedSubject.ref, validatedSubject);
+      await addOrUpdateInstructorSubcollection(instructorData.id, validatedSubject);
   
       const updatedSubjects = subjects.map((sub) =>
         sub.id === updatedSubject.id ? updatedSubject : sub
@@ -329,6 +361,8 @@ const AddSubject = () => {
     const lowerCaseQuery = searchQuery.toLowerCase();
     return (
       (showArchived || !sub.archived) &&
+      (filterYear === "" || sub.year === filterYear) &&
+      (filterTerm === "" || sub.term === filterTerm) &&
       ((sub.title && sub.title.toLowerCase().includes(lowerCaseQuery)) ||
         (sub.instructor &&
           sub.instructor.name.toLowerCase().includes(lowerCaseQuery)) ||
@@ -343,6 +377,7 @@ const AddSubject = () => {
           sub.Schedule.time.toLowerCase().includes(lowerCaseQuery)))
     );
   });
+  
 
   // Input validation for schedule
   const isNumberKey = (evt) => {
@@ -383,19 +418,29 @@ const AddSubject = () => {
               className="filter-sub-style"
             />
 
-              <select id="filterYear "className="filter-sub-style">
-                <option>---</option>
-                <option>First Year</option>
-                <option>Second Year</option>
-                <option>Third Year</option>
-                <option>Fourth Year</option>
-              </select>
+            <select 
+              id="filterYear"
+              className="filter-sub-style"
+              value={filterYear}
+              onChange={(e) => setFilterYear(e.target.value)}
+            >
+              <option value="">Filter Year</option>
+              <option value="First Year">First Year</option>
+              <option value="Second Year">Second Year</option>
+              <option value="Third Year">Third Year</option>
+              <option value="Fourth Year">Fourth Year</option>
+            </select>
 
-              <select id ="filterSem" className="filter-sub-style">
-                <option>---</option>
-                <option>First Semester</option>
-                <option>Second Semester</option>
-              </select>
+            <select 
+              id="filterSem"
+              className="filter-sub-style"
+              value={filterTerm}
+              onChange={(e) => setFilterTerm(e.target.value)}
+            >
+              <option value="">Filter Term</option>
+              <option value="First Semester">First Semester</option>
+              <option value="Second Semester">Second Semester</option>
+            </select>
  
             <label className="filter-sub-style">
               <input
@@ -417,6 +462,8 @@ const AddSubject = () => {
                 <th>Days</th>
                 <th>Time</th>
                 <th>Instructor</th>
+                <th>Year</th>
+                <th>Term</th>
                 <th>Archived</th>
               </tr>
             </thead>
@@ -431,6 +478,8 @@ const AddSubject = () => {
                     <td>{schedule.days}</td>
                     <td>{schedule.time}</td>
                     <td>{sub.instructor.name}</td>
+                    <td>{sub.year}</td>
+                    <td>{sub.term}</td>
                     <td>{sub.archived ? "Yes" : "No"}</td>
                   </tr>
                 );
@@ -518,21 +567,29 @@ const AddSubject = () => {
 
             <label className="addSubForm">
               Year:
-              <select>
-                  <option>Select Year</option>
-                  <option>First Year</option>
-                  <option>Second Year</option>
-                  <option>Third Year</option>
-                  <option>Fourth Year</option>
+              <select
+                name="year"
+                value={subject.year}
+                onChange={handleChange}
+              >
+                  <option value="">Select Year</option>
+                  <option value="First Year">First Year</option>
+                  <option value="Second Year">Second Year</option>
+                  <option value="Third Year">Third Year</option>
+                  <option value="Fourth Year">Fourth Year</option>
               </select>
             </label>
 
             <label className="addSubForm">
               Term:
-              <select>
-                <option>Select Term</option>
-                <option>First Semester</option>
-                <option>Second Semester</option>
+              <select
+                name="term"
+                value={subject.term}
+                onChange={handleChange}
+              >
+                <option value="">Select Term</option>
+                <option value="First Semester">First Semester</option>
+                <option value="Second Semester">Second Semester</option>
               </select>
             </label>
               
