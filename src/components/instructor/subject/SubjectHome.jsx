@@ -217,7 +217,7 @@ const SubjectHome = () => {
 
       await setDoc(attendanceDocRef, {
         attendanceIn: {
-          In: null,
+          In: false,
           timestamp: null,
           accessible: true,
         },
@@ -253,7 +253,7 @@ const SubjectHome = () => {
         attendanceDocRef,
         {
           attendanceOut: {
-            Out: null,
+            Out: false,
             timestamp: null,
             accessible: true,
           },
