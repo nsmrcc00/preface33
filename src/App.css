@@ -22,7 +22,6 @@ body {
 
 .calendar-toolbar {
   display: flex;
-  justify-content: flex-start;
 }
 
 .calendar-toolbar .toolbar-label {
@@ -33,6 +32,24 @@ body {
   width: 100px;
   margin: 0px 0px 10px 10px;
 }
+
+.filter-sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+}
+.filter-sub > * {
+  min-width: fit-content;
+  flex: 1;
+}
+.filter-sub-style {
+  margin: 0px 10px 10px 0px;
+}
+
+#filterYear,#filterSem {
+  width: 130px;
+}
+
 
 .subject-home {
   width: 100%;

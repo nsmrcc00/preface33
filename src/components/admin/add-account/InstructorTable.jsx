@@ -62,18 +62,18 @@ const InstructorsTable = ({ setSelectedAccount }) => {
                 <thead>
                     <tr>
                         <th onClick={() => requestSort('idNumber')} className={getClassNamesFor('idNumber')}>ID Number</th>
-                        <th onClick={() => requestSort('email')} className={getClassNamesFor('email')}>Email</th>
                         <th onClick={() => requestSort('name.firstName')} className={getClassNamesFor('name.firstName')}>Name</th>
+                        <th onClick={() => requestSort('email')} className={getClassNamesFor('email')}>Email</th>
                     </tr>
                 </thead>
                 <tbody>
                     {sortedInstructors.map((instructor) => (
                         <tr key={instructor.id} onClick={() => setSelectedAccount(instructor)}>
                             <td>{instructor.idNumber}</td>
-                            <td>{instructor.email}</td>
                             <td>
                                 {instructor.name.firstName} {instructor.name.middleName} {instructor.name.lastName}
                             </td>
+                            <td>{instructor.email}</td>
                         </tr>
                     ))}
                 </tbody>

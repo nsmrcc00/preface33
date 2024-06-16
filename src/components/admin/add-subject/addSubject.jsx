@@ -7,6 +7,7 @@ import {
   updateDoc,
   getDocs,
   collection,
+  setDoc,
 } from "firebase/firestore";
 
 Modal.setAppElement("#root");
@@ -116,115 +117,108 @@ const AddSubject = () => {
     setIsEditMode(false);
   };
 
-  // Add Subject to Collection
+  const addOrUpdateInstructorSubcollection = async (instructorId, subjectData) => {
+    try {
+      const instructorRef = doc(db, "Users", instructorId);
+      const subjectsHandledRef = collection(instructorRef, "subjectsHandled");
+      const querySnapshot = await getDocs(subjectsHandledRef);
+      let subjectHandledDoc = null;
+  
+      querySnapshot.forEach((doc) => {
+        if (doc.id === subjectData.id) {
+          subjectHandledDoc = doc;
+        }
+      });
+  
+      if (subjectHandledDoc) {
+        console.log(`Updating existing subjectHandled document with ID: ${subjectHandledDoc.id}`);
+        await updateDoc(subjectHandledDoc.ref, {
+          title: subjectData.title,
+          ref: subjectData.ref,
+          archived: subjectData.archived
+        });
+      } else {
+        console.log(`Adding new subjectHandled document with ID: ${subjectData.id}`);
+        const subjectHandledDocRef = doc(subjectsHandledRef, subjectData.id);
+        await setDoc(subjectHandledDocRef, {
+          subjectCode: subjectData.subjectCode,
+          title: subjectData.title,
+          section: subjectData.section,
+          ref: subjectData.ref,
+          archived: subjectData.archived
+        });
+      }
+      console.log("Instructor's subjectsHandled subcollection updated successfully!");
+    } catch (error) {
+      console.error("Error in addOrUpdateInstructorSubcollection:", error);
+    }
+  };
+  
+  const prepareSubjectData = (instructorData, formattedSchedule, ref) => ({
+    subjectCode: subject.subjectCode,
+    instructor: {
+      id: instructorData.id,
+      ref: instructorData.ref,
+      name: instructorData.name
+    },
+    Schedule: formattedSchedule,
+    section: subject.section,
+    title: subject.title,
+    archived: subject.archived,
+    ref
+  });
+  
   const addSub = async (e) => {
     e.preventDefault();
     const formattedSchedule = formatSchedule();
     const instructorData = users.find((user) => user.id === subject.instructor);
+    const newSubject = prepareSubjectData(instructorData, formattedSchedule, null);
+  
     try {
-      // Add subject to "Subjects" collection
-      const newSubjectRef = await addDoc(collection(db, "Subjects"), {
-        subjectCode: subject.subjectCode,
-        instructor: {
-          id: instructorData.id,
-          ref: instructorData.ref,
-          name: instructorData.name,
-        },
-        Schedule: formattedSchedule,
-        section: subject.section,
-        title: subject.title,
-        archived: subject.archived,
-      });
-
-      console.log("Subject added successfully!");
-
-      // Add subject reference to "subjectsHandled" subcollection in the instructor's document
-      const instructorRef = doc(db, "Users", instructorData.id);
-      const subjectsHandledRef = collection(instructorRef, "subjectsHandled");
-      await addDoc(subjectsHandledRef, {
-        subjectCode: subject.subjectCode,
-        title: subject.title,
-        section: subject.section,
-        ref: newSubjectRef,
-      });
-
-      console.log(
-        "Subject added to instructor's subjectsHandled subcollection!"
-      );
-
+      const newSubjectRef = await addDoc(collection(db, "Subjects"), newSubject);
+      newSubject.ref = newSubjectRef;
+      newSubject.id = newSubjectRef.id;
+  
+      await addOrUpdateInstructorSubcollection(instructorData.id, newSubject);
+  
+      const updatedSubjects = [...subjects, { ...newSubject, id: newSubject.id }];
+      setSubjects(updatedSubjects);
+      setCachedSubjects(updatedSubjects);
+  
       closeModal();
-      fetchSubjects();
+      console.log("Subject added successfully!");
     } catch (error) {
       alert("Error adding subject.");
       console.error(error);
     }
   };
-
-  // Update Subject Information
+  
   const updateSub = async (e) => {
     e.preventDefault();
     const formattedSchedule = formatSchedule();
     const instructorData = users.find((user) => user.id === subject.instructor);
+    const updatedSubject = prepareSubjectData(instructorData, formattedSchedule, doc(db, "Subjects", subject.id));
+    updatedSubject.id = subject.id;
+  
     try {
-      // Update subject in "Subjects" collection
-      const subjectRef = doc(db, "Subjects", subject.id);
-      await updateDoc(subjectRef, {
-        subjectCode: subject.subjectCode,
-        instructor: {
-          id: instructorData.id,
-          ref: instructorData.ref,
-          name: instructorData.name,
-        },
-        Schedule: formattedSchedule,
-        section: subject.section,
-        title: subject.title,
-        archived: subject.archived,
-      });
-
-      console.log("Subject updated successfully!");
-
-      // Update or add subject reference to "subjectsHandled" subcollection in the instructor's document
-      const instructorRef = doc(db, "Users", instructorData.id);
-      const subjectsHandledRef = collection(instructorRef, "subjectsHandled");
-      const querySnapshot = await getDocs(subjectsHandledRef);
-      let subjectHandledDoc = null;
-
-      querySnapshot.forEach((doc) => {
-        if (
-          doc.data().subjectCode === subject.subjectCode &&
-          doc.data().section === subject.section
-        ) {
-          // Include section in comparison
-          subjectHandledDoc = doc;
-        }
-      });
-
-      if (subjectHandledDoc) {
-        await updateDoc(subjectHandledDoc.ref, {
-          title: subject.title,
-          ref: subjectRef,
-        });
-        console.log("Instructor's subjectsHandled subcollection updated!");
-      } else {
-        await addDoc(subjectsHandledRef, {
-          subjectCode: subject.subjectCode,
-          title: subject.title,
-          section: subject.section, // Include section
-          ref: subjectRef,
-        });
-        console.log(
-          "Subject added to instructor's subjectsHandled subcollection!"
-        );
-      }
-
+      await updateDoc(updatedSubject.ref, updatedSubject);
+      await addOrUpdateInstructorSubcollection(instructorData.id, updatedSubject);
+  
+      const updatedSubjects = subjects.map((sub) =>
+        sub.id === updatedSubject.id ? updatedSubject : sub
+      );
+      setSubjects(updatedSubjects);
+      setCachedSubjects(updatedSubjects);
+  
       closeModal();
-      fetchSubjects();
+      console.log("Subject updated successfully!");
     } catch (error) {
       alert("Error updating subject.");
       console.error(error);
     }
   };
-
+  
+  
   // Table behavior when clicked
   const handleRowClick = (sub) => {
     const schedule = sub.Schedule || { days: "", time: "" };
@@ -264,23 +258,19 @@ const AddSubject = () => {
 
   // Fetch subjects from "Subjects" collection
   const fetchSubjects = async () => {
-    if (cachedSubjects.length > 0) {
-      setSubjects(cachedSubjects);
-    } else {
-      try {
-        const querySnapshot = await getDocs(collection(db, "Subjects"));
-        const subjectsList = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setSubjects(subjectsList);
-        setCachedSubjects(subjectsList);
-      } catch (error) {
-        console.error("Error fetching subjects:", error);
-      }
+    try {
+      const querySnapshot = await getDocs(collection(db, "Subjects"));
+      const subjectsList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setSubjects(subjectsList);
+      setCachedSubjects(subjectsList); // Update cached subjects
+    } catch (error) {
+      console.error("Error fetching subjects:", error);
     }
   };
-
+  
   // Fetch instructors from "Users" collection
   const fetchUsers = async () => {
     if (cachedUsers.length > 0) {
@@ -332,7 +322,7 @@ const AddSubject = () => {
     fetchSubjects();
     fetchUsers();
     fetchSections();
-  }, []);
+  }, [subjects]);
 
   // Client-side search
   const filteredSubjects = subjects.filter((sub) => {
@@ -383,30 +373,45 @@ const AddSubject = () => {
     <>
       <section id="schoolSectionPage">
         <div className="table-container">
-          <h2>Subjects List</h2>
-          <input
-            type="text"
-            placeholder="Search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              margin: "0px 10px 10px 0px",
-            }}
-          />
-          <label>
+          <h2>Subjects List</h2>         
+          <div className="filter-sub">
             <input
-              type="checkbox"
-              checked={showArchived}
-              onChange={() => setShowArchived(!showArchived)}
-              style={{ marginRight: "10px" }}
+              type="text"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="filter-sub-style"
             />
-            Show Archived
-          </label>
 
+              <select id="filterYear "className="filter-sub-style">
+                <option>---</option>
+                <option>First Year</option>
+                <option>Second Year</option>
+                <option>Third Year</option>
+                <option>Fourth Year</option>
+              </select>
+
+              <select id ="filterSem" className="filter-sub-style">
+                <option>---</option>
+                <option>First Semester</option>
+                <option>Second Semester</option>
+              </select>
+ 
+            <label className="filter-sub-style">
+              <input
+                type="checkbox"
+                checked={showArchived}
+                onChange={() => setShowArchived(!showArchived)}
+                style={{ marginRight: "10px" }}
+              />
+              Show Archived
+            </label>
+          </div>
+          
           <table className="striped-table">
             <thead>
               <tr>
-                <th>Subject Code</th>
+                <th>Course Code</th>
                 <th>Title</th>
                 <th>Section</th>
                 <th>Days</th>
@@ -472,7 +477,7 @@ const AddSubject = () => {
               />
             </label>
             <label className="addSubForm">
-              Subject Code:
+              Course Code:
               <input
                 type="text"
                 name="subjectCode"
@@ -510,6 +515,27 @@ const AddSubject = () => {
                 ))}
               </select>
             </label>
+
+            <label className="addSubForm">
+              Year:
+              <select>
+                  <option>Select Year</option>
+                  <option>First Year</option>
+                  <option>Second Year</option>
+                  <option>Third Year</option>
+                  <option>Fourth Year</option>
+              </select>
+            </label>
+
+            <label className="addSubForm">
+              Term:
+              <select>
+                <option>Select Term</option>
+                <option>First Semester</option>
+                <option>Second Semester</option>
+              </select>
+            </label>
+              
             <label className="addSubForm">
               Archived:
               <select

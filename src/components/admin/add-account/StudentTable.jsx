@@ -63,8 +63,8 @@ const StudentTable = ({ setSelectedAccount }) => {
                 <thead>
                     <tr>
                         <th onClick={() => requestSort('idNumber')} className={getClassNamesFor('idNumber')}>ID Number</th>
-                        <th onClick={() => requestSort('email')} className={getClassNamesFor('email')}>Email</th>
                         <th onClick={() => requestSort('name.firstName')} className={getClassNamesFor('name.firstName')}>Name</th>
+                        <th onClick={() => requestSort('email')} className={getClassNamesFor('email')}>Email</th>                        
                         <th onClick={() => requestSort('section')} className={getClassNamesFor('section')}>Section</th>
                         <th>MAC Address</th>
                     </tr>
@@ -72,11 +72,11 @@ const StudentTable = ({ setSelectedAccount }) => {
                 <tbody>
                     {sortedStudents.map((student) => (
                         <tr key={student.id} onClick={() => setSelectedAccount(student)}>
-                            <td>{student.idNumber}</td>
-                            <td>{student.email}</td>
+                            <td>{student.idNumber}</td>                            
                             <td>
                                 {student.name.firstName} {student.name.middleName} {student.name.lastName}
-                            </td>
+                            </td>                            
+                            <td>{student.email}</td>
                             <td>{student.section}</td>
                             <td>{student.macAddress}</td>
                         </tr>
