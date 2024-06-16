@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db } from '../../../firebase/firebase';
-import { doc, addDoc, updateDoc, /*deleteDoc,*/ getDocs, collection } from 'firebase/firestore';
+import { doc, addDoc, updateDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
 import useSortableData from '../../table-sort/TableSort';
 
 const AddSection = () => {
@@ -59,6 +59,32 @@ const AddSection = () => {
       fetchSections();
     } catch (error) {
       alert("Error updating section.");
+      console.error(error);
+    }
+  };
+
+  // DELETE SECTION
+  const deleteSec = async (e) => {
+    e.preventDefault();
+    if (!selectedSectionId) {
+      alert("No section selected for deletion.");
+      return;
+    }
+    const confirmed = window.confirm("Are you sure you want to delete this section?");
+    if (!confirmed) {
+      return;
+    }
+    try {
+      await deleteDoc(doc(db, "Sections", selectedSectionId));
+      console.log("Section deleted successfully!");
+      setSection({
+        sectionName: '',
+        yearLevel: '',
+      });
+      setSelectedSectionId(null);
+      fetchSections();
+    } catch (error) {
+      alert("Error deleting section.");
       console.error(error);
     }
   };
@@ -164,6 +190,11 @@ const AddSection = () => {
             <button type="submit" className="sec-crud-btn btn btn-danger">
               {selectedSectionId ? 'Update Section' : 'Add Section'}
             </button>
+            {selectedSectionId && (
+              <button type="button" className="sec-crud-btn btn btn-danger" onClick={deleteSec}>
+                Delete Section
+              </button>
+            )}
           </div>
         </form>
       </div>
