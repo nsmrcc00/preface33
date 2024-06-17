@@ -6,6 +6,7 @@ import useSortableData from '../../table-sort/TableSort';
 const InstructorsTable = ({ setSelectedAccount }) => {
     const [instructors, setInstructors] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedStatus, setSelectedStatus] = useState('');
 
     useEffect(() => {
         const instructorsCollection = collection(db, "Users");
@@ -29,13 +30,25 @@ const InstructorsTable = ({ setSelectedAccount }) => {
         setSearchTerm(e.target.value);
     };
 
+    // Handle status filter change
+    const handleStatusChange = (e) => {
+        setSelectedStatus(e.target.value);
+    };
+
+
     // Filter instructors based on search term
     const filteredInstructors = instructors.filter((instructor) => {
         const fullName = `${instructor.name.firstName} ${instructor.name.middleName} ${instructor.name.lastName}`.toLowerCase();
-        return fullName.includes(searchTerm.toLowerCase()) ||
-            instructor.idNumber && instructor.email.toLowerCase().includes(searchTerm.toLowerCase())|| 
-            instructor.idNumber && instructor.idNumber.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearchTerm = fullName.includes(searchTerm.toLowerCase()) ||
+            (instructor.email && instructor.email.toLowerCase().includes(searchTerm.toLowerCase())) || 
+            (instructor.idNumber && instructor.idNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (instructor.section && instructor.section.toLowerCase().includes(searchTerm.toLowerCase()));
+        
+        const matchesStatus = selectedStatus ? instructor.status === selectedStatus : true;
+
+        return matchesSearchTerm && matchesStatus;
     });
+
 
     const { items: sortedInstructors, requestSort, sortConfig } = useSortableData(filteredInstructors);
 
@@ -49,21 +62,33 @@ const InstructorsTable = ({ setSelectedAccount }) => {
     return (
         <div className='table-container'>
           <h2>Accounts List</h2>
+            <div className="filter-sub">
             <input
                 type="text"
                 placeholder="Search Instructors..."
                 value={searchTerm}
                 onChange={handleSearchChange}
-                style={{
-                  margin: '0px 0px 10px'
-                }}
+                className="filter-sub-style"
             />
+            <select 
+                    id="filterStatus"
+                    className="filter-sub-style"
+                    value={selectedStatus}
+                    onChange={handleStatusChange}
+                >
+                    <option value="">Filter Status</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+            </div>
+            
             <table className='striped-table'>
                 <thead>
                     <tr>
                         <th onClick={() => requestSort('idNumber')} className={getClassNamesFor('idNumber')}>ID Number</th>
                         <th onClick={() => requestSort('name.firstName')} className={getClassNamesFor('name.firstName')}>Name</th>
                         <th onClick={() => requestSort('email')} className={getClassNamesFor('email')}>Email</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -74,6 +99,7 @@ const InstructorsTable = ({ setSelectedAccount }) => {
                                 {instructor.name.firstName} {instructor.name.middleName} {instructor.name.lastName}
                             </td>
                             <td>{instructor.email}</td>
+                            <td>{instructor.status}</td>
                         </tr>
                     ))}
                 </tbody>

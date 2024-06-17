@@ -20,6 +20,7 @@ const Register = ({ selectedAccount }) => {
   const [role, /*setRole*/] = useState('student');
   const [section, setSection] = useState('');
   const [sections, setSections] = useState([]);
+  const [status, setStatus] = useState('')
   const [macAddress, setMacAddress] = useState('');
 
   useEffect(() => {
@@ -29,7 +30,8 @@ const Register = ({ selectedAccount }) => {
       setSection(selectedAccount.section)
       setFirstName(selectedAccount.name.firstName);
       setMiddleName(selectedAccount.name.middleName);
-      setLastName(selectedAccount.name.lastName); 
+      setLastName(selectedAccount.name.lastName);
+      setStatus(selectedAccount.status || '');
       setMacAddress(selectedAccount.macAddress || '');     
     }
   }, [selectedAccount]);
@@ -61,7 +63,7 @@ const Register = ({ selectedAccount }) => {
     }
     setIsRegistering(true);
     try {
-      await doCreateUserWithEmailAndPassword(email, password, role, firstName, middleName, lastName, idNumber, section, macAddress); // Pass section here
+      await doCreateUserWithEmailAndPassword(email, password, role, firstName, middleName, lastName, idNumber, section, status, macAddress); // Pass section here
       console.log("User registered successfully");
       clearForm(); // Clear the input fields
       setErrorMessage(''); // Clear any previous error messages
@@ -83,9 +85,9 @@ const Register = ({ selectedAccount }) => {
     setIsUpdating(true);
     try {
       const macAddr = macAddress || '';  // Ensure macAddress is not undefined
-      await doUpdateUser(selectedAccount.id, email, firstName, middleName, lastName, idNumber, section, macAddr);
+      await doUpdateUser(selectedAccount.id, email, firstName, middleName, lastName, idNumber, section, status, macAddr);
       console.log("User updated successfully");
-      clearForm(); // Clear the input fields
+      clearForm();
       setErrorMessage('');
       setSuccessMessage('User updated successfully');
     } catch (error) {
@@ -133,6 +135,7 @@ const Register = ({ selectedAccount }) => {
     setLastName('');
     setIdNumber('');
     setMacAddress('');
+    setStatus('');
     setSection('');
     setErrorMessage('');
     setSuccessMessage('');
@@ -149,8 +152,15 @@ const Register = ({ selectedAccount }) => {
         <input className="form-control" type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
         <input className="form-control" type="email" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} required />
         <input className="form-control" type="text" placeholder="ID Number" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} required />
+        <select className="form-control" name="status" value={status} onChange={(e) => setStatus(e.target.value)} required>
+              <option value="">Select Status</option>
+              <option value="Enrolled">Enrolled</option>
+              <option value="Inactive">Inactive</option>
+            </select>
         {selectedAccount && (
-          <input className="form-control" type="text" placeholder="MAC Address" value={macAddress} onChange={(e) => setMacAddress(e.target.value)} required />
+          <>
+            <input className="form-control" type="text" placeholder="MAC Address" value={macAddress} onChange={(e) => setMacAddress(e.target.value)} required />           
+          </>
         )}
         <input className="form-control" type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} required />
         <input className="form-control" type="password" placeholder='Confirm Password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />

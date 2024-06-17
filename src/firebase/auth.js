@@ -8,11 +8,11 @@ import {
   deleteUser
 } from "firebase/auth";
 
-export const doCreateUserWithEmailAndPassword = async (email, password, role, firstName, middleName, lastName, idNumber, section, macAddress) => {
+export const doCreateUserWithEmailAndPassword = async (email, password, role, firstName, middleName, lastName, idNumber, section, status, macAddress) => {
   const createUser = httpsCallable(functions, 'createUser');
 
   const result = await createUser({
-    email, password, role, firstName, middleName, lastName, idNumber, section, macAddress
+    email, password, role, firstName, middleName, lastName, idNumber, section, status, macAddress
   });
 
   return result.data;
@@ -43,7 +43,7 @@ export const doDeleteUser = async (userId) => {
   }
 };
 
-export const doUpdateUser = async (userId, email, firstName, middleName, lastName, idNumber, section, macAddress) => {
+export const doUpdateUser = async (userId, email, firstName, middleName, lastName, idNumber, section, status, macAddress) => {
   const userDocRef = doc(db, "Users", userId);
 
   await updateDoc(userDocRef, {
@@ -54,7 +54,8 @@ export const doUpdateUser = async (userId, email, firstName, middleName, lastNam
       middleName: middleName,
       lastName: lastName
     },
-    macAddress: macAddress,
+    macAddress: macAddress || null,
+    status: status,
     section: section // Include section here
   });
 

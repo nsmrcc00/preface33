@@ -16,6 +16,7 @@ const Register = ({ selectedAccount }) => {
   const [lastName, setLastName] = useState('');
   const [idNumber, setIdNumber] = useState('');
   const [role, setRole] = useState('instructor');
+  const [status, setStatus] = useState('')
 
   useEffect(() => {
     if (selectedAccount) {
@@ -23,7 +24,8 @@ const Register = ({ selectedAccount }) => {
       setEmail(selectedAccount.email);
       setFirstName(selectedAccount.name.firstName);
       setMiddleName(selectedAccount.name.middleName);
-      setLastName(selectedAccount.name.lastName);      
+      setLastName(selectedAccount.name.lastName);
+      setStatus(selectedAccount.status || '');      
     }
   }, [selectedAccount]);
 
@@ -36,7 +38,7 @@ const Register = ({ selectedAccount }) => {
     }
     setIsRegistering(true);
     try {
-      await doCreateUserWithEmailAndPassword(email, password, role, firstName, middleName, lastName, idNumber); // Pass idNumber here
+      await doCreateUserWithEmailAndPassword(email, password, role, firstName, middleName, lastName, idNumber, null, status, null); // Pass idNumber here
       console.log("User registered successfully");
       clearForm(); // Clear the input fields
       setErrorMessage(''); // Clear any previous error messages
@@ -57,7 +59,7 @@ const Register = ({ selectedAccount }) => {
     }
     setIsUpdating(true);
     try {
-      await doUpdateUser(selectedAccount.id, email, firstName, middleName, lastName, idNumber);
+      await doUpdateUser(selectedAccount.id, email, firstName, middleName, lastName, idNumber, null, status, null);
       console.log("User updated successfully");
       clearForm(); // Clear the input fields
       setErrorMessage('');
@@ -106,6 +108,7 @@ const Register = ({ selectedAccount }) => {
     setMiddleName('');
     setLastName('');
     setIdNumber('');
+    setStatus('');
     setErrorMessage('');
     setSuccessMessage('');
   };
@@ -121,6 +124,11 @@ const Register = ({ selectedAccount }) => {
         <input className="form-control" type="text" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
         <input className="form-control" type="email" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} required />
         <input className="form-control" type="text" placeholder="ID Number" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} required />
+        <select className="form-control" name="status" value={status} onChange={(e) => setStatus(e.target.value)} required>
+          <option value="">Select Status</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
         <input className="form-control" type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} required />
         <input className="form-control" type="password" placeholder='Confirm Password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
         <div className="mb-3 text-center acc-crud">
