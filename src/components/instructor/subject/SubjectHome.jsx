@@ -219,8 +219,9 @@ const SubjectHome = () => {
         attendanceIn: {
           In: false,
           timestamp: null,
-          accessible: true,
+          accessible: true,          
         },
+        status: "Absent",
       });
       console.log("Attendance in recorded for student:", student.id);
     }
