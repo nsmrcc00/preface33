@@ -33,15 +33,23 @@ body {
   margin: 0px 0px 10px 10px;
 }
 
+.timer {
+  margin: 0px 10px 10px 0px;
+  font-size: 18px;
+  color: red;
+}
+
 .filter-sub {
   display: flex;
   flex-wrap: wrap;
   align-content: center;
 }
+
 .filter-sub > * {
   min-width: fit-content;
   flex: 1;
 }
+
 .filter-sub-style {
   margin: 0px 10px 10px 0px;
 }

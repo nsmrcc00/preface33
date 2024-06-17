@@ -51,6 +51,8 @@ const SubjectHome = () => {
   const [filteredClassList, setFilteredClassList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
+  const [timer, setTimer] = useState(null);
+  const [timerRunning, setTimerRunning] = useState(false);
   const [view, setView] = useState("month");
   const calendarRef = useRef(null);
 
@@ -203,15 +205,30 @@ const SubjectHome = () => {
     }
   };
 
+  const startTimer = (duration) => {
+    setTimer(duration);
+    setTimerRunning(true);
+    const timerInterval = setInterval(() => {
+      setTimer((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(timerInterval);
+          setTimerRunning(false);
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+  };
+
   const handleStartAttendanceIn = async () => {
     if (!selectedDate) {
       console.log("No selected date");
       return;
     }
-
+  
     const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
     console.log("Starting attendance in for date:", formattedDate);
-
+  
     for (const student of classList) {
       console.log("Processing student:", student.id);
       const attendanceLedgerRef = collection(
@@ -221,31 +238,41 @@ const SubjectHome = () => {
         "attendanceLedger"
       );
       const attendanceDocRef = doc(attendanceLedgerRef, formattedDate);
-
+  
       await setDoc(attendanceDocRef, {
         attendanceIn: {
           In: false,
           timestamp: null,
-          accessible: true,          
+          accessible: true,
         },
         status: "Absent",
       });
       console.log("Attendance in recorded for student:", student.id);
+  
+      // Set a timeout to update the 'accessible' field to false after 10 seconds
+      setTimeout(async () => {
+        await setDoc(attendanceDocRef, {
+          attendanceIn: {
+            accessible: false,
+          },
+        }, { merge: true });
+        console.log("Updated accessible to false for student:", student.id);
+      }, 10000);
     }
-
-    // Optionally, you could fetch the class list again to update the UI.
-    // await fetchClassList(subject.title, subject.section);
+  
+    // Start the 10-second timer
+    startTimer(10);
   };
-
+  
   const handleStartAttendanceOut = async () => {
     if (!selectedDate) {
       console.log("No selected date");
       return;
     }
-
+  
     const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
     console.log("Starting attendance out for date:", formattedDate);
-
+  
     for (const student of classList) {
       console.log("Processing student:", student.id);
       const attendanceLedgerRef = collection(
@@ -255,7 +282,7 @@ const SubjectHome = () => {
         "attendanceLedger"
       );
       const attendanceDocRef = doc(attendanceLedgerRef, formattedDate);
-
+  
       // Update the document with attendanceOut field, if it already exists
       await setDoc(
         attendanceDocRef,
@@ -269,11 +296,22 @@ const SubjectHome = () => {
         { merge: true } // Merge to ensure we don't overwrite existing fields
       );
       console.log("Attendance out recorded for student:", student.id);
+  
+      // Set a timeout to update the 'accessible' field to false after 10 seconds
+      setTimeout(async () => {
+        await setDoc(attendanceDocRef, {
+          attendanceOut: {
+            accessible: false,
+          },
+        }, { merge: true });
+        console.log("Updated accessible to false for student:", student.id);
+      }, 10000);
     }
-
-    // Optionally, you could fetch the class list again to update the UI.
-    // await fetchClassList(subject.title, subject.section);
+  
+    // Start the 10-second timer
+    startTimer(10);
   };
+  
 
   return (
     <>
@@ -334,7 +372,7 @@ const SubjectHome = () => {
         <div className="table-container">
           <h2>{subject ? subject.title : "Loading..."} Class List</h2>
           <p>Selected Date: {moment(selectedDate).format("MMMM Do YYYY")}</p>
-          <div>
+          <div className="filter-sub">
             <input
               type="text"
               placeholder="Search"
@@ -354,6 +392,11 @@ const SubjectHome = () => {
             >
               Start Attendance Out
             </button>
+            {timerRunning && (
+              <div className="timer">
+                Time remaining: {timer} seconds
+              </div>
+            )}
           </div>
           <table className="striped-table">
             <thead>
