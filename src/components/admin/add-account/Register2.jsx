@@ -178,6 +178,9 @@ const Register = ({ selectedAccount }) => {
               </button>
             </>
           )}
+          <button type="button" onClick={clearForm} className="acc-crud-btn btn btn-danger">
+            Clear Form
+          </button>
         </div>
       </form>
     </>
