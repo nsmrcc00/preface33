@@ -153,10 +153,10 @@ const Register = ({ selectedAccount }) => {
         <input className="form-control" type="email" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} required />
         <input className="form-control" type="text" placeholder="ID Number" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} required />
         <select className="form-control" name="status" value={status} onChange={(e) => setStatus(e.target.value)} required>
-              <option value="">Select Status</option>
-              <option value="Enrolled">Enrolled</option>
-              <option value="Inactive">Inactive</option>
-            </select>
+          <option value="">Select Status</option>
+          <option value="Enrolled">Enrolled</option>
+          <option value="Inactive">Inactive</option>
+        </select>
         {selectedAccount && (
           <>
             <input className="form-control" type="text" placeholder="MAC Address" value={macAddress} onChange={(e) => setMacAddress(e.target.value)} required />           
