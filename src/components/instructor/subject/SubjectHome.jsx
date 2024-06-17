@@ -12,6 +12,7 @@ import {
   where,
   getDocs,
   setDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -101,7 +102,7 @@ const SubjectHome = () => {
     }
   };
 
-  const fetchClassList = async (subjectTitle, subjectSection) => {
+  const fetchClassList = (subjectTitle, subjectSection) => {
     console.log("Fetching class list for:", subjectTitle, subjectSection);
     const subjectsRef = collection(db, "Subjects");
     const q = query(
@@ -109,55 +110,59 @@ const SubjectHome = () => {
       where("title", "==", subjectTitle),
       where("section", "==", subjectSection)
     );
-    const querySnapshot = await getDocs(q);
-    const classListData = [];
-
-    for (const subjectDoc of querySnapshot.docs) {
-      const subjectDocId = subjectDoc.id;
-      const classListRef = collection(subjectDoc.ref, "classList");
-      const classListSnapshot = await getDocs(classListRef);
-
-      for (const studentDoc of classListSnapshot.docs) {
-        const studentData = {
-          id: studentDoc.id,
-          ...studentDoc.data(),
-          subjectDocId,
-        };
-        const attendanceLedgerRef = collection(
-          studentDoc.ref,
-          "attendanceLedger"
-        );
-        const attendanceDocId = moment(selectedDate).format("MMMM D, YYYY");
-        const attendanceDocRef = doc(attendanceLedgerRef, attendanceDocId);
-        const attendanceDocSnapshot = await getDoc(attendanceDocRef);
-
-        if (attendanceDocSnapshot.exists()) {
-          const attendanceData = attendanceDocSnapshot.data();
-          studentData.attendance = {
-            in: attendanceData.attendanceIn?.In || false,
-            inTimestamp: attendanceData.attendanceIn?.timestamp || null,
-            out: attendanceData.attendanceOut?.Out || false,
-            outTimestamp: attendanceData.attendanceOut?.timestamp || null,
-            status: attendanceData.status || "--",
+  
+    const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+      const classListData = [];
+  
+      for (const subjectDoc of querySnapshot.docs) {
+        const subjectDocId = subjectDoc.id;
+        const classListRef = collection(subjectDoc.ref, "classList");
+        const classListSnapshot = await getDocs(classListRef);
+  
+        for (const studentDoc of classListSnapshot.docs) {
+          const studentData = {
+            id: studentDoc.id,
+            ...studentDoc.data(),
+            subjectDocId,
           };
-        } else {
-          studentData.attendance = {
-            in: false,
-            inTimestamp: null,
-            out: false,
-            outTimestamp: null,
-            status: "--",
-          };
+          const attendanceLedgerRef = collection(
+            studentDoc.ref,
+            "attendanceLedger"
+          );
+          const attendanceDocId = moment(selectedDate).format("MMMM D, YYYY");
+          const attendanceDocRef = doc(attendanceLedgerRef, attendanceDocId);
+          const attendanceDocSnapshot = await getDoc(attendanceDocRef);
+  
+          if (attendanceDocSnapshot.exists()) {
+            const attendanceData = attendanceDocSnapshot.data();
+            studentData.attendance = {
+              in: attendanceData.attendanceIn?.In || false,
+              inTimestamp: attendanceData.attendanceIn?.timestamp || null,
+              out: attendanceData.attendanceOut?.Out || false,
+              outTimestamp: attendanceData.attendanceOut?.timestamp || null,
+              status: attendanceData.status || "--",
+            };
+          } else {
+            studentData.attendance = {
+              in: false,
+              inTimestamp: null,
+              out: false,
+              outTimestamp: null,
+              status: "--",
+            };
+          }
+  
+          classListData.push(studentData);
         }
-
-        classListData.push(studentData);
       }
-    }
-    console.log("Class list data:", classListData);
-    setClassList(classListData);
-    setFilteredClassList(classListData);
+      console.log("Class list data:", classListData);
+      setClassList(classListData);
+      setFilteredClassList(classListData);
+    });
+  
+    return unsubscribe; // Return the unsubscribe function to clean up the listener
   };
-
+  
   useEffect(() => {
     const fetchSubject = async () => {
       console.log("Fetching subject");
@@ -165,18 +170,20 @@ const SubjectHome = () => {
         const userDoc = doc(db, "Users", currentUser.uid);
         const subjectDoc = doc(userDoc, "subjectsHandled", subjectId);
         const subjectSnapshot = await getDoc(subjectDoc);
-
+  
         if (subjectSnapshot.exists()) {
           const subjectData = subjectSnapshot.data();
           setSubject(subjectData);
-
-          await fetchClassList(subjectData.title, subjectData.section);
+  
+          const unsubscribe = fetchClassList(subjectData.title, subjectData.section);
+          return () => unsubscribe(); // Clean up the listener when component unmounts
         }
       }
     };
-
+  
     fetchSubject();
   }, [currentUser, subjectId, selectedDate]);
+  
 
   const handleSearch = (event) => {
     const query = event.target.value.toLowerCase();

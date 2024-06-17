@@ -31,22 +31,15 @@ export const doPasswordChange = (password) => {
 };
 
 export const doDeleteUser = async (userId) => {
-  const user = auth.currentUser;
-  if (user) {
-    // Ensure the user is authenticated
-    try {
-      // Delete the user's document from Firestore
-      await deleteDoc(doc(db, "Users", userId));
-      console.log(`User document with ID ${userId} deleted from Firestore`);
+  const deleteUser = httpsCallable(functions, "deleteUser");
 
-      // Delete the user from Firebase Authentication
-      await deleteUser(user);
-      console.log(`User with ID ${userId} deleted from Firebase Authentication`);
-    } catch (error) {
-      console.error("Error deleting user:", error);
-    }
-  } else {
-    console.error("No authenticated user found");
+  try {
+    const result = await deleteUser({ userId });
+    console.log(`User with ID ${userId} deleted successfully`);
+    return result.data;
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    throw error;
   }
 };
 
