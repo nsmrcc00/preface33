@@ -513,6 +513,7 @@ const AddSubject = () => {
               borderRadius: "10px",
               width: "max(80%, 400px)",
               overflowX: "auto",
+              maxHeight: '90vh',
             },
           }}
         >

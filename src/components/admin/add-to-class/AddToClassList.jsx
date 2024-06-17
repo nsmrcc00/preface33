@@ -235,7 +235,7 @@ const AddToClassList = () => {
             padding: '20px',
             borderRadius: '10px',
             width: 'max(80%, 400px)',
-            maxHeight: '80vh'                              
+            maxHeight: '80vh',                              
           }
         }}
       >
