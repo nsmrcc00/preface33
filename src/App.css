@@ -39,10 +39,14 @@ body {
   color: red;
 }
 
-.filter-sub {
+.filter-sub,.filter-sub-info {
   display: flex;
   flex-wrap: wrap;
   align-content: center;
+}
+
+.filter-sub-info {
+  gap: 10px;
 }
 
 .filter-sub > * {

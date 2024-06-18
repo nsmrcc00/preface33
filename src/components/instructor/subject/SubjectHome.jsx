@@ -55,6 +55,9 @@ const SubjectHome = () => {
   const [timerRunning, setTimerRunning] = useState(false);
   const [view, setView] = useState("month");
   const calendarRef = useRef(null);
+  const [numStudents, setNumStudents] = useState(0);
+  const [numPresent, setNumPresent] = useState(0);
+  const [numAbsent, setNumAbsent] = useState(0);
 
   useEffect(() => {
     if (modalIsOpen) {
@@ -186,6 +189,15 @@ const SubjectHome = () => {
     fetchSubject();
   }, [currentUser, subjectId, selectedDate]);
   
+  useEffect(() => {
+    const totalStudents = filteredClassList.length;
+    const presentStudents = filteredClassList.filter(student => student.attendance.status === "Present").length;
+    const absentStudents = filteredClassList.filter(student => student.attendance.status === "Absent").length;
+
+    setNumStudents(totalStudents);
+    setNumPresent(presentStudents);
+    setNumAbsent(absentStudents);
+  }, [filteredClassList]);
 
   const handleSearch = (event) => {
     const query = event.target.value.toLowerCase();
@@ -372,7 +384,15 @@ const SubjectHome = () => {
       >
         <div className="table-container">
           <h2>{subject ? subject.title : "Loading..."} Class List</h2>
-          <p>Selected Date: {moment(selectedDate).format("MMMM Do YYYY")}</p>
+          <div className="filter-sub-info">
+            <p>Selected Date: {moment(selectedDate).format("MMMM Do YYYY")}</p>
+            <p>|</p>
+            <p>Number of Students: {numStudents}</p>
+            <p>|</p>
+            <p>Students Present: {numPresent}</p>
+            <p>|</p>
+            <p>Students Absent: {numAbsent}</p>
+          </div>          
           <div className="filter-sub">
             <input
               type="text"

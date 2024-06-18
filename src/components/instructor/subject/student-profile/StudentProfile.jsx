@@ -89,7 +89,7 @@ const StudentProfile = () => {
             </div>
             <div className="attendanceTotalContent">
               <p>Total number of absences:</p>
-              <p>{attendanceData.filter(entry => entry.status === 'Absent').length}</p>
+              <p>{attendanceData.filter(entry => entry.status === 'Absent').length}/3</p>
             </div>
           </div>          
         </section>
