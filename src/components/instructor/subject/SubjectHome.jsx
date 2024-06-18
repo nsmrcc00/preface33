@@ -58,6 +58,7 @@ const SubjectHome = () => {
   const [numStudents, setNumStudents] = useState(0);
   const [numPresent, setNumPresent] = useState(0);
   const [numAbsent, setNumAbsent] = useState(0);
+  const timerIntervalRef = useRef(null);
 
   useEffect(() => {
     if (modalIsOpen) {
@@ -115,15 +116,15 @@ const SubjectHome = () => {
       where("title", "==", subjectTitle),
       where("section", "==", subjectSection)
     );
-  
+
     const unsubscribe = onSnapshot(q, async (querySnapshot) => {
       const classListData = [];
-  
+
       for (const subjectDoc of querySnapshot.docs) {
         const subjectDocId = subjectDoc.id;
         const classListRef = collection(subjectDoc.ref, "classList");
         const classListSnapshot = await getDocs(classListRef);
-  
+
         for (const studentDoc of classListSnapshot.docs) {
           const studentData = {
             id: studentDoc.id,
@@ -137,7 +138,7 @@ const SubjectHome = () => {
           const attendanceDocId = moment(selectedDate).format("MMMM D, YYYY");
           const attendanceDocRef = doc(attendanceLedgerRef, attendanceDocId);
           const attendanceDocSnapshot = await getDoc(attendanceDocRef);
-  
+
           if (attendanceDocSnapshot.exists()) {
             const attendanceData = attendanceDocSnapshot.data();
             studentData.attendance = {
@@ -156,7 +157,7 @@ const SubjectHome = () => {
               status: "--",
             };
           }
-  
+
           classListData.push(studentData);
         }
       }
@@ -164,10 +165,10 @@ const SubjectHome = () => {
       setClassList(classListData);
       setFilteredClassList(classListData);
     });
-  
+
     return unsubscribe; // Return the unsubscribe function to clean up the listener
   };
-  
+
   useEffect(() => {
     const fetchSubject = async () => {
       console.log("Fetching subject");
@@ -175,20 +176,20 @@ const SubjectHome = () => {
         const userDoc = doc(db, "Users", currentUser.uid);
         const subjectDoc = doc(userDoc, "subjectsHandled", subjectId);
         const subjectSnapshot = await getDoc(subjectDoc);
-  
+
         if (subjectSnapshot.exists()) {
           const subjectData = subjectSnapshot.data();
           setSubject(subjectData);
-  
+
           const unsubscribe = fetchClassList(subjectData.title, subjectData.section);
           return () => unsubscribe(); // Clean up the listener when component unmounts
         }
       }
     };
-  
+
     fetchSubject();
   }, [currentUser, subjectId, selectedDate]);
-  
+
   useEffect(() => {
     const totalStudents = filteredClassList.length;
     const presentStudents = filteredClassList.filter(student => student.attendance.status === "Present").length;
@@ -220,16 +221,22 @@ const SubjectHome = () => {
   const startTimer = (duration) => {
     setTimer(duration);
     setTimerRunning(true);
-    const timerInterval = setInterval(() => {
+    timerIntervalRef.current = setInterval(() => {
       setTimer((prevTime) => {
         if (prevTime <= 1) {
-          clearInterval(timerInterval);
+          clearInterval(timerIntervalRef.current);
           setTimerRunning(false);
           return 0;
         }
         return prevTime - 1;
       });
     }, 1000);
+  };
+
+  const stopTimer = () => {
+    clearInterval(timerIntervalRef.current);
+    setTimerRunning(false);
+    setTimer(null);
   };
 
   const formatTimer = (time) => {
@@ -243,10 +250,10 @@ const SubjectHome = () => {
       console.log("No selected date");
       return;
     }
-  
+
     const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
     console.log("Starting attendance in for date:", formattedDate);
-  
+
     for (const student of classList) {
       console.log("Processing student:", student.id);
       const attendanceLedgerRef = collection(
@@ -256,7 +263,7 @@ const SubjectHome = () => {
         "attendanceLedger"
       );
       const attendanceDocRef = doc(attendanceLedgerRef, formattedDate);
-  
+
       await setDoc(attendanceDocRef, {
         attendanceIn: {
           In: false,
@@ -266,7 +273,7 @@ const SubjectHome = () => {
         status: "Absent",
       });
       console.log("Attendance in recorded for student:", student.id);
-  
+
       // Set a timeout to update the 'accessible' field to false after 5 minutes
       setTimeout(async () => {
         await setDoc(attendanceDocRef, {
@@ -277,20 +284,20 @@ const SubjectHome = () => {
         console.log("Updated accessible to false for student:", student.id);
       }, 300000); // 5 minutes
     }
-  
+
     // Start the 5-minute timer
     startTimer(300);
   };
-  
+
   const handleStartAttendanceOut = async () => {
     if (!selectedDate) {
       console.log("No selected date");
       return;
     }
-  
+
     const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
     console.log("Starting attendance out for date:", formattedDate);
-  
+
     for (const student of classList) {
       console.log("Processing student:", student.id);
       const attendanceLedgerRef = collection(
@@ -300,7 +307,7 @@ const SubjectHome = () => {
         "attendanceLedger"
       );
       const attendanceDocRef = doc(attendanceLedgerRef, formattedDate);
-  
+
       await setDoc(attendanceDocRef, {
         attendanceOut: {
           Out: false,
@@ -309,7 +316,7 @@ const SubjectHome = () => {
         },
       }, { merge: true });
       console.log("Attendance out recorded for student:", student.id);
-  
+
       // Set a timeout to update the 'accessible' field to false after 5 minutes
       setTimeout(async () => {
         await setDoc(attendanceDocRef, {
@@ -320,11 +327,42 @@ const SubjectHome = () => {
         console.log("Updated accessible to false for student:", student.id);
       }, 300000); // 5 minutes
     }
-  
+
     // Start the 5-minute timer
     startTimer(300);
   };
-  
+
+  const handleStatusChange = async (event, student) => {
+    const newStatus = event.target.value;
+    const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
+    const attendanceLedgerRef = collection(
+      doc(db, "Subjects", student.subjectDocId),
+      "classList",
+      student.id,
+      "attendanceLedger"
+    );
+    const attendanceDocRef = doc(attendanceLedgerRef, formattedDate);
+
+    await setDoc(attendanceDocRef, {
+      status: newStatus,
+    }, { merge: true });
+
+    setClassList(prevClassList =>
+      prevClassList.map(item =>
+        item.id === student.id
+          ? { ...item, attendance: { ...item.attendance, status: newStatus } }
+          : item
+      )
+    );
+
+    setFilteredClassList(prevFilteredList =>
+      prevFilteredList.map(item =>
+        item.id === student.id
+          ? { ...item, attendance: { ...item.attendance, status: newStatus } }
+          : item
+      )
+    );
+  };
 
   return (
     <>
@@ -412,11 +450,19 @@ const SubjectHome = () => {
               onClick={handleStartAttendanceOut}
             >
               Start Attendance Out
-            </button>
+            </button>            
             {timerRunning && (
-              <div className="timer">
-                Time remaining: {timer} seconds
-              </div>
+              <>
+                <button
+                  className="calendar-modal"
+                  onClick={stopTimer}
+                >
+                  Stop Timer
+                </button>
+                <div className="timer">
+                  Time remaining: {timer} seconds
+                </div>
+              </>              
             )}
           </div>
           <table className="striped-table">
@@ -450,12 +496,15 @@ const SubjectHome = () => {
                       : "--"}
                   </td>
                   <td>
-                    <select value={student.attendance.status} readOnly>
-                      <option>--</option>
-                      <option>Present</option>
-                      <option>Late</option>
-                      <option>Absent</option>
-                      <option>Excused</option>
+                    <select
+                      value={student.attendance.status}
+                      onChange={(event) => handleStatusChange(event, student)}
+                    >
+                      <option value="--">--</option>
+                      <option value="Present">Present</option>
+                      <option value="Late">Late</option>
+                      <option value="Absent">Absent</option>
+                      <option value="Excused">Excused</option>
                     </select>
                   </td>
                   <td>

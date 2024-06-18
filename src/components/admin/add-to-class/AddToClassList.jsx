@@ -168,16 +168,19 @@ const AddToClassList = () => {
   };
 
   const handleRemoveFromClassList = async (documentId) => {
-    try {
-      await deleteDoc(doc(db, 'Subjects', selectedSubject.id, 'classList', documentId));
-      await refreshClassList(selectedSubject.id); // Refresh the class list
-      alert('Student removed from class list');
-    } catch (error) {
-      console.error('Error removing student from class list: ', error);
-      alert('Error removing student from class list');
+    const confirmed = window.confirm('Are you sure you want to remove this student from the class list?');
+    if (confirmed) {
+      try {
+        await deleteDoc(doc(db, 'Subjects', selectedSubject.id, 'classList', documentId));
+        await refreshClassList(selectedSubject.id); // Refresh the class list
+        alert('Student removed from class list');
+      } catch (error) {
+        console.error('Error removing student from class list: ', error);
+        alert('Error removing student from class list');
+      }
     }
   };
-
+  
   const refreshClassList = async (subjectId) => {
     const classListRef = collection(db, 'Subjects', subjectId, 'classList');
     const classListSnapshot = await getDocs(classListRef);
