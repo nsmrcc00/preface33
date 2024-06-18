@@ -12,6 +12,7 @@ const AddSection = () => {
   const [sections, setSections] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSectionId, setSelectedSectionId] = useState(null);
+  const [filterYear, setFilterYear] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -115,10 +116,11 @@ const AddSection = () => {
   // CLIENT-SIDE FILTERING
   const filteredSections = sections.filter(sec => {
     const lowerCaseQuery = searchQuery.toLowerCase();
-    return (
-      (sec.sectionName && sec.sectionName.toLowerCase().includes(lowerCaseQuery)) ||
-      (sec.yearLevel && sec.yearLevel.toLowerCase().includes(lowerCaseQuery))
-    );
+    const yearLevelMatches = filterYear === "" || sec.yearLevel === filterYear;
+    const sectionNameMatches = sec.sectionName && sec.sectionName.toLowerCase().includes(lowerCaseQuery);
+    const yearLevelMatchesQuery = sec.yearLevel && sec.yearLevel.toLowerCase().includes(lowerCaseQuery);
+
+    return yearLevelMatches && (sectionNameMatches || yearLevelMatchesQuery);
   });
 
   const { items: sortedSections, requestSort, sortConfig } = useSortableData(filteredSections);
@@ -129,19 +131,33 @@ const AddSection = () => {
       }
       return sortConfig.key === name ? sortConfig.direction : undefined;
   };
+
   return (
     <>
       <div className='table-container'>
         <h2>Section List</h2>
-        <input
-          type="text"
-          placeholder="Search Sections..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{
-            margin: '0px 0px 10px'
-          }}
-        />
+        <div className='filter-sec'>
+          <input
+            type="text"
+            placeholder="Search Sections..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="filter-sub-style"
+          />
+          <select 
+            id="filterYear"
+            className="filter-sub-style"
+            value={filterYear}
+            onChange={(e) => setFilterYear(e.target.value)}
+          >
+            <option value="">Filter Year</option>
+            <option value="First Year">First Year</option>
+            <option value="Second Year">Second Year</option>
+            <option value="Third Year">Third Year</option>
+            <option value="Fourth Year">Fourth Year</option>
+          </select>
+        </div>
+
         <table className='striped-table'>
           <thead>
             <tr>

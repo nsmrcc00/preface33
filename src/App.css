@@ -39,7 +39,7 @@ body {
   color: red;
 }
 
-.filter-sub,.filter-sub-info {
+.filter-sub,.filter-sub-info,.filter-sec {
   display: flex;
   flex-wrap: wrap;
   align-content: center;

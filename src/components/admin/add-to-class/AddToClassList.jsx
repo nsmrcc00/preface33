@@ -15,7 +15,11 @@ const AddToClassList = () => {
   const [classList, setClassList] = useState([]);
   const [studentSearchTerm, setStudentSearchTerm] = useState('');
   const [selectAllChecked, setSelectAllChecked] = useState(false);
-
+  const [sections, setSections] = useState([]);
+  const [cachedSections, setCachedSections] = useState([]);
+  const [selectedSection, setSelectedSection] = useState('');
+  const [studentFilterSection, setStudentFilterSection] = useState('');
+  
   useEffect(() => {
     const fetchSubjects = async () => {
       const q = query(collection(db, 'Subjects'), where('archived', '==', false));
@@ -83,17 +87,19 @@ const AddToClassList = () => {
   };
 
   const filteredSubjects = subjects.filter(subject =>
-    (subject.subjectCode && subject.subjectCode.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (subject.title && subject.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (subject.instructorName && subject.instructorName.toLowerCase().includes(searchTerm.toLowerCase()))
+    ((subject.subjectCode && subject.subjectCode.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (subject.title && subject.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (subject.instructorName && subject.instructorName.toLowerCase().includes(searchTerm.toLowerCase()))) &&
+    (selectedSection === '' || subject.section === selectedSection) // Grouped this condition
   );
 
   const filteredStudents = students.filter(student =>
-    (student.idNumber && student.idNumber.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
-    (student.name.firstName && student.name.firstName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
-    (student.name.middleName && student.name.middleName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
-    (student.name.lastName && student.name.lastName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
-    (student.section && student.section.toLowerCase().includes(studentSearchTerm.toLowerCase()))
+    ((student.idNumber && student.idNumber.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
+      (student.name.firstName && student.name.firstName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
+      (student.name.middleName && student.name.middleName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
+      (student.name.lastName && student.name.lastName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
+      (student.section && student.section.toLowerCase().includes(studentSearchTerm.toLowerCase()))) &&
+      (studentFilterSection === '' || student.section === studentFilterSection)
   );
 
   const { items: sortedSubjects, requestSort: requestSortSubjects, sortConfig: sortConfigSubjects } = useSortableData(filteredSubjects);
@@ -183,21 +189,44 @@ const AddToClassList = () => {
     }));
     setClassList(classListData);
   };
-  
+
+  useEffect(() => {
+    const distinctSections = Array.from(new Set(students.map(student => student.section)));
+    setCachedSections(distinctSections);
+    setSections(distinctSections);
+  }, [students]);
+
+  const handleSectionChange = (event) => {
+    setSelectedSection(event.target.value);
+  };
+
+  const handleStudentFilterSectionChange = (event) => {
+    setStudentFilterSection(event.target.value);
+  };
 
   return (
     <>
       <div className='table-container'>
         <h2>Subjects</h2>
-        <input
-          type="text"
-          placeholder="Search Subjects..."
-          value={searchTerm}
-          onChange={handleSearchChange}
-          style={{
-            margin: '0px 0px 10px'
-          }}
-        />
+        <div className="filter-sec">
+          <input
+            type="text"
+            placeholder="Search Subjects..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="filter-sub-style"
+          />
+          <select
+            id="filterSection"
+            className="filter-sub-style"
+            value={selectedSection} onChange={handleSectionChange}>
+          <option value="">All Sections</option>
+          {sections.map(section => (
+              <option key={section} value={section}>{section}</option>
+            ))}
+          </select>
+        </div>
+
         <table className='striped-table'>
           <thead>
             <tr>
@@ -208,8 +237,8 @@ const AddToClassList = () => {
             </tr>
           </thead>
           <tbody>
-            {sortedSubjects.map(subject => (
-              <tr key={subject.id} onClick={() => openModal(subject)}>
+            {sortedSubjects.map((subject, index) => (
+              <tr key={index} onClick={() => openModal(subject)}>
                 <td>{subject.subjectCode}</td>
                 <td>{subject.title}</td>
                 <td>{subject.instructorName}</td>
@@ -235,14 +264,14 @@ const AddToClassList = () => {
             padding: '20px',
             borderRadius: '10px',
             width: 'max(80%, 400px)',
-            maxHeight: '80vh',                              
+            maxHeight: '80vh',
           }
         }}
       >
         {selectedSubject && (
           <div style={{
             overflowX: 'auto',
-            overflowY: 'auto',  
+            overflowY: 'auto',
           }}>
             <div className='subjectInfo'>
               <h2 className='subjectInfoContent'>{selectedSubject.title}</h2>
@@ -251,13 +280,11 @@ const AddToClassList = () => {
               <p className='subjectInfoContent'><strong>Instructor:</strong> {selectedSubject.instructorName}</p>
             </div>
 
-            <label><strong>Class List</strong></label>
+            <label className="filter-sub-style"><strong>Class List</strong></label>
             <input
               type="text"
               placeholder="Search Class List..."
-              style={{
-                margin: '0px 0px 10px 10px'
-              }}
+              className='filter-sub-style'
             />
             <table id='classListTable' className='striped-table'>
               <thead>
@@ -279,17 +306,28 @@ const AddToClassList = () => {
                 ))}
               </tbody>
             </table>
-
-            <label><strong>Student List</strong></label>
-            <input
-              type="text"
-              placeholder="Search Student List..."
-              value={studentSearchTerm}
-              onChange={handleStudentSearchChange}
-              style={{
-                margin: '10px 0px 10px 10px'
-              }}
-            />
+            <div className="filter-sec" style={{marginTop: "10px"}}>
+              <label className="filter-sub-style"><strong>Student List</strong></label>
+              <input
+                type="text"
+                placeholder="Search Student List..."
+                value={studentSearchTerm}
+                onChange={handleStudentSearchChange}
+                className="filter-sub-style"
+              />
+              <select 
+                id="filterSection"
+                className="filter-sub-style"
+                value={studentFilterSection} 
+                onChange={handleStudentFilterSectionChange}
+              >
+                <option value="">All Sections</option>
+                {cachedSections.map(section => (
+                  <option key={section} value={section}>{section}</option>
+                ))}
+              </select>
+            </div>
+            
             <table id='studentListTable' className='striped-table'>
               <thead>
                 <tr>
