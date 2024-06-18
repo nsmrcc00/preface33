@@ -220,6 +220,12 @@ const SubjectHome = () => {
     }, 1000);
   };
 
+  const formatTimer = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  };
+
   const handleStartAttendanceIn = async () => {
     if (!selectedDate) {
       console.log("No selected date");
@@ -249,7 +255,7 @@ const SubjectHome = () => {
       });
       console.log("Attendance in recorded for student:", student.id);
   
-      // Set a timeout to update the 'accessible' field to false after 10 seconds
+      // Set a timeout to update the 'accessible' field to false after 5 minutes
       setTimeout(async () => {
         await setDoc(attendanceDocRef, {
           attendanceIn: {
@@ -257,11 +263,11 @@ const SubjectHome = () => {
           },
         }, { merge: true });
         console.log("Updated accessible to false for student:", student.id);
-      }, 10000);
+      }, 300000); // 5 minutes
     }
   
-    // Start the 10-second timer
-    startTimer(10);
+    // Start the 5-minute timer
+    startTimer(300);
   };
   
   const handleStartAttendanceOut = async () => {
@@ -283,21 +289,16 @@ const SubjectHome = () => {
       );
       const attendanceDocRef = doc(attendanceLedgerRef, formattedDate);
   
-      // Update the document with attendanceOut field, if it already exists
-      await setDoc(
-        attendanceDocRef,
-        {
-          attendanceOut: {
-            Out: false,
-            timestamp: null,
-            accessible: true,
-          },
+      await setDoc(attendanceDocRef, {
+        attendanceOut: {
+          Out: false,
+          timestamp: null,
+          accessible: true,
         },
-        { merge: true } // Merge to ensure we don't overwrite existing fields
-      );
+      }, { merge: true });
       console.log("Attendance out recorded for student:", student.id);
   
-      // Set a timeout to update the 'accessible' field to false after 10 seconds
+      // Set a timeout to update the 'accessible' field to false after 5 minutes
       setTimeout(async () => {
         await setDoc(attendanceDocRef, {
           attendanceOut: {
@@ -305,11 +306,11 @@ const SubjectHome = () => {
           },
         }, { merge: true });
         console.log("Updated accessible to false for student:", student.id);
-      }, 10000);
+      }, 300000); // 5 minutes
     }
   
-    // Start the 10-second timer
-    startTimer(10);
+    // Start the 5-minute timer
+    startTimer(300);
   };
   
 
