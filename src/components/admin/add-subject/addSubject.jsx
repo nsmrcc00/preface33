@@ -8,6 +8,7 @@ import {
   getDocs,
   collection,
   setDoc,
+  deleteDoc,
 } from "firebase/firestore";
 
 Modal.setAppElement("#root");
@@ -36,6 +37,14 @@ const AddSubject = () => {
     archived: false,
   });
 
+  const yearOptions = [
+    { value: "", label: "Select Year" },
+    { value: "First Year", label: "First Year" },
+    { value: "Second Year", label: "Second Year" },
+    { value: "Third Year", label: "Third Year" },
+    { value: "Fourth Year", label: "Fourth Year" },
+  ];
+
   const [subjects, setSubjects] = useState([]);
   const [users, setUsers] = useState([]);
   const [sections, setSections] = useState([]);
@@ -46,7 +55,7 @@ const AddSubject = () => {
   const [timeInputs, setTimeInputs] = useState(initialTimeState);
   const [filterYear, setFilterYear] = useState("");
   const [filterTerm, setFilterTerm] = useState("");
-
+  const [previousInstructor, setPreviousInstructor] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -126,7 +135,7 @@ const AddSubject = () => {
 
   const validateFields = (data) => {
     const validData = {};
-    Object.keys(data).forEach(key => {
+    Object.keys(data).forEach((key) => {
       if (data[key] !== undefined) {
         validData[key] = data[key];
       }
@@ -134,19 +143,22 @@ const AddSubject = () => {
     return validData;
   };
 
-  const addOrUpdateInstructorSubcollection = async (instructorId, subjectData) => {
+  const addOrUpdateInstructorSubcollection = async (
+    instructorId,
+    subjectData
+  ) => {
     try {
       const instructorRef = doc(db, "Users", instructorId);
       const subjectsHandledRef = collection(instructorRef, "subjectsHandled");
       const querySnapshot = await getDocs(subjectsHandledRef);
       let subjectHandledDoc = null;
-  
+
       querySnapshot.forEach((doc) => {
         if (doc.id === subjectData.id) {
           subjectHandledDoc = doc;
         }
       });
-  
+
       const validatedSubjectData = validateFields({
         title: subjectData.title,
         ref: subjectData.ref,
@@ -156,7 +168,9 @@ const AddSubject = () => {
       });
 
       if (subjectHandledDoc) {
-        console.log(`Updating existing subjectHandled document with ID: ${subjectHandledDoc.id}`);
+        console.log(
+          `Updating existing subjectHandled document with ID: ${subjectHandledDoc.id}`
+        );
         await updateDoc(subjectHandledDoc.ref, {
           subjectCode: subjectData.subjectCode,
           title: subjectData.title,
@@ -167,7 +181,9 @@ const AddSubject = () => {
           term: subjectData.term,
         });
       } else {
-        console.log(`Adding new subjectHandled document with ID: ${subjectData.id}`);
+        console.log(
+          `Adding new subjectHandled document with ID: ${subjectData.id}`
+        );
         const subjectHandledDocRef = doc(subjectsHandledRef, subjectData.id);
         await setDoc(subjectHandledDocRef, {
           subjectCode: subjectData.subjectCode,
@@ -179,18 +195,20 @@ const AddSubject = () => {
           term: subjectData.term,
         });
       }
-      console.log("Instructor's subjectsHandled subcollection updated successfully!");
+      console.log(
+        "Instructor's subjectsHandled subcollection updated successfully!"
+      );
     } catch (error) {
       console.error("Error in addOrUpdateInstructorSubcollection:", error);
     }
   };
-  
+
   const prepareSubjectData = (instructorData, formattedSchedule, ref) => ({
     subjectCode: subject.subjectCode,
     instructor: {
       id: instructorData.id,
       ref: instructorData.ref,
-      name: instructorData.name
+      name: instructorData.name,
     },
     Schedule: formattedSchedule,
     section: subject.section,
@@ -198,26 +216,36 @@ const AddSubject = () => {
     year: subject.year,
     term: subject.term,
     archived: subject.archived,
-    ref
+    ref,
   });
-  
+
   const addSub = async (e) => {
     e.preventDefault();
     const formattedSchedule = formatSchedule();
     const instructorData = users.find((user) => user.id === subject.instructor);
-    const newSubject = prepareSubjectData(instructorData, formattedSchedule, null);
-  
+    const newSubject = prepareSubjectData(
+      instructorData,
+      formattedSchedule,
+      null
+    );
+
     try {
-      const newSubjectRef = await addDoc(collection(db, "Subjects"), newSubject);
+      const newSubjectRef = await addDoc(
+        collection(db, "Subjects"),
+        newSubject
+      );
       newSubject.ref = newSubjectRef;
       newSubject.id = newSubjectRef.id;
-  
+
       await addOrUpdateInstructorSubcollection(instructorData.id, newSubject);
-  
-      const updatedSubjects = [...subjects, { ...newSubject, id: newSubject.id }];
+
+      const updatedSubjects = [
+        ...subjects,
+        { ...newSubject, id: newSubject.id },
+      ];
       setSubjects(updatedSubjects);
       setCachedSubjects(updatedSubjects);
-  
+
       closeModal();
       console.log("Subject added successfully!");
     } catch (error) {
@@ -225,17 +253,38 @@ const AddSubject = () => {
       console.error(error);
     }
   };
+
+  const removeSubjectFromInstructor = async (instructorId, subjectId) => {
+    try {
+      const instructorRef = doc(db, "Users", instructorId);
+      const subjectsHandledRef = collection(instructorRef, "subjectsHandled");
+      const subjectDocRef = doc(subjectsHandledRef, subjectId);
+      await deleteDoc(subjectDocRef);
+      console.log("Subject removed from previous instructor's subjectsHandled subcollection.");
+    } catch (error) {
+      console.error("Error removing subject from instructor:", error);
+    }
+  };
   
   const updateSub = async (e) => {
     e.preventDefault();
     const formattedSchedule = formatSchedule();
     const instructorData = users.find((user) => user.id === subject.instructor);
-    const updatedSubject = prepareSubjectData(instructorData, formattedSchedule, doc(db, "Subjects", subject.id));
+    const updatedSubject = prepareSubjectData(
+      instructorData,
+      formattedSchedule,
+      doc(db, "Subjects", subject.id)
+    );
     updatedSubject.id = subject.id;
   
     try {
       const validatedSubject = validateFields(updatedSubject);
       await updateDoc(updatedSubject.ref, validatedSubject);
+  
+      if (previousInstructor && previousInstructor !== instructorData.id) {
+        await removeSubjectFromInstructor(previousInstructor, updatedSubject.id);
+      }
+  
       await addOrUpdateInstructorSubcollection(instructorData.id, validatedSubject);
   
       const updatedSubjects = subjects.map((sub) =>
@@ -252,23 +301,25 @@ const AddSubject = () => {
     }
   };
   
-  
+
   // Table behavior when clicked
   const handleRowClick = (sub) => {
     const schedule = sub.Schedule || { days: "", time: "" };
-
+  
     setSubject({
       ...sub,
       Schedule: schedule,
       id: sub.id, // Ensure ID is set
     });
     setIsEditMode(true);
-
+    
+    setPreviousInstructor(sub.instructor.id); // Set previous instructor
+  
     const days = schedule.days ? schedule.days.split(",") : [];
     const times = schedule.time ? schedule.time.split(",") : [];
-
+  
     const newTimeInputs = { ...initialTimeState };
-
+  
     days.forEach((day, index) => {
       const [start, end] = times[index].split("-");
       const [startHour, startMin] = start.split(":");
@@ -280,11 +331,11 @@ const AddSubject = () => {
         newTimeInputs[dayFull] = { startHour, startMin, endHour, endMin };
       }
     });
-
+  
     setTimeInputs(newTimeInputs);
     openModal();
   };
-
+ 
   // Cache data in local state
   const [cachedSubjects, setCachedSubjects] = useState([]);
   const [cachedUsers, setCachedUsers] = useState([]);
@@ -304,7 +355,7 @@ const AddSubject = () => {
       console.error("Error fetching subjects:", error);
     }
   };
-  
+
   // Fetch instructors from "Users" collection
   const fetchUsers = async () => {
     if (cachedUsers.length > 0) {
@@ -365,21 +416,14 @@ const AddSubject = () => {
       (showArchived || !sub.archived) &&
       (filterYear === "" || sub.year === filterYear) &&
       (filterTerm === "" || sub.term === filterTerm) &&
-      ((sub.title && sub.title.toLowerCase().includes(lowerCaseQuery)) ||
-        (sub.instructor &&
-          sub.instructor.name.toLowerCase().includes(lowerCaseQuery)) ||
-        (sub.subjectCode &&
-          sub.subjectCode.toLowerCase().includes(lowerCaseQuery)) ||
-        (sub.section && sub.section.toLowerCase().includes(lowerCaseQuery)) ||
-        (sub.Schedule &&
-          sub.Schedule.days &&
-          sub.Schedule.days.toLowerCase().includes(lowerCaseQuery)) ||
-        (sub.Schedule &&
-          sub.Schedule.time &&
-          sub.Schedule.time.toLowerCase().includes(lowerCaseQuery)))
+      (sub?.title.toLowerCase().includes(lowerCaseQuery) ||
+        sub?.instructor?.name.toLowerCase().includes(lowerCaseQuery) ||
+        sub?.subjectCode.toLowerCase().includes(lowerCaseQuery) ||
+        sub?.section.toLowerCase().includes(lowerCaseQuery) ||
+        sub?.Schedule?.days.toLowerCase().includes(lowerCaseQuery) ||
+        sub?.Schedule?.time.toLowerCase().includes(lowerCaseQuery))
     );
   });
-  
 
   // Input validation for schedule
   const isNumberKey = (evt) => {
@@ -410,7 +454,7 @@ const AddSubject = () => {
     <>
       <section id="schoolSectionPage">
         <div className="table-container">
-          <h2>Subjects List</h2>         
+          <h2>Subjects List</h2>
           <div className="filter-sub">
             <input
               type="text"
@@ -420,20 +464,20 @@ const AddSubject = () => {
               className="filter-sub-style"
             />
 
-            <select 
+            <select
               id="filterYear"
               className="filter-sub-style"
               value={filterYear}
               onChange={(e) => setFilterYear(e.target.value)}
             >
-              <option value="">Filter Year</option>
-              <option value="First Year">First Year</option>
-              <option value="Second Year">Second Year</option>
-              <option value="Third Year">Third Year</option>
-              <option value="Fourth Year">Fourth Year</option>
+              {yearOptions.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </select>
 
-            <select 
+            <select
               id="filterSem"
               className="filter-sub-style"
               value={filterTerm}
@@ -443,7 +487,7 @@ const AddSubject = () => {
               <option value="First Semester">First Semester</option>
               <option value="Second Semester">Second Semester</option>
             </select>
- 
+
             <label className="filter-sub-style">
               <input
                 type="checkbox"
@@ -454,7 +498,7 @@ const AddSubject = () => {
               Show Archived
             </label>
           </div>
-          
+
           <table className="striped-table">
             <thead>
               <tr>
@@ -513,7 +557,7 @@ const AddSubject = () => {
               borderRadius: "10px",
               width: "max(80%, 400px)",
               overflowX: "auto",
-              maxHeight: '90vh',
+              maxHeight: "90vh",
             },
           }}
         >
@@ -570,32 +614,24 @@ const AddSubject = () => {
 
             <label className="addSubForm">
               Year:
-              <select
-                name="year"
-                value={subject.year}
-                onChange={handleChange}
-              >
-                  <option value="">Select Year</option>
-                  <option value="First Year">First Year</option>
-                  <option value="Second Year">Second Year</option>
-                  <option value="Third Year">Third Year</option>
-                  <option value="Fourth Year">Fourth Year</option>
+              <select name="year" value={subject.year} onChange={handleChange}>
+                {yearOptions.map(({ value, label }) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
               </select>
             </label>
 
             <label className="addSubForm">
               Term:
-              <select
-                name="term"
-                value={subject.term}
-                onChange={handleChange}
-              >
+              <select name="term" value={subject.term} onChange={handleChange}>
                 <option value="">Select Term</option>
                 <option value="First Semester">First Semester</option>
                 <option value="Second Semester">Second Semester</option>
               </select>
             </label>
-              
+
             <label className="addSubForm">
               Archived:
               <select

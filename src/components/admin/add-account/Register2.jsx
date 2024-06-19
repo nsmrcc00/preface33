@@ -10,8 +10,8 @@ const Register = ({ selectedAccount }) => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [/*errorMessage, */setErrorMessage] = useState('');
-  const [/*successMessage, */setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const [firstName, setFirstName] = useState('');
   const [middleName, setMiddleName] = useState('');
