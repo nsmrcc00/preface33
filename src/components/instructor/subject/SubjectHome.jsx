@@ -219,6 +219,11 @@ const SubjectHome = () => {
   };
 
   const startTimer = (duration) => {
+    // Clear any existing interval
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+    }
+  
     setTimer(duration);
     setTimerRunning(true);
     timerIntervalRef.current = setInterval(() => {
@@ -245,49 +250,49 @@ const SubjectHome = () => {
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
-  const handleStartAttendanceIn = async () => {
-    if (!selectedDate) {
-      console.log("No selected date");
-      return;
-    }
+const handleStartAttendanceIn = async () => {
+  if (!selectedDate) {
+    console.log("No selected date");
+    return;
+  }
 
-    const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
-    console.log("Starting attendance in for date:", formattedDate);
+  const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
+  console.log("Starting attendance in for date:", formattedDate);
 
-    for (const student of classList) {
-      console.log("Processing student:", student.id);
-      const attendanceLedgerRef = collection(
-        doc(db, "Subjects", student.subjectDocId),
-        "classList",
-        student.id,
-        "attendanceLedger"
-      );
-      const attendanceDocRef = doc(attendanceLedgerRef, formattedDate);
+  for (const student of classList) {
+    console.log("Processing student:", student.id);
+    const attendanceLedgerRef = collection(
+      doc(db, "Subjects", student.subjectDocId),
+      "classList",
+      student.id,
+      "attendanceLedger"
+    );
+    const attendanceDocRef = doc(attendanceLedgerRef, formattedDate);
 
+    await setDoc(attendanceDocRef, {
+      attendanceIn: {
+        In: false,
+        timestamp: null,
+        accessible: true,
+      },
+      status: "Absent",
+    });
+    console.log("Attendance in recorded for student:", student.id);
+
+    // Set a timeout to update the 'accessible' field to false after 5 minutes
+    setTimeout(async () => {
       await setDoc(attendanceDocRef, {
         attendanceIn: {
-          In: false,
-          timestamp: null,
-          accessible: true,
+          accessible: false,
         },
-        status: "Absent",
-      });
-      console.log("Attendance in recorded for student:", student.id);
+      }, { merge: true });
+      console.log("Updated accessible to false for student:", student.id);
+    }, 300000); // 5 minutes
+  }
 
-      // Set a timeout to update the 'accessible' field to false after 5 minutes
-      setTimeout(async () => {
-        await setDoc(attendanceDocRef, {
-          attendanceIn: {
-            accessible: false,
-          },
-        }, { merge: true });
-        console.log("Updated accessible to false for student:", student.id);
-      }, 300000); // 5 minutes
-    }
-
-    // Start the 5-minute timer
-    startTimer(300);
-  };
+  // Start the 5-minute timer
+  startTimer(300);
+};
 
   const handleStartAttendanceOut = async () => {
     if (!selectedDate) {
