@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { db } from '../../../firebase/firebase';
-import { collection, query, where, getDocs, doc, writeBatch, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, writeBatch, deleteDoc, onSnapshot } from 'firebase/firestore';
 import Modal from 'react-modal';
 import useSortableData from '../../table-sort/TableSort';
 
@@ -19,48 +19,57 @@ const AddToClassList = () => {
   const [cachedSections, setCachedSections] = useState([]);
   const [selectedSection, setSelectedSection] = useState('');
   const [studentFilterSection, setStudentFilterSection] = useState('');
-  
+
   useEffect(() => {
-    const fetchSubjects = async () => {
+    const fetchSubjects = () => {
       const q = query(collection(db, 'Subjects'), where('archived', '==', false));
-      const querySnapshot = await getDocs(q);
-      const subjectsList = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        subjectCode: doc.data().subjectCode,
-        title: doc.data().title,
-        instructorName: doc.data().instructor.name,
-        section: doc.data().section
-      }));
-      setSubjects(subjectsList);
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const subjectsList = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          subjectCode: doc.data().subjectCode,
+          title: doc.data().title,
+          instructorName: doc.data().instructor.name,
+          section: doc.data().section
+        }));
+        setSubjects(subjectsList);
+      });
+
+      return () => unsubscribe();
     };
 
-    const fetchStudents = async () => {
+    const fetchStudents = () => {
       const q = query(collection(db, 'Users'), where('role', '==', 'student'));
-      const querySnapshot = await getDocs(q);
-      const studentsList = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        idNumber: doc.data().idNumber,
-        name: doc.data().name,
-        section: doc.data().section,
-        checked: false // Add a checked property to each student object
-      }));
-      setStudents(studentsList);
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const studentsList = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          idNumber: doc.data().idNumber,
+          name: doc.data().name,
+          section: doc.data().section,
+          checked: false // Add a checked property to each student object
+        }));
+        setStudents(studentsList);
+      });
+
+      return () => unsubscribe();
     };
 
     fetchSubjects();
     fetchStudents();
   }, []);
 
-  const fetchClassList = async (subjectId) => {
+  const fetchClassList = (subjectId) => {
     const classListRef = collection(db, 'Subjects', subjectId, 'classList');
-    const classListSnapshot = await getDocs(classListRef);
-    const classListData = classListSnapshot.docs.map(doc => ({
-      id: doc.id,
-      idNumber: doc.data().idNumber,
-      name: doc.data().name,
-      section: doc.data().section,
-    }));
-    setClassList(classListData);
+    const unsubscribe = onSnapshot(classListRef, (classListSnapshot) => {
+      const classListData = classListSnapshot.docs.map(doc => ({
+        id: doc.id,
+        idNumber: doc.data().idNumber,
+        name: doc.data().name,
+        section: doc.data().section,
+      }));
+      setClassList(classListData);
+    });
+
+    return () => unsubscribe();
   };
 
   const handleSearchChange = (event) => {
@@ -87,28 +96,28 @@ const AddToClassList = () => {
   };
 
   const filteredSubjects = subjects.filter(subject =>
-    ((subject.subjectCode && subject.subjectCode.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (subject.title && subject.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (subject.instructorName && subject.instructorName.toLowerCase().includes(searchTerm.toLowerCase()))) &&
+    ((subject?.subjectCode.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (subject?.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (subject?.instructorName.toLowerCase().includes(searchTerm.toLowerCase()))) &&
     (selectedSection === '' || subject.section === selectedSection) // Grouped this condition
   );
 
   const filteredStudents = students.filter(student =>
-    ((student.idNumber && student.idNumber.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
-      (student.name.firstName && student.name.firstName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
-      (student.name.middleName && student.name.middleName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
-      (student.name.lastName && student.name.lastName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
-      (student.section && student.section.toLowerCase().includes(studentSearchTerm.toLowerCase()))) &&
+    ((student?.idNumber.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
+      (student?.name?.firstName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
+      (student?.name?.middleName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
+      (student?.name?.lastName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
+      (student?.section.toLowerCase().includes(studentSearchTerm.toLowerCase()))) &&
       (studentFilterSection === '' || student.section === studentFilterSection)
   );
 
   const { items: sortedSubjects, requestSort: requestSortSubjects, sortConfig: sortConfigSubjects } = useSortableData(filteredSubjects);
   const { items: sortedStudents, requestSort: requestSortStudents, sortConfig: sortConfigStudents } = useSortableData(filteredStudents);
 
-  const openModal = async (subject) => {
+  const openModal = (subject) => {
     setSelectedSubject(subject);
     setModalIsOpen(true);
-    await fetchClassList(subject.id);
+    fetchClassList(subject.id);
   };
 
   const closeModal = () => {
@@ -150,7 +159,6 @@ const AddToClassList = () => {
 
       try {
         await batch.commit();
-        await fetchClassList(selectedSubject.id); // Refresh the class list
         alert('Students successfully added to class list');
         // Clear the checkboxes
         setStudents(students.map(student => ({
@@ -172,25 +180,12 @@ const AddToClassList = () => {
     if (confirmed) {
       try {
         await deleteDoc(doc(db, 'Subjects', selectedSubject.id, 'classList', documentId));
-        await refreshClassList(selectedSubject.id); // Refresh the class list
         alert('Student removed from class list');
       } catch (error) {
         console.error('Error removing student from class list: ', error);
         alert('Error removing student from class list');
       }
     }
-  };
-  
-  const refreshClassList = async (subjectId) => {
-    const classListRef = collection(db, 'Subjects', subjectId, 'classList');
-    const classListSnapshot = await getDocs(classListRef);
-    const classListData = classListSnapshot.docs.map(doc => ({
-      id: doc.id,
-      idNumber: doc.data().idNumber,
-      name: doc.data().name,
-      section: doc.data().section,
-    }));
-    setClassList(classListData);
   };
 
   useEffect(() => {
