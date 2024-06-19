@@ -157,11 +157,14 @@ const Register = ({ selectedAccount }) => {
           <option value="Enrolled">Enrolled</option>
           <option value="Inactive">Inactive</option>
         </select>
-        {selectedAccount && (
+        {/*
+          {selectedAccount && (
           <>
             <input className="form-control" type="text" placeholder="MAC Address" value={macAddress} onChange={(e) => setMacAddress(e.target.value)} required />           
           </>
         )}
+        */}
+
         <input className="form-control" type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} required />
         <input className="form-control" type="password" placeholder='Confirm Password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
         

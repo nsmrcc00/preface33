@@ -132,7 +132,7 @@ const StudentTable = ({ setSelectedAccount }) => {
                         <th onClick={() => requestSort('email')} className={getClassNamesFor('email')}>Email</th>                        
                         <th onClick={() => requestSort('section')} className={getClassNamesFor('section')}>Section</th>
                         <th>Status</th>
-                        <th>MAC Address</th>
+                        {/*<th>MAC Address</th>*/}                        
                     </tr>
                 </thead>
                 <tbody>
@@ -145,7 +145,7 @@ const StudentTable = ({ setSelectedAccount }) => {
                             <td>{student.email}</td>
                             <td>{student.section}</td>
                             <td>{student.status}</td>
-                            <td>{student.macAddress}</td>
+                            {/*<td>{student.macAddress}</td>*/}                            
                         </tr>
                     ))}
                 </tbody>
