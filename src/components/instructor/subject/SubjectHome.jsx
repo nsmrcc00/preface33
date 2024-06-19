@@ -59,6 +59,9 @@ const SubjectHome = () => {
   const [numPresent, setNumPresent] = useState(0);
   const [numAbsent, setNumAbsent] = useState(0);
   const timerIntervalRef = useRef(null);
+  const [attendanceInStarted, setAttendanceInStarted] = useState(false);
+  const [attendanceOutStarted, setAttendanceOutStarted] = useState(false);
+
 
   useEffect(() => {
     if (modalIsOpen) {
@@ -238,12 +241,49 @@ const SubjectHome = () => {
     }, 1000);
   };
 
-  const stopTimer = () => {
+  const stopTimer = async () => {
     clearInterval(timerIntervalRef.current);
     setTimerRunning(false);
     setTimer(null);
-  };
 
+    if (attendanceInStarted || attendanceOutStarted) {
+      const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
+      for (const student of classList) {
+        const attendanceLedgerRef = collection(
+          doc(db, "Subjects", student.subjectDocId),
+          "classList",
+          student.id,
+          "attendanceLedger"
+        );
+        const attendanceDocRef = doc(attendanceLedgerRef, formattedDate);
+        if (attendanceInStarted) {
+          await setDoc(
+            attendanceDocRef,
+            {
+              attendanceIn: {
+                accessible: false,
+              },
+            },
+            { merge: true }
+          );
+        }
+        if (attendanceOutStarted) {
+          await setDoc(
+            attendanceDocRef,
+            {
+              attendanceOut: {
+                accessible: false,
+              },
+            },
+            { merge: true }
+          );
+        }
+      } // Reset the attendance states after updating the documents
+      setAttendanceInStarted(false);
+      setAttendanceOutStarted(false);
+    }
+  };
+    
   const formatTimer = (time) => {
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
@@ -289,7 +329,7 @@ const handleStartAttendanceIn = async () => {
       console.log("Updated accessible to false for student:", student.id);
     }, 300000); // 5 minutes
   }
-
+  setAttendanceInStarted(true);
   // Start the 5-minute timer
   startTimer(300);
 };
@@ -334,6 +374,7 @@ const handleStartAttendanceIn = async () => {
     }
 
     // Start the 5-minute timer
+    setAttendanceOutStarted(true);
     startTimer(300);
   };
 
@@ -455,7 +496,7 @@ const handleStartAttendanceIn = async () => {
               onClick={handleStartAttendanceOut}
             >
               Start Attendance Out
-            </button>            
+            </button>         
             {timerRunning && (
               <>
                 <button
@@ -465,7 +506,7 @@ const handleStartAttendanceIn = async () => {
                   Stop Timer
                 </button>
                 <div className="timer">
-                  Time remaining: {timer} seconds
+                  Time remaining: {formatTimer(timer)}
                 </div>
               </>              
             )}
