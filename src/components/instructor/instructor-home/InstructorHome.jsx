@@ -5,6 +5,7 @@ import { collection, getDocs, doc } from "firebase/firestore";
 import { useAuth } from "../../../contexts/authContext";
 import { db } from "../../../firebase/firebase";
 import { doSignOut } from "../../../firebase/auth";
+import background from "/banner_1.jpg"
 
 const InstructorHome = () => {
   const { currentUser, userLoggedIn } = useAuth();
@@ -57,6 +58,16 @@ const InstructorHome = () => {
         <InstructorHeader />
       </header>
       <main className="subjectsPage">
+              {/*
+              style={{ 
+        backgroundImage: `url(${background})`,
+        backgroundPosition: 'center center',
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',                         
+      }}
+        */}
+        <aside className="white-space"/>
         <section className="instructorPage">
           {subjects.map((subject) => (
             <div
@@ -64,22 +75,24 @@ const InstructorHome = () => {
               key={subject.id}
               onClick={() => handleSubjectClick(subject.id)}
             >
-              <p>{subject.title}</p>
-              <p>Code: {subject.subjectCode}</p>
-              <p>Section: {subject.section}</p>
+              <div className="subject-dash-div-content-container ">
+                <p style={{fontWeight: "bold"}}>{subject.title}</p>
+                <p>Code: {subject.subjectCode}</p>
+                <p>Section: {subject.section}</p>
+                {subject.Schedule && (
+                  <>
+                    <p>Days: {subject.Schedule.days}</p>
+                    <p>Time: {subject.Schedule.time}</p>
+                  </>
+                )}
+              </div>
             </div>
           ))}
         </section>
-        <aside className="instructorNotifications">
-          <h2>Notifications</h2>
-          <div>PLACEHOLDER</div>
-          <div>PLACEHOLDER</div>
-          <div>PLACEHOLDER</div>
-        </aside>
+        <aside className="white-space"/>
       </main>
     </>
   );
 };
 
 export default InstructorHome;
-

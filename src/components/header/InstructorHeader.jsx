@@ -14,11 +14,14 @@ function InstructorHeader() {
   const navigate = useNavigate();
   const { userLoggedIn, currentUser } = useAuth();
   const [show, setShow] = useState(false);
+  const [show2, setShow2] = useState(false);
   const [unloading, setUnloading] = useState(false);
   const [subjects, setSubjects] = useState([]);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  const handleClose2 = () => setShow2(false);
+  const handleShow2 = () => setShow2(true);
 
   const navi1 = (subjectId) => {
     if (userLoggedIn === true) {
@@ -109,6 +112,9 @@ function InstructorHeader() {
               <img src="/hamburger.svg" alt="Menu" />
             </Navbar.Brand>
             <Navbar.Collapse className="justify-content-end">
+              <Navbar.Brand onClick={handleShow2} style={{ cursor: "pointer" }}>
+                <img src="/notification-bell.svg" width="30" height="30" alt="Notifications" />
+              </Navbar.Brand>
               <Navbar.Brand style={{ cursor: "pointer" }}>
                 <img
                   src="/preface.png"
@@ -123,7 +129,7 @@ function InstructorHeader() {
         </Navbar>
       </header>
 
-      <Offcanvas className="header-off-canvas" show={show} onHide={handleClose}>
+      <Offcanvas className="header-off-canvas" show={show} onHide={handleClose} >
         <Offcanvas.Header closeButton></Offcanvas.Header>
         <Offcanvas.Body>
           <Stack gap={2} className="col-md mx-auto">
@@ -154,6 +160,21 @@ function InstructorHeader() {
             >
               Logout
             </button>
+          </Stack>
+        </Offcanvas.Body>
+      </Offcanvas>
+
+      <Offcanvas className="header-off-canvas" show={show2} onHide={handleClose2} placement="end">
+        <Offcanvas.Header closeButton>
+          <h4><b>Notifications</b></h4>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          <Stack gap={2} className="col-md mx-auto">
+           <ListGroup>
+           <ListGroup.Item>
+                Notification
+            </ListGroup.Item>
+           </ListGroup>
           </Stack>
         </Offcanvas.Body>
       </Offcanvas>
