@@ -179,6 +179,7 @@ const AddSubject = () => {
           archived: subjectData.archived,
           year: subjectData.year,
           term: subjectData.term,
+          Schedule: subjectData.Schedule, // Include Schedule
         });
       } else {
         console.log(
@@ -193,6 +194,7 @@ const AddSubject = () => {
           archived: subjectData.archived,
           year: subjectData.year,
           term: subjectData.term,
+          Schedule: subjectData.Schedule, // Include Schedule
         });
       }
       console.log(
