@@ -2,6 +2,29 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
+/*Notif Cards*/
+.notification-content {
+  display: flex;
+  flex-direction: column; /* Stack title and message vertically */
+}
+
+.notification-content > div:nth-child(1), /* Target the first child (title) */
+.notification-content > div:nth-child(2) { /* Target the second child (message) */
+  flex: 1; /* Allow content to grow and shrink proportionally */
+}
+
+img[alt="Close"] {
+  position: absolute; /* Position the icon absolutely */
+  top: 10px; /* Set top position from the container's top */
+  right: 10px; /* Set right position from the container's right */
+}
+
+.notification-blank {
+  display: flex;
+  justify-content: center;
+}
+
+
 /*Override React-Big-Calendar Styling*/
 .rbc-today {
   background-color: #AD1212 !important;

@@ -8,7 +8,7 @@ import Offcanvas from "react-bootstrap/Offcanvas";
 import { Stack } from "react-bootstrap";
 import ListGroup from "react-bootstrap/ListGroup";
 import { db } from "../../firebase/firebase";
-import { collection, getDocs, doc } from "firebase/firestore";
+import { collection, getDocs, doc, query, where, updateDoc } from "firebase/firestore";
 
 function InstructorHeader() {
   const navigate = useNavigate();
@@ -61,30 +61,50 @@ function InstructorHeader() {
       }
     };
 
-    const fetchNotifs = async () => {
-      try {
-        if (currentUser) {
-          const userDoc1 = doc(db, "Users", currentUser.uid);
-          const notifCollection = collection(userDoc1, "Notifications");
-          const notifSnapshot = await getDocs(notifCollection);
-          const notifList = notifSnapshot.docs.map((doc) => {
-            return {
-              id: doc.id,
-              title: doc.data().title || "", // Handle missing title
-              message: doc.data().message || "", // Handle missing message
-            };
-          });
-          console.log("Notifications fetched:", notifList);
-          setNotifs(notifList);
-        }
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-      }
-    };
-
-    fetchNotifs();
     fetchSubjects();
   }, [currentUser]);
+
+  
+  const fetchNotifs = async () => {
+    try {
+      if (currentUser) {
+        const userDoc1 = doc(db, "Users", currentUser.uid);
+        const notifCollection = collection(userDoc1, "Notifications");
+        const notifQuery = query(notifCollection, where("visible", "==", true));
+        const notifSnapshot = await getDocs(notifQuery);
+        const notifList = notifSnapshot.docs.map((doc) => {
+          return {
+            id: doc.id,
+            title: doc.data().title || "", // Handle missing title
+            message: doc.data().message || "", // Handle missing message
+          };
+        });
+        console.log("Notifications fetched:", notifList);
+        setNotifs(notifList);
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifs();
+  }, [currentUser]); // Fetch on currentUser change
+
+  const handleRefreshNotifications = async () => {
+    await fetchNotifs(); // Call the fetch function to refresh
+  };
+
+  const handleCloseNotification = async (notifId) => {
+    try {
+      const notificationRef = doc(db, "Users", currentUser.uid, "Notifications", notifId);
+      await updateDoc(notificationRef, { visible: false }); // Update "visible" to false
+      const updatedNotifs = notifs.filter((notif) => notif.id !== notifId); // Filter out closed notification
+      setNotifs(updatedNotifs);
+    } catch (error) {
+      console.error("Error hiding notification:", error);
+    }
+  };
 
   useEffect(() => {
     const handleBeforeUnload = async (event) => {
@@ -192,24 +212,37 @@ function InstructorHeader() {
           <h4><b>Notifications</b></h4>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          <Stack gap={3} className="col-md mx-auto">
+        <Stack gap={3} className="col-md mx-auto">
+          <button onClick={handleRefreshNotifications}>
+            Refresh
+          </button>
+          {notifs.length === 0 ? ( // Check if notifs array is empty
+            <div className="notification-blank">
+              <p>No notifications found.</p>
+            </div>
+            
+          ) : (
             <ListGroup>
               {notifs.map((notif) => {
                 return (
-                  <ListGroup.Item
-                    key={notif.id}
-                    action
-                  >
+                  <ListGroup.Item key={notif.id} action>
                     <div>
                       <h5>{notif.title}</h5>
                       <p>{notif.message}</p>
                     </div>
-                    <img src="/close.svg" width="18" height="18" alt="Close"/>
+                    <img
+                      src="/close.svg"
+                      width="18"
+                      height="18"
+                      alt="Close"
+                      onClick={() => handleCloseNotification(notif.id)}
+                    />
                   </ListGroup.Item>
                 );
               })}
             </ListGroup>
-          </Stack>
+          )}
+        </Stack>
         </Offcanvas.Body>
       </Offcanvas>
     </>
