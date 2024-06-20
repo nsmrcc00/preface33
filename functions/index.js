@@ -65,3 +65,23 @@ exports.deleteUser = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError("unknown", "Error deleting user");
   }
 });
+
+exports.sendNotification = functions.https.onCall(async (data, context) => {
+  const {tokens, title, body} = data;
+
+  const message = {
+    notification: {
+      title: title,
+      body: body,
+    },
+    tokens: tokens,
+  };
+
+  try {
+    const response = await admin.messaging().sendMulticast(message);
+    return {success: true, response: response};
+  } catch (error) {
+    console.error("Error sending notification:", error);
+    return {success: false, error: error};
+  }
+});
