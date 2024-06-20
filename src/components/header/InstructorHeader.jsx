@@ -17,6 +17,7 @@ function InstructorHeader() {
   const [show2, setShow2] = useState(false);
   const [unloading, setUnloading] = useState(false);
   const [subjects, setSubjects] = useState([]);
+  const [notifs, setNotifs] = useState([]);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -60,6 +61,28 @@ function InstructorHeader() {
       }
     };
 
+    const fetchNotifs = async () => {
+      try {
+        if (currentUser) {
+          const userDoc1 = doc(db, "Users", currentUser.uid);
+          const notifCollection = collection(userDoc1, "Notifications");
+          const notifSnapshot = await getDocs(notifCollection);
+          const notifList = notifSnapshot.docs.map((doc) => {
+            return {
+              id: doc.id,
+              title: doc.data().title || "", // Handle missing title
+              message: doc.data().message || "", // Handle missing message
+            };
+          });
+          console.log("Notifications fetched:", notifList);
+          setNotifs(notifList);
+        }
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      }
+    };
+
+    fetchNotifs();
     fetchSubjects();
   }, [currentUser]);
 
@@ -169,12 +192,23 @@ function InstructorHeader() {
           <h4><b>Notifications</b></h4>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          <Stack gap={2} className="col-md mx-auto">
-           <ListGroup>
-           <ListGroup.Item>
-                Notification
-            </ListGroup.Item>
-           </ListGroup>
+          <Stack gap={3} className="col-md mx-auto">
+            <ListGroup>
+              {notifs.map((notif) => {
+                return (
+                  <ListGroup.Item
+                    key={notif.id}
+                    action
+                  >
+                    <div>
+                      <h5>{notif.title}</h5>
+                      <p>{notif.message}</p>
+                    </div>
+                    <img src="/close.svg" width="18" height="18" alt="Close"/>
+                  </ListGroup.Item>
+                );
+              })}
+            </ListGroup>
           </Stack>
         </Offcanvas.Body>
       </Offcanvas>
