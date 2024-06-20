@@ -221,6 +221,39 @@ const SubjectHome = () => {
     }
   };
 
+  const sendNotificationToStudents = async (title, body) => {
+    const tokens = classList.map(student => student.fcmToken).filter(token => token);
+  
+    if (tokens.length > 0) {
+      try {
+        const response = await fetch("https://us-central1-***REMOVED***.cloudfunctions.net/sendNotification", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            tokens: tokens,
+            title: title,
+            body: body,
+          }),
+        });
+  
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+  
+        const data = await response.json();
+        console.log("Notification sent:", data);
+      } catch (error) {
+        console.error("Error sending notification:", error);
+      }
+    } else {
+      console.log("No FCM tokens available for sending notifications.");
+    }
+  };
+  
+
   const startTimer = (duration) => {
     // Clear any existing interval
     if (timerIntervalRef.current) {
@@ -266,6 +299,7 @@ const SubjectHome = () => {
             },
             { merge: true }
           );
+          sendNotificationToStudents("Attendance In", "Attendance in process has ended.");
         }
         if (attendanceOutStarted) {
           await setDoc(
@@ -277,6 +311,7 @@ const SubjectHome = () => {
             },
             { merge: true }
           );
+          sendNotificationToStudents("Attendance Out", "Attendance out process has ended.");
         }
       } // Reset the attendance states after updating the documents
       setAttendanceInStarted(false);
@@ -362,9 +397,11 @@ const SubjectHome = () => {
         console.log("Updated accessible to false for student:", student.id);
       }, 300000); // 5 minutes
     }
+    
     setAttendanceInStarted(true);
     // Start the 5-minute timer
     startTimer(300);
+    sendNotificationToStudents("Attendance In", "Attendance in process has started. Please mark your attendance.");
   };
 
   const handleStartAttendanceOut = async () => {
@@ -409,6 +446,7 @@ const SubjectHome = () => {
     // Start the 5-minute timer
     setAttendanceOutStarted(true);
     startTimer(300);
+    sendNotificationToStudents("Attendance Out", "Attendance out process has started. Please mark your attendance.");
   };
 
   const handleStatusChange = async (event, student) => {

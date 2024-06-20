@@ -1,5 +1,6 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const cors = require("cors")({origin: true});
 
 admin.initializeApp();
 
@@ -66,22 +67,33 @@ exports.deleteUser = functions.https.onCall(async (data, context) => {
   }
 });
 
-exports.sendNotification = functions.https.onCall(async (data, context) => {
-  const {tokens, title, body} = data;
+exports.sendNotification = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    if (req.method !== "POST") {
+      return res.status(405).send("Method Not Allowed");
+    }
 
-  const message = {
-    notification: {
-      title: title,
-      body: body,
-    },
-    tokens: tokens,
-  };
+    const {tokens, title, body} = req.body;
 
-  try {
-    const response = await admin.messaging().sendMulticast(message);
-    return {success: true, response: response};
-  } catch (error) {
-    console.error("Error sending notification:", error);
-    return {success: false, error: error};
-  }
+    if (!tokens || !title || !body) {
+      return res.status(400).send(
+          "Bad Request: Missing tokens, title, or body");
+    }
+
+    const message = {
+      notification: {
+        title: title,
+        body: body,
+      },
+      tokens: tokens,
+    };
+
+    try {
+      const response = await admin.messaging().sendMulticast(message);
+      return res.status(200).send(response);
+    } catch (error) {
+      console.error("Error sending notification:", error);
+      return res.status(500).send(error);
+    }
+  });
 });
