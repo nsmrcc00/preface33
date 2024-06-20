@@ -53,6 +53,19 @@ const StudentProfile = () => {
     return <div>Loading...</div>;
   }
 
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case 'Absent':
+        return { color: 'red' };
+      case 'Late':
+        return { color: 'yellow' };
+      case 'Present':
+        return { color: 'green' };
+      default:
+        return {};
+    }
+  };
+
   return (
     <>
       <header>
@@ -73,7 +86,7 @@ const StudentProfile = () => {
                 {attendanceData.map((entry, index) => (
                   <tr key={index}>
                     <td>{moment(entry.date, "MMMM D, YYYY").format("MMMM D, YYYY")}</td>
-                    <td>{entry.status}</td>
+                    <td style={getStatusStyle(entry.status)}>{entry.status}</td>
                   </tr>
                 ))}
               </tbody>
