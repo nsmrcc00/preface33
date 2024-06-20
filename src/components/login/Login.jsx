@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/authContext";
-import { doSignInWithEmailAndPassword } from "../../firebase/auth";
+import { doSignInWithEmailAndPassword, updateFcmToken } from "../../firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 
@@ -27,7 +27,11 @@ const Login = () => {
             navigate("/unauthorized"); // Redirect unauthorized users
           } else if (!userData.Passchange) {
             navigate("/change-password"); // Redirect to change password page
+          } else {
+            // Update FCM token if user has logged in successfully
+            await updateFcmToken(userId); // Call function to update FCM token
           }
+
         } else {
           console.error("No such user document!");
           alert("Error! User document not found.");

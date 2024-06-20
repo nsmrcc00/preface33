@@ -1,6 +1,7 @@
 import { doc, setDoc, deleteDoc, updateDoc } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { auth, db, functions } from "./firebase";
+import { getMessaging, getToken } from "firebase/messaging";
 import {
   /*createUserWithEmailAndPassword,*/
   signInWithEmailAndPassword,
@@ -61,6 +62,19 @@ export const doUpdateUser = async (userId, email, firstName, middleName, lastNam
 
   return true;
 };
+
+export async function updateFcmToken(userId) {
+  const messaging = getMessaging();
+
+  try {
+    const token = await getToken(messaging, { vapidKey: "***REMOVED***" }); // Replace with your VAPID key
+    const userDocRef = doc(db, "Users", userId);
+    await updateDoc(userDocRef, { fcmToken: token });
+    console.log("FCM token updated successfully");
+  } catch (error) {
+    console.error("Error updating FCM token:", error);
+  }
+}
 
 /*
 
