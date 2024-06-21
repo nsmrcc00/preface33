@@ -3,6 +3,7 @@ import { useParams, useLocation } from "react-router-dom";
 import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "../../../../firebase/firebase";
 import { useState, useEffect } from "react";
+import { getAuth } from "firebase/auth";
 import moment from "moment";
 
 const StudentProfile = () => {
@@ -11,6 +12,8 @@ const StudentProfile = () => {
   const { subjectDocId } = location.state || {}; // Provide a default value
   const [studentData, setStudentData] = useState(null);
   const [attendanceData, setAttendanceData] = useState([]);
+  const [subjectTitle, setSubjectTitle] = useState('');
+  const [userEmail, setUserEmail] = useState('');
 
   useEffect(() => {
     const fetchStudentData = async () => {
@@ -21,25 +24,38 @@ const StudentProfile = () => {
         }
 
         console.log('Fetching student data for studentId:', studentId);
-        const studentDoc = doc(db, "Subjects", subjectDocId, "classList", studentId);
-        const studentSnapshot = await getDoc(studentDoc);
-        if (studentSnapshot.exists()) {
-          const studentData = studentSnapshot.data();
-          console.log('Fetched student data:', studentData);
-          setStudentData(studentData);
+        const subjectDoc = doc(db, "Subjects", subjectDocId);
+        const subjectSnapshot = await getDoc(subjectDoc);
 
-          // Fetch attendance data
-          const attendanceLedgerRef = collection(studentDoc, "attendanceLedger");
-          const attendanceLedgerSnapshot = await getDocs(attendanceLedgerRef);
-          const attendanceList = attendanceLedgerSnapshot.docs.map(doc => ({
-            date: doc.id,
-            status: doc.data().status
-          }));
+        if (subjectSnapshot.exists()) {
+          const subjectData = subjectSnapshot.data();
+          const title = subjectData.title;
+          setSubjectTitle(title);
+          console.log('Fetched subject title:', title);
 
-          console.log('Fetched attendance data:', attendanceList);
-          setAttendanceData(attendanceList);
+          const studentDoc = doc(db, "Subjects", subjectDocId, "classList", studentId);
+          const studentSnapshot = await getDoc(studentDoc);
+
+          if (studentSnapshot.exists()) {
+            const studentData = studentSnapshot.data();
+            console.log('Fetched student data:', studentData);
+            setStudentData(studentData);
+
+            // Fetch attendance data
+            const attendanceLedgerRef = collection(studentDoc, "attendanceLedger");
+            const attendanceLedgerSnapshot = await getDocs(attendanceLedgerRef);
+            const attendanceList = attendanceLedgerSnapshot.docs.map(doc => ({
+              date: doc.id,
+              status: doc.data().status
+            }));
+
+            console.log('Fetched attendance data:', attendanceList);
+            setAttendanceData(attendanceList);
+          } else {
+            console.log('Student data not found');
+          }
         } else {
-          console.log('Student data not found');
+          console.log('Subject data not found');
         }
       } catch (error) {
         console.error("Error fetching student data:", error);
@@ -48,6 +64,34 @@ const StudentProfile = () => {
 
     fetchStudentData();
   }, [studentId, subjectDocId]);
+
+  useEffect(() => {
+    const fetchUserEmail = async () => {
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+  
+        if (user) {
+          const userDoc = doc(db, "Users", user.uid);
+          const userSnapshot = await getDoc(userDoc);
+  
+          if (userSnapshot.exists()) {
+            const userData = userSnapshot.data();
+            setUserEmail(userData.email); // Assuming email field is stored as "email"
+            console.log('Fetched user email:', userData.email);
+          } else {
+            console.log('User data not found');
+          }
+        } else {
+          console.log('No user is signed in');
+        }
+      } catch (error) {
+        console.error("Error fetching user email:", error);
+      }
+    };
+  
+    fetchUserEmail();
+  }, []);
 
   if (!studentData) {
     return <div>Loading...</div>;
@@ -65,6 +109,41 @@ const StudentProfile = () => {
         return {};
     }
   };
+
+  const sendNotificationToStudents = async (title, body) => {
+    if (studentData && studentData.fcmToken) {
+      const tokens = [studentData.fcmToken]; // Wrap in an array for the API
+      console.log("Sending notification to tokens:", tokens);
+
+      try {
+        const response = await fetch("https://us-central1-***REMOVED***.cloudfunctions.net/sendNotification", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            tokens: tokens,
+            title: title,
+            body: body,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        const data = await response.json();
+        console.log("Notification sent:", data);
+      } catch (error) {
+        console.error("Error sending notification:", error);
+      }
+    } else {
+      console.log("No FCM token available for sending notifications.");
+    }
+  };
+
+  const absenceCount = attendanceData.filter(entry => entry.status === 'Absent').length;
 
   return (
     <>
@@ -92,7 +171,6 @@ const StudentProfile = () => {
               </tbody>
             </table>                                   
           </div>
-          
         </section>
         <section className="subject-home-container">
           <div id="attendanceTotal" className="table-container">
@@ -102,9 +180,14 @@ const StudentProfile = () => {
             </div>
             <div className="attendanceTotalContent">
               <p>Total number of absences:</p>
-              <p>{attendanceData.filter(entry => entry.status === 'Absent').length}/3</p>
+              <p>{absenceCount}/3</p>
             </div>
-          </div>          
+            {absenceCount >= 3 && (
+            <div className="attendanceTotalContent">
+              <button onClick={() => sendNotificationToStudents("Attendance Warning", `You have accumulated ${absenceCount} absences in ${subjectTitle}. Please contact your instructor at ${userEmail} for further instructions.`)}>Notify Student</button>
+            </div>              
+            )}        
+          </div>
         </section>
       </main>
     </>
