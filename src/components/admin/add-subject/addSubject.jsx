@@ -165,6 +165,7 @@ const AddSubject = () => {
         archived: subjectData.archived,
         year: subjectData.year,
         term: subjectData.term,
+        instructorEmail: subjectData.instructor.email,
       });
 
       if (subjectHandledDoc) {
@@ -179,6 +180,7 @@ const AddSubject = () => {
           archived: subjectData.archived,
           year: subjectData.year,
           term: subjectData.term,
+          instructorEmail: subjectData.instructor.email,
           Schedule: subjectData.Schedule, // Include Schedule
         });
       } else {
@@ -194,6 +196,7 @@ const AddSubject = () => {
           archived: subjectData.archived,
           year: subjectData.year,
           term: subjectData.term,
+          instructorEmail: subjectData.instructor.email,
           Schedule: subjectData.Schedule, // Include Schedule
         });
       }
@@ -211,6 +214,7 @@ const AddSubject = () => {
       id: instructorData.id,
       ref: instructorData.ref,
       name: instructorData.name,
+      email: instructorData.email,
     },
     Schedule: formattedSchedule,
     section: subject.section,
@@ -375,6 +379,7 @@ const AddSubject = () => {
                 data.name.middleName ? data.name.middleName + " " : ""
               }${data.name.lastName}`,
               role: data.role,
+              email: data.email,
             };
           })
           .filter((user) => user.role === "instructor");
