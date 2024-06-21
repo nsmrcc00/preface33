@@ -298,8 +298,7 @@ const SubjectHome = () => {
               },
             },
             { merge: true }
-          );
-          sendNotificationToStudents("Attendance In", "Attendance in process has ended.");
+          );          
         }
         if (attendanceOutStarted) {
           await setDoc(
@@ -310,10 +309,18 @@ const SubjectHome = () => {
               },
             },
             { merge: true }
-          );
-          sendNotificationToStudents("Attendance Out", "Attendance out process has ended.");
+          );          
         }
       } // Reset the attendance states after updating the documents
+
+      if (attendanceInStarted) {
+        sendNotificationToStudents("Attendance In", `Attendance in process has ended for ${subject.title}.`);
+      }
+
+      if (attendanceOutStarted) {
+        sendNotificationToStudents("Attendance Out", `Attendance out process has ended for ${subject.title}.`);
+      }
+
       setAttendanceInStarted(false);
       setAttendanceOutStarted(false);
     }
@@ -401,7 +408,7 @@ const SubjectHome = () => {
     setAttendanceInStarted(true);
     // Start the 5-minute timer
     startTimer(300);
-    sendNotificationToStudents("Attendance In", "Attendance in process has started. Please mark your attendance.");
+    sendNotificationToStudents("Attendance In", `Attendance in process has started for ${subject.title}. Please mark your attendance.`);
   };
 
   const handleStartAttendanceOut = async () => {
@@ -446,7 +453,7 @@ const SubjectHome = () => {
     // Start the 5-minute timer
     setAttendanceOutStarted(true);
     startTimer(300);
-    sendNotificationToStudents("Attendance Out", "Attendance out process has started. Please mark your attendance.");
+    sendNotificationToStudents("Attendance Out", `Attendance out process has started for ${subject.title}. Please mark your attendance.`);
   };
 
   const handleStatusChange = async (event, student) => {
