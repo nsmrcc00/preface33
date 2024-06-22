@@ -18,7 +18,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app)
 const db = getFirestore(app);
-const functions = getFunctions(app);
+const functions = getFunctions(app, "asia-southeast1");
 const messaging = getMessaging(app);
 
 export { app, auth, db, functions, messaging, getToken };

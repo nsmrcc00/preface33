@@ -210,7 +210,7 @@ const SubjectHome = () => {
   
     if (tokens.length > 0) {
       try {
-        const response = await fetch("https://us-central1-***REMOVED***.cloudfunctions.net/sendNotification", {
+        const response = await fetch("https://asia-southeast1-***REMOVED***.cloudfunctions.net/sendNotification", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
