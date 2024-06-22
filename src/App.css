@@ -96,6 +96,11 @@ img[alt="Close"] {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  padding: 1.5rem;
+}
+
+.subject-home-heading {
+  margin-bottom: 1.5rem;
 }
 
 #attendanceTotal {
@@ -108,9 +113,18 @@ img[alt="Close"] {
 .attendanceTotalContent{
   display: flex;
   justify-content: start;
-  gap: 1rem;
-  
+  gap: 1rem;  
 }
+
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  gap: 2rem;
+}
+
 /*Login Page*/
 #login-page {
   width: auto;
@@ -386,7 +400,7 @@ input[type=number] {
   padding: 1.5rem;
   box-sizing: border-box;
   height: 50%;
-  gap: 1.5rem;
+  gap: 1.5rem;  
 }
 
 .subject-dash-div{
@@ -397,6 +411,7 @@ input[type=number] {
   background-color: #AD1212;
   color: #fff;
   cursor: pointer;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
 }
 
 .subject-dash-div-content-container {
@@ -425,6 +440,7 @@ input[type=number] {
   box-sizing: border-box;
   border: 1px solid #ddd;
   overflow-x: auto;
+  
 }
 
 
@@ -436,7 +452,7 @@ input[type=number] {
     padding: 12px;
     gap: 12px;
   }
-  .instructorNotifications {
+  .instructorNotifications,.white-space {
     display: none;
   }
   

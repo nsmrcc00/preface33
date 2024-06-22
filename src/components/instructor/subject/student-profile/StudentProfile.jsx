@@ -5,11 +5,12 @@ import { db } from "../../../../firebase/firebase";
 import { useState, useEffect } from "react";
 import { getAuth } from "firebase/auth";
 import moment from "moment";
+import { Spinner } from "react-bootstrap";
 
 const StudentProfile = () => {
   const { studentId } = useParams();
   const location = useLocation();
-  const { subjectDocId } = location.state || {}; // Provide a default value
+  const { subjectId } = location.state || {}; // Provide a default value
   const [studentData, setStudentData] = useState(null);
   const [attendanceData, setAttendanceData] = useState([]);
   const [subjectTitle, setSubjectTitle] = useState('');
@@ -18,13 +19,13 @@ const StudentProfile = () => {
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
-        if (!subjectDocId) {
+        if (!subjectId) {
           console.error("subjectDocId is missing");
           return;
         }
 
         console.log('Fetching student data for studentId:', studentId);
-        const subjectDoc = doc(db, "Subjects", subjectDocId);
+        const subjectDoc = doc(db, "Subjects", subjectId);
         const subjectSnapshot = await getDoc(subjectDoc);
 
         if (subjectSnapshot.exists()) {
@@ -33,7 +34,7 @@ const StudentProfile = () => {
           setSubjectTitle(title);
           console.log('Fetched subject title:', title);
 
-          const studentDoc = doc(db, "Subjects", subjectDocId, "classList", studentId);
+          const studentDoc = doc(db, "Subjects", subjectId, "classList", studentId);
           const studentSnapshot = await getDoc(studentDoc);
 
           if (studentSnapshot.exists()) {
@@ -63,7 +64,7 @@ const StudentProfile = () => {
     };
 
     fetchStudentData();
-  }, [studentId, subjectDocId]);
+  }, [studentId, subjectId]);
 
   useEffect(() => {
     const fetchUserEmail = async () => {
@@ -94,7 +95,16 @@ const StudentProfile = () => {
   }, []);
 
   if (!studentData) {
-    return <div>Loading...</div>;
+    return (
+      <>
+        <div className="loading-screen">
+        <h2>Loading Attendance Record</h2>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+        </div>
+      </>
+    );
   }
 
   const getStatusStyle = (status) => {

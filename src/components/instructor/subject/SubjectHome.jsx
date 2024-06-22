@@ -61,6 +61,7 @@ const SubjectHome = () => {
   const timerIntervalRef = useRef(null);
   const [attendanceInStarted, setAttendanceInStarted] = useState(false);
   const [attendanceOutStarted, setAttendanceOutStarted] = useState(false);
+  const [loading, setLoading] = useState(true); // New loading state
 
 
   useEffect(() => {
@@ -101,15 +102,16 @@ const SubjectHome = () => {
     }
   };
 
-  const navi2 = (studentId, subjectDocId) => {
+  const navi2 = (studentId) => {
     console.log("Navigating to student profile:", studentId);
     if (userLoggedIn === true) {
-      navigate(`/student-profile/${studentId}`, { state: { subjectDocId } });
+      navigate(`/student-profile/${studentId}`, { state: { subjectId } });
     } else {
       doSignOut();
       navigate("/login");
     }
   };
+  
 
   const fetchClassList = (subjectTitle, subjectSection) => {
     console.log("Fetching class list for:", subjectTitle, subjectSection);
@@ -124,7 +126,7 @@ const SubjectHome = () => {
       const classListData = [];
 
       for (const subjectDoc of querySnapshot.docs) {
-        const subjectDocId = subjectDoc.id;
+        const subjectId = subjectDoc.id;
         const classListRef = collection(subjectDoc.ref, "classList");
         const classListSnapshot = await getDocs(classListRef);
 
@@ -132,7 +134,7 @@ const SubjectHome = () => {
           const studentData = {
             id: studentDoc.id,
             ...studentDoc.data(),
-            subjectDocId,
+            subjectId,
           };
           const attendanceLedgerRef = collection(
             studentDoc.ref,
@@ -167,6 +169,7 @@ const SubjectHome = () => {
       console.log("Class list data:", classListData);
       setClassList(classListData);
       setFilteredClassList(classListData);
+      setLoading(false);
     });
 
     return unsubscribe; // Return the unsubscribe function to clean up the listener
@@ -283,7 +286,7 @@ const SubjectHome = () => {
       const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
       for (const student of classList) {
         const attendanceLedgerRef = collection(
-          doc(db, "Subjects", student.subjectDocId),
+          doc(db, "Subjects", student.subjectId),
           "classList",
           student.id,
           "attendanceLedger"
@@ -338,7 +341,7 @@ const SubjectHome = () => {
 
     for (const student of classList) {
       const attendanceLedgerRef = collection(
-        doc(db, "Subjects", student.subjectDocId),
+        doc(db, "Subjects", student.subjectId),
         "classList",
         student.id,
         "attendanceLedger"
@@ -377,7 +380,7 @@ const SubjectHome = () => {
     for (const student of classList) {
       console.log("Processing student:", student.id);
       const attendanceLedgerRef = collection(
-        doc(db, "Subjects", student.subjectDocId),
+        doc(db, "Subjects", student.subjectId),
         "classList",
         student.id,
         "attendanceLedger"
@@ -423,7 +426,7 @@ const SubjectHome = () => {
     for (const student of classList) {
       console.log("Processing student:", student.id);
       const attendanceLedgerRef = collection(
-        doc(db, "Subjects", student.subjectDocId),
+        doc(db, "Subjects", student.subjectId),
         "classList",
         student.id,
         "attendanceLedger"
@@ -460,7 +463,7 @@ const SubjectHome = () => {
     const newStatus = event.target.value;
     const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
     const attendanceLedgerRef = collection(
-      doc(db, "Subjects", student.subjectDocId),
+      doc(db, "Subjects", student.subjectId),
       "classList",
       student.id,
       "attendanceLedger"
@@ -497,7 +500,7 @@ const SubjectHome = () => {
         <section className="subject-home-container">
           {subject && (
             <>
-              <h1>
+              <h1 className="subject-home-heading">
                 {subject.title} - {subject.section}
               </h1>
               <div className="table-container">
@@ -613,7 +616,22 @@ const SubjectHome = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredClassList.map((student, index) => (
+            {loading ? (
+              <tr>
+                <td colSpan={6} className="empty-data">
+                    <span>Loading...</span>              
+                </td>
+              </tr>
+            ) : filteredClassList.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="empty-data">
+
+                    <span>No students found.</span>
+
+                </td>
+              </tr>
+              ) : (
+              filteredClassList.map((student, index) => (
                 <tr key={index}>
                   <td>{student.name}</td>
                   <td>{student.section}</td>
@@ -645,13 +663,14 @@ const SubjectHome = () => {
                   </td>
                   <td>
                     <button
-                      onClick={() => navi2(student.id, student.subjectDocId)}
+                      onClick={() => navi2(student.id)}
                     >
                       View Profile
                     </button>
                   </td>
                 </tr>
-              ))}
+              ))
+            )}
             </tbody>
           </table>
         </div>
