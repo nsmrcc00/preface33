@@ -26,20 +26,14 @@ Modal.setAppElement("#root");
 const CustomToolbar = ({ label, onNavigate }) => (
   <div className="calendar-toolbar">
     <h3 className="toolbar-label">{label}</h3>
-    <button
-      className="calendar-toolbar-btn"
-      onClick={() => onNavigate("TODAY")}
-    >
-      Today
-    </button>
-    <button className="calendar-toolbar-btn" onClick={() => onNavigate("PREV")}>
-      Previous
-    </button>
-    <button className="calendar-toolbar-btn" onClick={() => onNavigate("NEXT")}>
-      Next
-    </button>
+    {["TODAY", "PREV", "NEXT"].map((action) => (
+      <button key={action} className="calendar-toolbar-btn" onClick={() => onNavigate(action)}>
+        {action.charAt(0) + action.slice(1).toLowerCase()}
+      </button>
+    ))}
   </div>
 );
+
 
 const SubjectHome = () => {
   const navigate = useNavigate();
@@ -65,14 +59,8 @@ const SubjectHome = () => {
 
 
   useEffect(() => {
-    if (modalIsOpen) {
-      document.body.classList.add("hide-rbc-button-link");
-    } else {
-      document.body.classList.remove("hide-rbc-button-link");
-    }
-    return () => {
-      document.body.classList.remove("hide-rbc-button-link");
-    };
+    document.body.classList.toggle("hide-rbc-button-link", modalIsOpen);
+    return () => document.body.classList.remove("hide-rbc-button-link");
   }, [modalIsOpen]);
 
   const handleSelectSlot = ({ start }) => {
@@ -87,21 +75,6 @@ const SubjectHome = () => {
     setSelectedDate(null);
   };
 
-  const afterOpenModal = () => {
-    console.log("Modal opened");
-    const modalElement = document.querySelector(".ReactModal__Content");
-    if (modalElement) {
-      modalElement.focus();
-    }
-  };
-
-  const afterCloseModal = () => {
-    console.log("Modal after close");
-    if (calendarRef.current) {
-      calendarRef.current.focus();
-    }
-  };
-
   const navi2 = (studentId) => {
     console.log("Navigating to student profile:", studentId);
     if (userLoggedIn === true) {
@@ -112,7 +85,6 @@ const SubjectHome = () => {
     }
   };
   
-
   const fetchClassList = (subjectTitle, subjectSection) => {
     console.log("Fetching class list for:", subjectTitle, subjectSection);
     const subjectsRef = collection(db, "Subjects");
@@ -121,20 +93,25 @@ const SubjectHome = () => {
       where("title", "==", subjectTitle),
       where("section", "==", subjectSection)
     );
-
+  
     const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-      const classListData = [];
-
-      for (const subjectDoc of querySnapshot.docs) {
+      const classListDataPromises = querySnapshot.docs.map(async (subjectDoc) => {
         const subjectId = subjectDoc.id;
         const classListRef = collection(subjectDoc.ref, "classList");
         const classListSnapshot = await getDocs(classListRef);
-
-        for (const studentDoc of classListSnapshot.docs) {
+        
+        return Promise.all(classListSnapshot.docs.map(async (studentDoc) => {
           const studentData = {
             id: studentDoc.id,
             ...studentDoc.data(),
             subjectId,
+            attendance: {
+              in: false,
+              inTimestamp: null,
+              out: false,
+              outTimestamp: null,
+              status: "--",
+            }
           };
           const attendanceLedgerRef = collection(
             studentDoc.ref,
@@ -142,39 +119,43 @@ const SubjectHome = () => {
           );
           const attendanceDocId = moment(selectedDate).format("MMMM D, YYYY");
           const attendanceDocRef = doc(attendanceLedgerRef, attendanceDocId);
-          const attendanceDocSnapshot = await getDoc(attendanceDocRef);
-
-          if (attendanceDocSnapshot.exists()) {
-            const attendanceData = attendanceDocSnapshot.data();
-            studentData.attendance = {
-              in: attendanceData.attendanceIn?.In || false,
-              inTimestamp: attendanceData.attendanceIn?.timestamp || null,
-              out: attendanceData.attendanceOut?.Out || false,
-              outTimestamp: attendanceData.attendanceOut?.timestamp || null,
-              status: attendanceData.status || "--",
-            };
-          } else {
-            studentData.attendance = {
-              in: false,
-              inTimestamp: null,
-              out: false,
-              outTimestamp: null,
-              status: "--",
-            };
-          }
-
-          classListData.push(studentData);
-        }
-      }
+          
+          const unsubscribeAttendance = onSnapshot(attendanceDocRef, (attendanceDocSnapshot) => {
+            if (attendanceDocSnapshot.exists()) {
+              const attendanceData = attendanceDocSnapshot.data();
+              studentData.attendance = {
+                in: attendanceData.attendanceIn?.In || false,
+                inTimestamp: attendanceData.attendanceIn?.timestamp ? attendanceData.attendanceIn.timestamp.toDate() : null,
+                out: attendanceData.attendanceOut?.Out || false,
+                outTimestamp: attendanceData.attendanceOut?.timestamp ? attendanceData.attendanceOut.timestamp.toDate() : null,
+                status: attendanceData.status || "--",
+              };
+            }
+            setClassList((prevClassList) =>
+              prevClassList.map((item) =>
+                item.id === studentData.id ? studentData : item
+              )
+            );
+            setFilteredClassList((prevFilteredList) =>
+              prevFilteredList.map((item) =>
+                item.id === studentData.id ? studentData : item
+              )
+            );
+          });
+          return studentData;
+        }));
+      });
+  
+      const classListData = await Promise.all(classListDataPromises).then(results => results.flat());
       console.log("Class list data:", classListData);
       setClassList(classListData);
       setFilteredClassList(classListData);
       setLoading(false);
     });
-
+  
     return unsubscribe; // Return the unsubscribe function to clean up the listener
   };
-
+  
   useEffect(() => {
     const fetchSubject = async () => {
       console.log("Fetching subject");
@@ -257,7 +238,7 @@ const SubjectHome = () => {
   };
   
 
-  const startTimer = (duration) => {
+  const startTimer = (duration, onEndCallback) => {
     // Clear any existing interval
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
@@ -270,12 +251,16 @@ const SubjectHome = () => {
         if (prevTime <= 1) {
           clearInterval(timerIntervalRef.current);
           setTimerRunning(false);
+          if (onEndCallback) {
+            onEndCallback();
+          }
           return 0;
         }
         return prevTime - 1;
       });
     }, 1000);
   };
+  
 
   const stopTimer = async () => {
     clearInterval(timerIntervalRef.current);
@@ -284,45 +269,20 @@ const SubjectHome = () => {
 
     if (attendanceInStarted || attendanceOutStarted) {
       const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
-      for (const student of classList) {
-        const attendanceLedgerRef = collection(
-          doc(db, "Subjects", student.subjectId),
-          "classList",
-          student.id,
-          "attendanceLedger"
+      const updateAttendance = async (studentId, attendanceType) => {
+        await setDoc(
+          doc(collection(doc(db, "Subjects", subjectId), "classList", studentId, "attendanceLedger"), formattedDate),
+          { [attendanceType]: { accessible: false } },
+          { merge: true }
         );
-        const attendanceDocRef = doc(attendanceLedgerRef, formattedDate);
-        if (attendanceInStarted) {
-          await setDoc(
-            attendanceDocRef,
-            {
-              attendanceIn: {
-                accessible: false,
-              },
-            },
-            { merge: true }
-          );          
-        }
-        if (attendanceOutStarted) {
-          await setDoc(
-            attendanceDocRef,
-            {
-              attendanceOut: {
-                accessible: false,
-              },
-            },
-            { merge: true }
-          );          
-        }
-      } // Reset the attendance states after updating the documents
-
-      if (attendanceInStarted) {
-        sendNotificationToStudents("Attendance In", `Attendance in process has ended for ${subject.title}.`);
+      };
+      for (const student of classList) {
+        if (attendanceInStarted) await updateAttendance(student.id, "attendanceIn");
+        if (attendanceOutStarted) await updateAttendance(student.id, "attendanceOut");
       }
 
-      if (attendanceOutStarted) {
-        sendNotificationToStudents("Attendance Out", `Attendance out process has ended for ${subject.title}.`);
-      }
+      if (attendanceInStarted) sendNotificationToStudents("Attendance In", `Attendance in process has ended for ${subject.title}.`);
+      if (attendanceOutStarted) sendNotificationToStudents("Attendance Out", `Attendance out process has ended for ${subject.title}.`);
 
       setAttendanceInStarted(false);
       setAttendanceOutStarted(false);
@@ -369,93 +329,55 @@ const SubjectHome = () => {
   };
 
   const handleStartAttendanceIn = async () => {
-    if (!selectedDate) {
-      console.log("No selected date");
-      return;
-    }
-
+    if (!selectedDate) return;
     const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
-    console.log("Starting attendance in for date:", formattedDate);
 
     for (const student of classList) {
       console.log("Processing student:", student.id);
-      const attendanceLedgerRef = collection(
-        doc(db, "Subjects", student.subjectId),
-        "classList",
-        student.id,
-        "attendanceLedger"
-      );
-      const attendanceDocRef = doc(attendanceLedgerRef, formattedDate);
-
-      await setDoc(attendanceDocRef, {
-        attendanceIn: {
-          In: false,
-          timestamp: null,
-          accessible: true,
-        },
-        status: "Absent",
-      });
-      console.log("Attendance in recorded for student:", student.id);
-
-      // Set a timeout to update the 'accessible' field to false after 5 minutes
-      setTimeout(async () => {
-        await setDoc(attendanceDocRef, {
-          attendanceIn: {
-            accessible: false,
-          },
-        }, { merge: true });
-        console.log("Updated accessible to false for student:", student.id);
-      }, 300000); // 5 minutes
-    }
-    
+      await setDoc(
+        doc(collection(doc(db, "Subjects", student.subjectId), "classList", student.id, "attendanceLedger"), formattedDate),
+        { attendanceIn: { In: false, timestamp: null, accessible: true }, status: "Absent" },
+        { merge: true }
+      );    
+    }    
     setAttendanceInStarted(true);
-    // Start the 5-minute timer
-    startTimer(300);
+    startTimer(300, async () => {
+      for (const student of classList) {
+        await setDoc(
+          doc(collection(doc(db, "Subjects", student.subjectId), "classList", student.id, "attendanceLedger"), formattedDate),
+          { attendanceIn: { accessible: false } },
+          { merge: true }
+        );
+        console.log("Updated accessible to false for student:", student.id);
+      }
+    });
+    console.log(`Attendance in process has started for ${subject.title}. Please mark your attendance.`);
     sendNotificationToStudents("Attendance In", `Attendance in process has started for ${subject.title}. Please mark your attendance.`);
   };
 
   const handleStartAttendanceOut = async () => {
-    if (!selectedDate) {
-      console.log("No selected date");
-      return;
-    }
-
+    if (!selectedDate) return;
     const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
-    console.log("Starting attendance out for date:", formattedDate);
 
     for (const student of classList) {
-      console.log("Processing student:", student.id);
-      const attendanceLedgerRef = collection(
-        doc(db, "Subjects", student.subjectId),
-        "classList",
-        student.id,
-        "attendanceLedger"
-      );
-      const attendanceDocRef = doc(attendanceLedgerRef, formattedDate);
-
-      await setDoc(attendanceDocRef, {
-        attendanceOut: {
-          Out: false,
-          timestamp: null,
-          accessible: true,
-        },
-      }, { merge: true });
-      console.log("Attendance out recorded for student:", student.id);
-
-      // Set a timeout to update the 'accessible' field to false after 5 minutes
-      setTimeout(async () => {
-        await setDoc(attendanceDocRef, {
-          attendanceOut: {
-            accessible: false,
-          },
-        }, { merge: true });
-        console.log("Updated accessible to false for student:", student.id);
-      }, 300000); // 5 minutes
+      await setDoc(
+        doc(collection(doc(db, "Subjects", student.subjectId), "classList", student.id, "attendanceLedger"), formattedDate),
+        { attendanceOut: { Out: false, timestamp: null, accessible: true } },
+        { merge: true }
+      );      
     }
-
-    // Start the 5-minute timer
     setAttendanceOutStarted(true);
-    startTimer(300);
+    startTimer(300, async () => {
+      for (const student of classList) {
+        await setDoc(
+          doc(collection(doc(db, "Subjects", student.subjectId), "classList", student.id, "attendanceLedger"), formattedDate),
+          { attendanceOut: { accessible: false } },
+          { merge: true }
+        );
+        console.log("Updated accessible to false for student:", student.id);
+      }
+    });
+    console.log(`Attendance out process has started for ${subject.title}. Please mark your attendance.`);
     sendNotificationToStudents("Attendance Out", `Attendance out process has started for ${subject.title}. Please mark your attendance.`);
   };
 
@@ -528,8 +450,6 @@ const SubjectHome = () => {
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={closeModal}
-        onAfterOpen={afterOpenModal}
-        onAfterClose={afterCloseModal}
         contentLabel="Attendance"
         style={{
           content: {
@@ -636,17 +556,13 @@ const SubjectHome = () => {
                   <td>{student.name}</td>
                   <td>{student.section}</td>
                   <td>
-                    {student.attendance.in
-                      ? moment(student.attendance.inTimestamp.toDate()).format(
-                          "hh:mm A"
-                        )
+                    {student.attendance.inTimestamp
+                      ? moment(student.attendance.inTimestamp).format("hh:mm A")
                       : "--"}
                   </td>
                   <td>
-                    {student.attendance.out
-                      ? moment(student.attendance.outTimestamp.toDate()).format(
-                          "hh:mm A"
-                        )
+                    {student.attendance.outTimestamp
+                      ? moment(student.attendance.outTimestamp).format("hh:mm A")
                       : "--"}
                   </td>
                   <td>
