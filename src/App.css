@@ -225,13 +225,24 @@ img[alt="Close"] {
   padding: 15px 12px 50px 12px;
 }
 
-#submitSub{
+.SubjectModal {
+  text-align: center
+}
+
+.submitSubContent{
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.subject-fields {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  flex-wrap: nowrap;
-  justify-content: space-evenly;
-  margin-top: 1rem;
+  width: max(450px, 45%);
+  padding: 1rem;
+  border: 1px solid #ddd;
 }
 
 .addSubForm{
@@ -244,9 +255,11 @@ img[alt="Close"] {
   display: flex;
   margin-top: 10px;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: center;
   flex-wrap: wrap;
+  width: 100%;
 }
+
 .subCrudButton {
   margin: 8px;
   width: 180px;
@@ -257,6 +270,15 @@ img[alt="Close"] {
   margin: 0px 10px 10px 0px;
   width: 180px;
   height: 34px;
+}
+
+#submitSub{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: space-evenly;
+  margin-top: 1rem;
 }
 
 
@@ -346,10 +368,9 @@ input[type=number] {
 }
 
 .schedule-table{  
-  margin-top: 1.5rem;
-  
+  /*margin-top: 1.5rem;*/  
   border-collapse: collapse;
-  width: 400px;  
+  width: max(100%, 400px);  
 }
 .schedule-table th,
 .schedule-table td {
@@ -455,7 +476,10 @@ input[type=number] {
   .instructorNotifications,.white-space {
     display: none;
   }
-  
+  .subject-fields {
+    align-items: center;
+    border: 0;
+  }
 } 
 
 

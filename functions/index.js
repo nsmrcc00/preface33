@@ -3,9 +3,93 @@ const admin = require("firebase-admin");
 const cors = require("cors")({origin: true});
 
 admin.initializeApp();
+const db = admin.firestore();
+
 
 // Define region
 const region = "asia-southeast1";
+
+const createNotifications = async () => {
+  try {
+    const usersSnapshot = await db
+        .collection("Users")
+        .where("role", "==", "instructor")
+        .get();
+    usersSnapshot.forEach(async (userDoc) => {
+      const userId = userDoc.id;
+      const subjectsSnapshot = await db
+          .collection("Users")
+          .doc(userId)
+          .collection("subjectsHandled")
+          .get();
+      subjectsSnapshot.forEach(async (subjectDoc) => {
+        const subjectId = subjectDoc.id;
+        const subjectData = await admin.firestore()
+            .collection("Subjects")
+            .doc(subjectId)
+            .get();
+        const subjectTitle = subjectData.data().title;
+        const classListSnapshot = await db
+            .collection("Subjects")
+            .doc(subjectId)
+            .collection("classList")
+            .get();
+        classListSnapshot.forEach(async (studentDoc) => {
+          const studentId = studentDoc.id;
+          const studentName = studentDoc.data().name;
+          const attendanceLedgerSnapshot = await db
+              .collection("Subjects")
+              .doc(subjectId)
+              .collection("classList")
+              .doc(studentId)
+              .collection("attendanceLedger")
+              .get();
+
+          let totalClasses = 0;
+          let absences = 0;
+          let lates = 0;
+          attendanceLedgerSnapshot.forEach((attendanceDoc) => {
+            totalClasses++;
+            const status = attendanceDoc.data().status;
+            if (status === "Absent") {
+              absences++;
+            } else if (status === "Late") {
+              lates++;
+            }
+          });
+
+          const absencePercentage = (absences / totalClasses) * 100;
+          const latePercentage = (lates / totalClasses) * 100;
+
+          const notificationsRef = db
+              .collection("Users")
+              .doc(userId)
+              .collection("Notifications");
+
+          if (absencePercentage > 50 || latePercentage > 50 || absences >= 3) {
+            const notificationMessage =
+              absences >= 3 ? `${studentName} has reached the maximum 
+              amount of total absences in ${subjectTitle}.` :
+              `${studentName} has a high percentage of absences 
+              (${absencePercentage.toFixed(2)}%) 
+              and/or lates (${latePercentage.toFixed(2)}%)
+              in ${subjectTitle}.`;
+
+            await notificationsRef.add({
+              title: "Attendance Alert",
+              message: notificationMessage,
+              visible: true,
+              timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            });
+          }
+        });
+      });
+    });
+    console.log("Notifications created successfully");
+  } catch (error) {
+    console.error("Error creating notifications:", error);
+  }
+};
 
 exports.createUser = functions.region(region).https.onCall(
     async (data, context) => {
@@ -102,4 +186,25 @@ exports.sendNotification = functions.region(region).https.onRequest(
           return res.status(500).send(error);
         }
       });
+    });
+
+exports.createWeeklyNotifications = functions.region(region).
+    pubsub.schedule("every sunday 00:00").onRun(async (context) => {
+      await createNotifications();
+    });
+
+exports.createNotificationsManually = functions
+    .region(region)
+    .https.onRequest(async (req, res) => {
+      res.set("Access-Control-Allow-Origin", "*");
+      res.set("Access-Control-Allow-Methods", "GET, POST");
+      res.set("Access-Control-Allow-Headers", "Content-Type");
+
+      // Handle OPTIONS preflight request
+      if (req.method === "OPTIONS") {
+        res.status(204).send("");
+        return;
+      }
+      await createNotifications();
+      res.status(200).send("Notifications created manually");
     });

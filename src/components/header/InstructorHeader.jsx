@@ -8,7 +8,7 @@ import Offcanvas from "react-bootstrap/Offcanvas";
 import { Stack } from "react-bootstrap";
 import ListGroup from "react-bootstrap/ListGroup";
 import { db } from "../../firebase/firebase";
-import { collection, getDocs, doc, query, where, updateDoc } from "firebase/firestore";
+import { collection, getDocs, doc, query, where, updateDoc, deleteDoc } from "firebase/firestore";
 
 function InstructorHeader() {
   const navigate = useNavigate();
@@ -106,6 +106,27 @@ function InstructorHeader() {
     }
   };
 
+  const handleDeleteAllNotifications = async () => {
+    try {
+      if (currentUser) {
+        const userDoc1 = doc(db, "Users", currentUser.uid);
+        const notifCollection = collection(userDoc1, "Notifications");
+        const notifSnapshot = await getDocs(notifCollection);
+
+        // Delete each notification document
+        const deletePromises = notifSnapshot.docs.map(async (notifDoc) => {
+          await deleteDoc(notifDoc.ref);
+        });
+
+        await Promise.all(deletePromises); // Wait for all deletions to complete
+        setNotifs([]); // Clear notifications state
+        console.log("All notifications deleted successfully");
+      }
+    } catch (error) {
+      console.error("Error deleting notifications:", error);
+    }
+  };
+
   useEffect(() => {
     const handleBeforeUnload = async (event) => {
       if (userLoggedIn) {
@@ -140,6 +161,22 @@ function InstructorHeader() {
       .catch((error) => console.error(error));
   };
 
+  const handleCreateNotificationsManually = async () => {
+    try {
+      const response = await fetch('https://asia-southeast1-***REMOVED***.cloudfunctions.net/createNotificationsManually', {
+        method: 'POST',
+      });
+      if (response.ok) {
+        console.log('Notifications created manually');
+        await fetchNotifs(); // Refresh notifications after creating them manually
+      } else {
+        console.error('Failed to create notifications manually');
+      }
+    } catch (error) {
+      console.error('Error creating notifications manually:', error);
+    }
+  };
+
   const navi3 = () => {
     if (userLoggedIn === true) {
       navigate("/instructor-home", { state: {} }); // Ensure state is not null
@@ -167,7 +204,7 @@ function InstructorHeader() {
                   onClick={navi3}
                 />
               </Navbar.Brand>
-            </Navbar.Collapse>
+              </Navbar.Collapse>
           </Container>
         </Navbar>
       </header>
@@ -216,13 +253,19 @@ function InstructorHeader() {
           <button onClick={handleRefreshNotifications}>
             Refresh
           </button>
+          <button onClick={handleCreateNotificationsManually}>
+            Create Notifications Manually (Test)
+          </button>
+          <button onClick={handleDeleteAllNotifications}>
+            Delete All Notifications
+          </button>
           {notifs.length === 0 ? ( // Check if notifs array is empty
             <div className="notification-blank">
               <p>No notifications found.</p>
             </div>
             
           ) : (
-            <ListGroup>
+            <ListGroup gap={3}>
               {notifs.map((notif) => {
                 return (
                   <ListGroup.Item key={notif.id} action>
