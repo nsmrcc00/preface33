@@ -331,12 +331,26 @@ const SubjectHome = () => {
   const handleStartAttendanceIn = async () => {
     if (!selectedDate) return;
     const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
-
+    const week = moment(selectedDate).isoWeek();
+    const dayOfWeek = moment(selectedDate).day(); // Get the day of the week (0-6)
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const humanReadableDay = dayNames[dayOfWeek]; // Get human-readable day name
+  
     for (const student of classList) {
       console.log("Processing student:", student.id);
       await setDoc(
         doc(collection(doc(db, "Subjects", student.subjectId), "classList", student.id, "attendanceLedger"), formattedDate),
-        { attendanceIn: { In: false, timestamp: null, accessible: true }, status: "Absent" },
+        {
+          attendanceIn: { 
+            In: false, 
+            timestamp: null, 
+            accessible: true 
+          }, 
+            status: "Absent", 
+            week: week, 
+            dayOfWeek: dayOfWeek, // Add the day of the week (numerical value)
+            day: humanReadableDay, // Add the human-readable day of the week          
+          },
         { merge: true }
       );    
     }    

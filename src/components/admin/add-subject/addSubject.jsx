@@ -13,38 +13,36 @@ import {
 
 Modal.setAppElement("#root");
 
+const initialTimeState = {
+  MONDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
+  TUESDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
+  WEDNESDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
+  THURSDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
+  FRIDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
+  SATURDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
+};
+
+const initialSubjectState = {
+  Schedule: { days: "", time: "" },
+  section: "",
+  subjectCode: "",
+  title: "",
+  instructor: "",
+  year: "",
+  term: "",
+  archived: false,
+};
+
+const yearOptions = [
+  { value: "", label: "Select Year" },
+  { value: "First Year", label: "First Year" },
+  { value: "Second Year", label: "Second Year" },
+  { value: "Third Year", label: "Third Year" },
+  { value: "Fourth Year", label: "Fourth Year" },
+];
+
 const AddSubject = () => {
-  const initialTimeState = {
-    MONDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
-    TUESDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
-    WEDNESDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
-    THURSDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
-    FRIDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
-    SATURDAY: { startHour: "", startMin: "", endHour: "", endMin: "" },
-  };
-
-  const [subject, setSubject] = useState({
-    Schedule: {
-      days: "",
-      time: "",
-    },
-    section: "",
-    subjectCode: "",
-    title: "",
-    instructor: "",
-    year: "",
-    term: "",
-    archived: false,
-  });
-
-  const yearOptions = [
-    { value: "", label: "Select Year" },
-    { value: "First Year", label: "First Year" },
-    { value: "Second Year", label: "Second Year" },
-    { value: "Third Year", label: "Third Year" },
-    { value: "Fourth Year", label: "Fourth Year" },
-  ];
-
+  const [subject, setSubject] = useState(initialSubjectState);
   const [subjects, setSubjects] = useState([]);
   const [users, setUsers] = useState([]);
   const [sections, setSections] = useState([]);
@@ -60,29 +58,23 @@ const AddSubject = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name.includes("Schedule")) {
-      const [schedule, key] = name.split(".");
-      setSubject((prevSubject) => ({
-        ...prevSubject,
-        Schedule: {
-          ...prevSubject.Schedule,
-          [key]: value,
-        },
+      const [, key] = name.split(".");
+      setSubject((prev) => ({
+        ...prev,
+        Schedule: { ...prev.Schedule, [key]: value },
       }));
     } else {
-      setSubject((prevSubject) => ({
-        ...prevSubject,
+      setSubject((prev) => ({
+        ...prev,
         [name]: name === "archived" ? value === "true" : value,
       }));
     }
   };
 
   const handleTimeChange = (day, field, value) => {
-    setTimeInputs((prevTimeInputs) => ({
-      ...prevTimeInputs,
-      [day]: {
-        ...prevTimeInputs[day],
-        [field]: value,
-      },
+    setTimeInputs((prev) => ({
+      ...prev,
+      [day]: { ...prev[day], [field]: value },
     }));
   };
 
@@ -93,21 +85,14 @@ const AddSubject = () => {
     Object.keys(timeInputs).forEach((day) => {
       const { startHour, startMin, endHour, endMin } = timeInputs[day];
       if (startHour && startMin && endHour && endMin) {
-        const dayAbbreviation = day.substring(0, 3).toUpperCase();
-        days.push(dayAbbreviation);
+        days.push(day.substring(0, 3).toUpperCase());
         times.push(
-          `${startHour.padStart(2, "0")}:${startMin.padStart(
-            2,
-            "0"
-          )}-${endHour.padStart(2, "0")}:${endMin.padStart(2, "0")}`
+          `${startHour.padStart(2, "0")}:${startMin.padStart(2, "0")}-${endHour.padStart(2, "0")}:${endMin.padStart(2, "0")}`
         );
       }
     });
 
-    return {
-      days: days.join(","),
-      time: times.join(","),
-    };
+    return { days: days.join(","), time: times.join(",") };
   };
 
   const openModal = () => {
@@ -116,19 +101,7 @@ const AddSubject = () => {
 
   const closeModal = () => {
     setModalIsOpen(false);
-    setSubject({
-      Schedule: {
-        days: "",
-        time: "",
-      },
-      section: "",
-      subjectCode: "",
-      title: "",
-      instructor: "",
-      year: "",
-      term: "",
-      archived: false,
-    });
+    setSubject(initialSubjectState);
     setTimeInputs(initialTimeState);
     setIsEditMode(false);
   };
@@ -136,17 +109,12 @@ const AddSubject = () => {
   const validateFields = (data) => {
     const validData = {};
     Object.keys(data).forEach((key) => {
-      if (data[key] !== undefined) {
-        validData[key] = data[key];
-      }
+      if (data[key] !== undefined) validData[key] = data[key];
     });
     return validData;
   };
 
-  const addOrUpdateInstructorSubcollection = async (
-    instructorId,
-    subjectData
-  ) => {
+  const addOrUpdateInstructorSubcollection = async (instructorId, subjectData) => {
     try {
       const instructorRef = doc(db, "Users", instructorId);
       const subjectsHandledRef = collection(instructorRef, "subjectsHandled");
@@ -154,9 +122,7 @@ const AddSubject = () => {
       let subjectHandledDoc = null;
 
       querySnapshot.forEach((doc) => {
-        if (doc.id === subjectData.id) {
-          subjectHandledDoc = doc;
-        }
+        if (doc.id === subjectData.id) subjectHandledDoc = doc;
       });
 
       const validatedSubjectData = validateFields({
@@ -169,40 +135,21 @@ const AddSubject = () => {
       });
 
       if (subjectHandledDoc) {
-        console.log(
-          `Updating existing subjectHandled document with ID: ${subjectHandledDoc.id}`
-        );
         await updateDoc(subjectHandledDoc.ref, {
+          ...validatedSubjectData,
           subjectCode: subjectData.subjectCode,
-          title: subjectData.title,
+          Schedule: subjectData.Schedule,
           section: subjectData.section,
-          ref: subjectData.ref,
-          archived: subjectData.archived,
-          year: subjectData.year,
-          term: subjectData.term,
-          instructorEmail: subjectData.instructor.email,
-          Schedule: subjectData.Schedule, // Include Schedule
         });
       } else {
-        console.log(
-          `Adding new subjectHandled document with ID: ${subjectData.id}`
-        );
         const subjectHandledDocRef = doc(subjectsHandledRef, subjectData.id);
         await setDoc(subjectHandledDocRef, {
+          ...validatedSubjectData,
           subjectCode: subjectData.subjectCode,
-          title: subjectData.title,
+          Schedule: subjectData.Schedule,
           section: subjectData.section,
-          ref: subjectData.ref,
-          archived: subjectData.archived,
-          year: subjectData.year,
-          term: subjectData.term,
-          instructorEmail: subjectData.instructor.email,
-          Schedule: subjectData.Schedule, // Include Schedule
         });
       }
-      console.log(
-        "Instructor's subjectsHandled subcollection updated successfully!"
-      );
     } catch (error) {
       console.error("Error in addOrUpdateInstructorSubcollection:", error);
     }
@@ -229,31 +176,19 @@ const AddSubject = () => {
     e.preventDefault();
     const formattedSchedule = formatSchedule();
     const instructorData = users.find((user) => user.id === subject.instructor);
-    const newSubject = prepareSubjectData(
-      instructorData,
-      formattedSchedule,
-      null
-    );
+    const newSubject = prepareSubjectData(instructorData, formattedSchedule, null);
 
     try {
-      const newSubjectRef = await addDoc(
-        collection(db, "Subjects"),
-        newSubject
-      );
+      const newSubjectRef = await addDoc(collection(db, "Subjects"), newSubject);
       newSubject.ref = newSubjectRef;
       newSubject.id = newSubjectRef.id;
-
       await addOrUpdateInstructorSubcollection(instructorData.id, newSubject);
 
-      const updatedSubjects = [
-        ...subjects,
-        { ...newSubject, id: newSubject.id },
-      ];
+      const updatedSubjects = [...subjects, { ...newSubject, id: newSubject.id }];
       setSubjects(updatedSubjects);
       setCachedSubjects(updatedSubjects);
 
       closeModal();
-      console.log("Subject added successfully!");
     } catch (error) {
       alert("Error adding subject.");
       console.error(error);
@@ -264,14 +199,12 @@ const AddSubject = () => {
     try {
       const instructorRef = doc(db, "Users", instructorId);
       const subjectsHandledRef = collection(instructorRef, "subjectsHandled");
-      const subjectDocRef = doc(subjectsHandledRef, subjectId);
-      await deleteDoc(subjectDocRef);
-      console.log("Subject removed from previous instructor's subjectsHandled subcollection.");
+      await deleteDoc(doc(subjectsHandledRef, subjectId));
     } catch (error) {
       console.error("Error removing subject from instructor:", error);
     }
   };
-  
+
   const updateSub = async (e) => {
     e.preventDefault();
     const formattedSchedule = formatSchedule();
@@ -282,50 +215,40 @@ const AddSubject = () => {
       doc(db, "Subjects", subject.id)
     );
     updatedSubject.id = subject.id;
-  
+
     try {
       const validatedSubject = validateFields(updatedSubject);
       await updateDoc(updatedSubject.ref, validatedSubject);
-  
+
       if (previousInstructor && previousInstructor !== instructorData.id) {
         await removeSubjectFromInstructor(previousInstructor, updatedSubject.id);
       }
-  
+
       await addOrUpdateInstructorSubcollection(instructorData.id, validatedSubject);
-  
+
       const updatedSubjects = subjects.map((sub) =>
         sub.id === updatedSubject.id ? updatedSubject : sub
       );
       setSubjects(updatedSubjects);
       setCachedSubjects(updatedSubjects);
-  
+
       closeModal();
-      console.log("Subject updated successfully!");
     } catch (error) {
       alert("Error updating subject.");
       console.error(error);
     }
   };
-  
 
-  // Table behavior when clicked
   const handleRowClick = (sub) => {
-    const schedule = sub.Schedule || { days: "", time: "" };
-  
-    setSubject({
-      ...sub,
-      Schedule: schedule,
-      id: sub.id, // Ensure ID is set
-    });
+    setSubject({ ...sub, Schedule: sub.Schedule || { days: "", time: "" }, id: sub.id });
     setIsEditMode(true);
-    
-    setPreviousInstructor(sub.instructor.id); // Set previous instructor
-  
-    const days = schedule.days ? schedule.days.split(",") : [];
-    const times = schedule.time ? schedule.time.split(",") : [];
-  
+    setPreviousInstructor(sub.instructor.id);
+
+    const days = sub.Schedule.days ? sub.Schedule.days.split(",") : [];
+    const times = sub.Schedule.time ? sub.Schedule.time.split(",") : [];
+
     const newTimeInputs = { ...initialTimeState };
-  
+
     days.forEach((day, index) => {
       const [start, end] = times[index].split("-");
       const [startHour, startMin] = start.split(":");
@@ -337,17 +260,15 @@ const AddSubject = () => {
         newTimeInputs[dayFull] = { startHour, startMin, endHour, endMin };
       }
     });
-  
+
     setTimeInputs(newTimeInputs);
-    openModal();
+    setModalIsOpen(true);
   };
- 
-  // Cache data in local state
+
   const [cachedSubjects, setCachedSubjects] = useState([]);
   const [cachedUsers, setCachedUsers] = useState([]);
   const [cachedSections, setCachedSections] = useState([]);
 
-  // Fetch subjects from "Subjects" collection
   const fetchSubjects = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "Subjects"));
@@ -356,13 +277,12 @@ const AddSubject = () => {
         ...doc.data(),
       }));
       setSubjects(subjectsList);
-      setCachedSubjects(subjectsList); // Update cached subjects
+      setCachedSubjects(subjectsList);
     } catch (error) {
       console.error("Error fetching subjects:", error);
     }
   };
 
-  // Fetch instructors from "Users" collection
   const fetchUsers = async () => {
     if (cachedUsers.length > 0) {
       setUsers(cachedUsers);
@@ -375,9 +295,7 @@ const AddSubject = () => {
             return {
               id: doc.id,
               ref: doc.ref,
-              name: `${data.name.firstName} ${
-                data.name.middleName ? data.name.middleName + " " : ""
-              }${data.name.lastName}`,
+              name: `${data.name.firstName} ${data.name.middleName ? data.name.middleName + " " : ""}${data.name.lastName}`,
               role: data.role,
               email: data.email,
             };
@@ -391,7 +309,6 @@ const AddSubject = () => {
     }
   };
 
-  // Fetch sections from "Sections" collection
   const fetchSections = async () => {
     if (cachedSections.length > 0) {
       setSections(cachedSections);
@@ -400,7 +317,7 @@ const AddSubject = () => {
         const querySnapshot = await getDocs(collection(db, "Sections"));
         const sectionsList = querySnapshot.docs.map((doc) => ({
           ...doc.data(),
-          ref: doc.ref, //may be unnecessary
+          ref: doc.ref,
         }));
         setSections(sectionsList);
         setCachedSections(sectionsList);
@@ -416,7 +333,6 @@ const AddSubject = () => {
     fetchSections();
   }, []);
 
-  // Client-side search
   const filteredSubjects = subjects.filter((sub) => {
     const lowerCaseQuery = searchQuery.toLowerCase();
     return (
@@ -432,29 +348,10 @@ const AddSubject = () => {
     );
   });
 
-  // Input validation for schedule
   const isNumberKey = (evt) => {
     const charCode = evt.which ? evt.which : evt.keyCode;
-
-    if (
-      charCode === 8 ||
-      charCode === 46 ||
-      charCode === 9 ||
-      (charCode >= 37 && charCode <= 40) ||
-      charCode === 27
-    ) {
-      return;
-    }
-
-    if (charCode < 48 || charCode > 57) {
-      evt.preventDefault();
-      return;
-    }
-
-    const input = evt.target;
-    if (input.value.length >= 2) {
-      evt.preventDefault();
-    }
+    if ([8, 46, 9, 27].includes(charCode) || (charCode >= 37 && charCode <= 40)) return;
+    if (charCode < 48 || charCode > 57 || evt.target.value.length >= 2) evt.preventDefault();
   };
 
   return (
@@ -560,177 +457,186 @@ const AddSubject = () => {
               bottom: "auto",
               marginRight: "-50%",
               transform: "translate(-50%, -50%)",
-              padding: "20px",
-              borderRadius: "10px",
-              width: "max(80%, 400px)",
+              padding: "1.5rem",
+              borderRadius: "1rem",
+              width: "max(50%, 400px)",
               overflowX: "auto",
               maxHeight: "90vh",
             },
           }}
         >
           <form id="submitSub" onSubmit={isEditMode ? updateSub : addSub}>
-            <h2>{isEditMode ? "Edit Subject" : "Add Subject"}</h2>
-            <label className="addSubForm">
-              Title:
-              <input
-                type="text"
-                name="title"
-                value={subject.title}
-                onChange={handleChange}
-              />
-            </label>
-            <label className="addSubForm">
-              Course Code:
-              <input
-                type="text"
-                name="subjectCode"
-                value={subject.subjectCode}
-                onChange={handleChange}
-              />
-            </label>
-            <label className="addSubForm">
-              Section:
-              <select
-                name="section"
-                value={subject.section}
-                onChange={handleChange}
-              >
-                <option value="">Select Section</option>
-                {sections.map((section, index) => (
-                  <option key={index} value={`${section.sectionName}`}>
-                    {`${section.sectionName}`}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="addSubForm">
-              Instructor:
-              <select
-                name="instructor"
-                value={subject.instructor}
-                onChange={handleChange}
-              >
-                <option value="">Select Instructor</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <h2 className="SubjectModal">{isEditMode ? "Edit Subject" : "Add Subject"}</h2>
+              <div className="submitSubContent">
+              <div className="subject-fields">
+                <label className="addSubForm">
+                  Title:
+                  <input
+                    type="text"
+                    name="title"
+                    value={subject.title}
+                    onChange={handleChange}
+                  />
+                </label>
+                <label className="addSubForm">
+                  Course Code:
+                  <input
+                    type="text"
+                    name="subjectCode"
+                    value={subject.subjectCode}
+                    onChange={handleChange}
+                  />
+                </label>
+                <label className="addSubForm">
+                  Section:
+                  <select
+                    name="section"
+                    value={subject.section}
+                    onChange={handleChange}
+                  >
+                    <option value="">Select Section</option>
+                    {sections.map((section, index) => (
+                      <option key={index} value={`${section.sectionName}`}>
+                        {`${section.sectionName}`}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="addSubForm">
+                  Instructor:
+                  <select
+                    name="instructor"
+                    value={subject.instructor}
+                    onChange={handleChange}
+                  >
+                    <option value="">Select Instructor</option>
+                    {users.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
-            <label className="addSubForm">
-              Year:
-              <select name="year" value={subject.year} onChange={handleChange}>
-                {yearOptions.map(({ value, label }) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
+                <label className="addSubForm">
+                  Year:
+                  <select name="year" value={subject.year} onChange={handleChange}>
+                    {yearOptions.map(({ value, label }) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
-            <label className="addSubForm">
-              Term:
-              <select name="term" value={subject.term} onChange={handleChange}>
-                <option value="">Select Term</option>
-                <option value="First Semester">First Semester</option>
-                <option value="Second Semester">Second Semester</option>
-              </select>
-            </label>
+                <label className="addSubForm">
+                  Term:
+                  <select name="term" value={subject.term} onChange={handleChange}>
+                    <option value="">Select Term</option>
+                    <option value="First Semester">First Semester</option>
+                    <option value="Second Semester">Second Semester</option>
+                  </select>
+                </label>
 
-            <label className="addSubForm">
-              Archived:
-              <select
-                name="archived"
-                value={subject.archived}
-                onChange={handleChange}
-              >
-                <option value={false}>No</option>
-                <option value={true}>Yes</option>
-              </select>
-            </label>
-            <table className="schedule-table">
-              <thead>
-                <tr>
-                  <th>DAY</th>
-                  <th>START TIME</th>
-                  <th>END TIME</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.keys(timeInputs).map((day) => (
-                  <tr key={day}>
-                    <td>{day}</td>
-                    <td>
-                      <input
-                        style={{ width: "60px" }}
-                        type="number"
-                        min="0"
-                        max="23"
-                        maxLength={2}
-                        onKeyDown={isNumberKey}
-                        value={timeInputs[day].startHour}
-                        onChange={(e) =>
-                          handleTimeChange(day, "startHour", e.target.value)
-                        }
-                      />
-                      :
-                      <input
-                        style={{ width: "60px" }}
-                        type="number"
-                        min="0"
-                        max="59"
-                        maxLength={2}
-                        onKeyDown={isNumberKey}
-                        value={timeInputs[day].startMin}
-                        onChange={(e) =>
-                          handleTimeChange(day, "startMin", e.target.value)
-                        }
-                      />
-                    </td>
-                    <td>
-                      <input
-                        style={{ width: "60px" }}
-                        type="number"
-                        min="0"
-                        max="23"
-                        maxLength={2}
-                        onKeyDown={isNumberKey}
-                        value={timeInputs[day].endHour}
-                        onChange={(e) =>
-                          handleTimeChange(day, "endHour", e.target.value)
-                        }
-                      />
-                      :
-                      <input
-                        style={{ width: "60px" }}
-                        type="number"
-                        min="0"
-                        max="59"
-                        maxLength={2}
-                        onKeyDown={isNumberKey}
-                        value={timeInputs[day].endMin}
-                        onChange={(e) =>
-                          handleTimeChange(day, "endMin", e.target.value)
-                        }
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <div id="subCrudDiv">
-              <button type="submit" className="subCrudButton">
-                {isEditMode ? "Update Subject" : "Add Subject"}
-              </button>
-              <button
-                type="button"
-                onClick={closeModal}
-                className="subCrudButton"
-              >
-                Cancel
-              </button>
+                <label className="addSubForm">
+                  Archived:
+                  <select
+                    name="archived"
+                    value={subject.archived}
+                    onChange={handleChange}
+                  >
+                    <option value={false}>No</option>
+                    <option value={true}>Yes</option>
+                  </select>
+                </label>
+              </div>
+
+              <div className="subject-fields">
+                <label>Schedule:</label>
+                <table className="schedule-table">
+                  <thead>
+                    <tr>
+                      <th>DAY</th>
+                      <th>START TIME</th>
+                      <th>END TIME</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.keys(timeInputs).map((day) => (
+                      <tr key={day}>
+                        <td>{day}</td>
+                        <td>
+                          <input
+                            style={{ width: "60px" }}
+                            type="number"
+                            min="0"
+                            max="23"
+                            maxLength={2}
+                            onKeyDown={isNumberKey}
+                            value={timeInputs[day].startHour}
+                            onChange={(e) =>
+                              handleTimeChange(day, "startHour", e.target.value)
+                            }
+                          />
+                          :
+                          <input
+                            style={{ width: "60px" }}
+                            type="number"
+                            min="0"
+                            max="59"
+                            maxLength={2}
+                            onKeyDown={isNumberKey}
+                            value={timeInputs[day].startMin}
+                            onChange={(e) =>
+                              handleTimeChange(day, "startMin", e.target.value)
+                            }
+                          />
+                        </td>
+                        <td>
+                          <input
+                            style={{ width: "60px" }}
+                            type="number"
+                            min="0"
+                            max="23"
+                            maxLength={2}
+                            onKeyDown={isNumberKey}
+                            value={timeInputs[day].endHour}
+                            onChange={(e) =>
+                              handleTimeChange(day, "endHour", e.target.value)
+                            }
+                          />
+                          :
+                          <input
+                            style={{ width: "60px" }}
+                            type="number"
+                            min="0"
+                            max="59"
+                            maxLength={2}
+                            onKeyDown={isNumberKey}
+                            value={timeInputs[day].endMin}
+                            onChange={(e) =>
+                              handleTimeChange(day, "endMin", e.target.value)
+                            }
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>              
+              </div>  
+
+              <div id="subCrudDiv">
+                <button type="submit" className="subCrudButton">
+                  {isEditMode ? "Update Subject" : "Add Subject"}
+                </button>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="subCrudButton"
+                >
+                  Cancel
+                </button>
+              </div>           
             </div>
           </form>
         </Modal>
