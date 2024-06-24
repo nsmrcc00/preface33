@@ -595,7 +595,7 @@ const SubjectHome = () => {
                     <button
                       onClick={() => navi2(student.id)}
                     >
-                      View Profile
+                      View Report
                     </button>
                   </td>
                 </tr>

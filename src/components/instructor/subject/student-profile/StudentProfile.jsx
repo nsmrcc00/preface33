@@ -160,6 +160,21 @@ const StudentProfile = () => {
       <header>
         <InstructorHeader />
       </header>
+
+      <div className="cdspHeader">
+        <img 
+          src="/cdspLogo.png"
+          alt="CDSP"
+          width={54}
+          height={54}
+        />    
+        <div className="cdspHeaderText">
+          <h4>COLEGIO DE SAN PEDRO, INC</h4>
+          <p>Phase 1A Pacita Complex I, San Pedro, Laguna</p>
+          <p>Information Technology Education Department</p>
+        </div>
+      </div>       
+
       <main className="subject-home">
         <section className="subject-home-container">
           <div className="table-container">
@@ -192,11 +207,13 @@ const StudentProfile = () => {
               <p>Total number of absences:</p>
               <p>{absenceCount}/3</p>
             </div>
-            {absenceCount >= 3 && (
             <div className="attendanceTotalContent">
-              <button onClick={() => sendNotificationToStudents("Attendance Warning", `You have accumulated ${absenceCount} absences in ${subjectTitle}. Please contact your instructor at ${userEmail} for further instructions.`)}>Notify Student</button>
+              <button  onClick={window.print}>Print Report</button>
+              {absenceCount >= 3 && (
+                <button onClick={() => sendNotificationToStudents("Attendance Warning", `You have accumulated ${absenceCount} absences in ${subjectTitle}. Please contact your instructor at ${userEmail} for further instructions.`)}>Notify Student</button>
+              )} 
             </div>              
-            )}        
+                   
           </div>
         </section>
       </main>
