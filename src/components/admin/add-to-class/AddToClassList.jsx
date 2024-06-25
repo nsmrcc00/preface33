@@ -19,6 +19,7 @@ const AddToClassList = () => {
   const [cachedSections, setCachedSections] = useState([]);
   const [selectedSection, setSelectedSection] = useState('');
   const [studentFilterSection, setStudentFilterSection] = useState('');
+  const [filteredStudents, setFilteredStudents] = useState([]);
 
   useEffect(() => {
     const fetchSubjects = () => {
@@ -57,20 +58,26 @@ const AddToClassList = () => {
     fetchStudents();
   }, []);
 
-  const fetchClassList = (subjectId) => {
-    const classListRef = collection(db, 'Subjects', subjectId, 'classList');
-    const unsubscribe = onSnapshot(classListRef, (classListSnapshot) => {
-      const classListData = classListSnapshot.docs.map(doc => ({
-        id: doc.id,
-        idNumber: doc.data().idNumber,
-        name: doc.data().name,
-        section: doc.data().section,
-      }));
-      setClassList(classListData);
-    });
+  useEffect(() => {
+    const distinctSections = Array.from(new Set(students.map(student => student.section)));
+    setCachedSections(distinctSections);
+    setSections(distinctSections);
+  }, [students]);
 
-    return () => unsubscribe();
-  };
+  useEffect(() => {
+    const filterStudents = () => {
+      const filtered = students.filter(student =>
+        ((student?.idNumber.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
+          (student?.name?.firstName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
+          (student?.name?.middleName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
+          (student?.name?.lastName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
+          (student?.section.toLowerCase().includes(studentSearchTerm.toLowerCase()))) &&
+        (studentFilterSection === '' || student.section === studentFilterSection)
+      );
+      setFilteredStudents(filtered);
+    };
+    filterStudents();
+  }, [studentSearchTerm, studentFilterSection, students]);
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -82,9 +89,13 @@ const AddToClassList = () => {
 
   const toggleSelectAll = () => {
     setSelectAllChecked(!selectAllChecked);
-    setStudents(students.map(student => ({
+    setFilteredStudents(filteredStudents.map(student => ({
       ...student,
       checked: !selectAllChecked
+    })));
+    setStudents(students.map(student => ({
+      ...student,
+      checked: filteredStudents.some(filteredStudent => filteredStudent.id === student.id) ? !selectAllChecked : student.checked
     })));
   };
 
@@ -102,15 +113,6 @@ const AddToClassList = () => {
     (selectedSection === '' || subject.section === selectedSection) // Grouped this condition
   );
 
-  const filteredStudents = students.filter(student =>
-    ((student?.idNumber.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
-      (student?.name?.firstName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
-      (student?.name?.middleName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
-      (student?.name?.lastName.toLowerCase().includes(studentSearchTerm.toLowerCase())) ||
-      (student?.section.toLowerCase().includes(studentSearchTerm.toLowerCase()))) &&
-      (studentFilterSection === '' || student.section === studentFilterSection)
-  );
-
   const { items: sortedSubjects, requestSort: requestSortSubjects, sortConfig: sortConfigSubjects } = useSortableData(filteredSubjects);
   const { items: sortedStudents, requestSort: requestSortStudents, sortConfig: sortConfigStudents } = useSortableData(filteredStudents);
 
@@ -124,6 +126,21 @@ const AddToClassList = () => {
     setModalIsOpen(false);
     setSelectedSubject(null);
     setClassList([]);
+  };
+
+  const fetchClassList = (subjectId) => {
+    const classListRef = collection(db, 'Subjects', subjectId, 'classList');
+    const unsubscribe = onSnapshot(classListRef, (classListSnapshot) => {
+      const classListData = classListSnapshot.docs.map(doc => ({
+        id: doc.id,
+        idNumber: doc.data().idNumber,
+        name: doc.data().name,
+        section: doc.data().section,
+      }));
+      setClassList(classListData);
+    });
+
+    return () => unsubscribe();
   };
 
   const getClassNamesFor = (name, sortConfig) => {
@@ -188,12 +205,6 @@ const AddToClassList = () => {
     }
   };
 
-  useEffect(() => {
-    const distinctSections = Array.from(new Set(students.map(student => student.section)));
-    setCachedSections(distinctSections);
-    setSections(distinctSections);
-  }, [students]);
-
   const handleSectionChange = (event) => {
     setSelectedSection(event.target.value);
   };
@@ -218,8 +229,8 @@ const AddToClassList = () => {
             id="filterSection"
             className="filter-sub-style"
             value={selectedSection} onChange={handleSectionChange}>
-          <option value="">All Sections</option>
-          {sections.map(section => (
+            <option value="">All Sections</option>
+            {sections.map(section => (
               <option key={section} value={section}>{section}</option>
             ))}
           </select>
@@ -304,7 +315,7 @@ const AddToClassList = () => {
                 ))}
               </tbody>
             </table>
-            <div className="filter-sec" style={{marginTop: "10px"}}>
+            <div className="filter-sec" style={{ marginTop: "10px" }}>
               <label className="filter-sub-style"><strong>Student List</strong></label>
               <input
                 type="text"
@@ -313,10 +324,10 @@ const AddToClassList = () => {
                 onChange={handleStudentSearchChange}
                 className="filter-sub-style"
               />
-              <select 
+              <select
                 id="filterSection"
                 className="filter-sub-style"
-                value={studentFilterSection} 
+                value={studentFilterSection}
                 onChange={handleStudentFilterSectionChange}
               >
                 <option value="">All Sections</option>
@@ -325,7 +336,7 @@ const AddToClassList = () => {
                 ))}
               </select>
             </div>
-            
+
             <table id='studentListTable' className='striped-table'>
               <thead>
                 <tr>
