@@ -31,31 +31,6 @@ body {
   display: none;
 }
 
-@media only screen and (max-width: 600px) {
-  .instructorPage {
-    justify-content: center;
-    width: 100%;
-    padding: 12px;
-    gap: 12px;
-  }
-  .instructorNotifications,.white-space {
-    display: none;
-  }
-  .subject-fields {
-    align-items: center;
-    border: 0;
-  }
-} 
-
-@media only screen and (max-width: 2020px) {
-  #addInstructorInfo,#addStudentInfo {  
-    margin-top: 1rem;
-  }
-  .attendanceTotalContent{
-    justify-content: space-between;
-  }  
-}
-
 /*Notif Cards*/
 .notification-content {
   display: flex;
@@ -516,6 +491,31 @@ input[type=number] {
   border: 1px solid #ddd;
   overflow-x: auto;
   
+}
+
+@media only screen and (max-width: 600px) {
+  .instructorPage {
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    gap: 12px;
+  }
+  .instructorNotifications,.white-space {
+    display: none;
+  }
+  .subject-fields {
+    align-items: center;
+    border: 0;
+  }
+} 
+
+@media only screen and (max-width: 2020px) {
+  #addInstructorInfo,#addStudentInfo {  
+    margin-top: 1rem;
+  }
+  .attendanceTotalContent{
+    justify-content: space-between;
+  }  
 }
 
 /*
