@@ -208,3 +208,41 @@ exports.createNotificationsManually = functions
       await createNotifications();
       res.status(200).send("Notifications created manually");
     });
+
+exports.updateClassListWithFcmToken = functions
+    .region(region)
+    .firestore.document("Users/{userId}")
+    .onWrite(async (change, context) => {
+      const userId = context.params.userId;
+
+      // Get the user document data
+      const userData = change.after.exists ? change.after.data() : null;
+
+      if (userData) {
+        const fcmToken = userData.fcmToken;
+
+        if (fcmToken) {
+          // Query for the matching classList document
+          const subjectsSnapshot = await admin
+              .firestore()
+              .collection("Subjects")
+              .get();
+
+          subjectsSnapshot.forEach(async (subjectDoc) => {
+            const classListRef = subjectDoc.ref.collection("classList");
+            const classListSnapshot = await classListRef
+                .where("uid", "==", userId)
+                .get();
+
+            classListSnapshot.forEach(async (classListDoc) => {
+              // Update the classList document with the fcmToken
+              await classListDoc.ref.update({
+                fcmToken: fcmToken,
+              });
+            });
+          });
+        }
+      }
+
+      return null;
+    });
