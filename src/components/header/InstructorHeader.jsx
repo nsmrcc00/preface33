@@ -257,7 +257,7 @@ function InstructorHeader() {
             Create Notifications Manually (Test)
           </button>
           <button onClick={handleDeleteAllNotifications}>
-            Delete All Notifications
+            Clear Notifications
           </button>
           {notifs.length === 0 ? ( // Check if notifs array is empty
             <div className="notification-blank">
