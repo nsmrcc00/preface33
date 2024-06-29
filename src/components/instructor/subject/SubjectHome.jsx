@@ -346,7 +346,7 @@ const SubjectHome = () => {
             timestamp: null, 
             accessible: true 
           }, 
-            status: "Absent", 
+            status: "--", 
             week: week, 
             dayOfWeek: dayOfWeek, // Add the day of the week (numerical value)
             day: humanReadableDay, // Add the human-readable day of the week          

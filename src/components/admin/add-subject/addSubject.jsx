@@ -10,6 +10,7 @@ import {
   setDoc,
   deleteDoc,
 } from "firebase/firestore";
+import XLSX from 'xlsx';
 
 Modal.setAppElement("#root");
 
@@ -443,6 +444,7 @@ const AddSubject = () => {
           >
             Add Subject
           </button>
+          <input type="file" accept=".xlsx, .xls"/>
         </div>
 
         <Modal

@@ -11,6 +11,7 @@ import StudentAccount from "./components/admin/add-account/StudentAccount";
 import SubjectHome from "./components/instructor/subject/SubjectHome";
 import StudentProfile from "./components/instructor/subject/student-profile/StudentProfile";
 import ChangePassword from "./components/login/ChangePassword";
+import AddSubjectSheet from "./components/admin/add-subject/addSubjectSheet";
 
 const App = () => {
   const routesArray = [
@@ -25,6 +26,10 @@ const App = () => {
     {
       path: "/unauthorized",
       element: <Unauthorized />,
+    },
+    {
+      path: "/add-subject2",
+      element: <AddSubjectSheet/>,
     },
     {
       path: "/admin-home",
