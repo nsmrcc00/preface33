@@ -34,6 +34,12 @@ const CustomToolbar = ({ label, onNavigate }) => (
   </div>
 );
 
+const isDateInSchedule = (date, schedule) => {
+  const dayNames = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const selectedDayName = dayNames[date.getDay()];
+  const scheduleDays = schedule.days.split(",");
+  return scheduleDays.includes(selectedDayName);
+};
 
 const SubjectHome = () => {
   const navigate = useNavigate();
@@ -65,8 +71,12 @@ const SubjectHome = () => {
 
   const handleSelectSlot = ({ start }) => {
     console.log("Slot selected:", start);
-    setSelectedDate(start);
-    setModalIsOpen(true);
+    if (subject && isDateInSchedule(start, subject.Schedule)) {
+      setSelectedDate(start);
+      setModalIsOpen(true);
+    } else {
+      alert("You can only monitor the attendance on scheduled days.");
+    }
   };
 
   const closeModal = () => {
