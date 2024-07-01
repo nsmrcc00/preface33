@@ -355,42 +355,96 @@ const AddSubject = () => {
     if (charCode < 48 || charCode > 57 || evt.target.value.length >= 2) evt.preventDefault();
   };
 
-  const handleFileUpload = (event) => {
+  const handleFileUpload = async (event) => {
     const file = event.target.files[0];
-
     const reader = new FileReader();
-
-    reader.onload = (e) => {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-
-      const parsedData = XLSX.utils.sheet_to_json(sheet);
-
-      // Update this part to match your Excel file's structure
-      const newSubjects = parsedData.map(row => ({
-        subjectCode: row.subjectCode,
-        title: row.title,
-        instructor: row.instructor, // Adjust based on how you want to handle this
-        year: row.year,
-        term: row.term,
-        Schedule: {
-          days: row.days, // Assuming this format, adjust as needed
-          time: row.time  // Assuming this format, adjust as needed
-        },
-        section: row.section,
-        archived: row.archived,
-      }));
-
-      // You may want to further process and add these subjects to your database
-      setSubjects([...subjects, ...newSubjects]);
+  
+    reader.onload = async (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const parsedData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+        console.log(parsedData); // Log parsed data
+  
+        let addedCount = 0;
+        let errorCount = 0;
+  
+        for (const row of parsedData) {
+          try {
+            // Check if instructor field is present and not empty
+            let instructorData;
+            if (row.instructor) {
+              instructorData = users.find(user => 
+                `${user.name}`.toLowerCase() === row.instructor.toLowerCase()
+              );
+            }
+  
+            // If no instructor is found, assign default values
+            if (!instructorData) {
+              instructorData = {
+                id: "", // Use a default or placeholder ID
+                ref: null, // No reference
+                name: "",
+                email: ""
+              };
+            }
+  
+            // Debugging: Log the row data
+            console.log('Processing row:', row);
+  
+            // Ensure all required fields are present
+            if (!row.subjectCode || !row.title || !row.year || !row.term) {
+              throw new Error('Missing required fields');
+            }
+  
+            const newSubject = {
+              subjectCode: row.subjectCode,
+              title: row.title,
+              instructor: instructorData,
+              year: row.year,
+              term: row.term,
+              section: row.section,
+              archived: row.archived?.toLowerCase() === 'yes',
+              Schedule: {
+                days: row.days || '',
+                time: row.time || ''
+              }
+            };
+  
+            const formattedSchedule = {
+              days: newSubject.Schedule.days,
+              time: newSubject.Schedule.time
+            };
+  
+            const preparedSubject = prepareSubjectData(instructorData, formattedSchedule, null);
+  
+            const newSubjectRef = await addDoc(collection(db, "Subjects"), preparedSubject);
+            preparedSubject.ref = newSubjectRef;
+            preparedSubject.id = newSubjectRef.id;
+            await addOrUpdateInstructorSubcollection(instructorData.id, preparedSubject);
+  
+            setSubjects(prevSubjects => [...prevSubjects, { ...preparedSubject, id: preparedSubject.id }]);
+            setCachedSubjects(prevCachedSubjects => [...prevCachedSubjects, { ...preparedSubject, id: preparedSubject.id }]);
+  
+            addedCount++;
+            
+          } catch (error) {
+            console.error(`Error processing subject: ${row.title}`, error);
+            errorCount++;
+          }
+        }
+  
+        alert(`Successfully added ${addedCount} new subjects. ${errorCount} subjects had errors and were skipped.`);
+      } catch (error) {
+        console.error("Error processing file:", error);
+        alert("There was an error processing the file. Please check the file format and try again.");
+      }
     };
-
+  
     reader.readAsArrayBuffer(file);
   };
-
+  
   return (
     <>
       <section id="schoolSectionPage">
