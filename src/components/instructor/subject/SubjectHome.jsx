@@ -41,6 +41,20 @@ const isDateInSchedule = (date, schedule) => {
   return scheduleDays.includes(selectedDayName);
 };
 
+const isTimeInSchedule = (date, schedule) => {
+  const [start, end] = schedule.time.split("-");
+  const [startHour, startMinute] = start.split(":").map(Number);
+  const [endHour, endMinute] = end.split(":").map(Number);
+
+  const startDateTime = new Date(date);
+  startDateTime.setHours(startHour, startMinute, 0, 0);
+
+  const endDateTime = new Date(date);
+  endDateTime.setHours(endHour, endMinute, 0, 0);
+
+  return date >= startDateTime && date <= endDateTime;
+};
+
 const SubjectHome = () => {
   const navigate = useNavigate();
   const { subjectId } = useParams();
@@ -437,6 +451,9 @@ const SubjectHome = () => {
     );
   };
 
+  const currentTime = new Date();
+  const isWithinSchedule = subject && selectedDate && isDateInSchedule(selectedDate, subject.Schedule) && isTimeInSchedule(currentTime, subject.Schedule);
+
   return (
     <>
       <header>
@@ -513,12 +530,14 @@ const SubjectHome = () => {
             <button
               className="calendar-modal"
               onClick={handleStartAttendanceIn}
+              disabled={!isWithinSchedule}
             >
               Start Attendance In
             </button>
             <button
               className="calendar-modal"
               onClick={handleStartAttendanceOut}
+              disabled={!isWithinSchedule}
             >
               Start Attendance Out
             </button>
@@ -526,6 +545,7 @@ const SubjectHome = () => {
               className="calendar-modal"
               onChange={handleSetAllStatus} 
               defaultValue=""
+              disabled={!isWithinSchedule}
             >
               <option value="" disabled>Set all status to...</option>
               <option value="--">--</option>

@@ -355,6 +355,42 @@ const AddSubject = () => {
     if (charCode < 48 || charCode > 57 || evt.target.value.length >= 2) evt.preventDefault();
   };
 
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+
+      const parsedData = XLSX.utils.sheet_to_json(sheet);
+
+      // Update this part to match your Excel file's structure
+      const newSubjects = parsedData.map(row => ({
+        subjectCode: row.subjectCode,
+        title: row.title,
+        instructor: row.instructor, // Adjust based on how you want to handle this
+        year: row.year,
+        term: row.term,
+        Schedule: {
+          days: row.days, // Assuming this format, adjust as needed
+          time: row.time  // Assuming this format, adjust as needed
+        },
+        section: row.section,
+        archived: row.archived,
+      }));
+
+      // You may want to further process and add these subjects to your database
+      setSubjects([...subjects, ...newSubjects]);
+    };
+
+    reader.readAsArrayBuffer(file);
+  };
+
   return (
     <>
       <section id="schoolSectionPage">
@@ -444,7 +480,7 @@ const AddSubject = () => {
           >
             Add Subject
           </button>
-          <input type="file" accept=".xlsx, .xls"/>
+          <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload}/>
         </div>
 
         <Modal
