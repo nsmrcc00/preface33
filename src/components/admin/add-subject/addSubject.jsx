@@ -398,21 +398,21 @@ const AddSubject = () => {
           }
   
           const newSubject = {
-            subjectCode: row.subjectCode,
-            title: row.title,
+            subjectCode: row.subjectCode || "",
+            title: row.title || "",
             instructor: {
               id: instructorData.id,
               ref: instructorData.ref,
               name: instructorData.name,
               email: instructorData.email,
             },
-            year: row.year,
-            term: row.term,
+            year: row.year || "",
+            term: row.term || "",
             Schedule: {
-              days: row.days,
-              time: row.time
+              days: row.days || "",
+              time: row.time || "",
             },
-            section: row.section,
+            section: row.section || "",
             archived: row.archived.toLowerCase() === "yes",
           };
   
