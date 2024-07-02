@@ -29,20 +29,26 @@ const Register = ({ selectedAccount }) => {
     }
   }, [selectedAccount]);
 
+  const generatePassword = (length = 12) => {
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
+    let password = "";
+    for (let i = 0; i < length; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    return password;
+  };
+
   // Add Account
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      setErrorMessage('Passwords do not match');
-      return;
-    }
     setIsRegistering(true);
     try {
-      await doCreateUserWithEmailAndPassword(email, password, role, firstName, middleName, lastName, idNumber, null, status, null); // Pass idNumber here
+      const generatedPassword = generatePassword();
+      await doCreateUserWithEmailAndPassword(email, generatedPassword, role, firstName, middleName, lastName, idNumber, null, status, null);
       console.log("User registered successfully");
-      clearForm(); // Clear the input fields
-      setErrorMessage(''); // Clear any previous error messages
-      setSuccessMessage('User registered successfully'); // Set success message
+      clearForm();
+      setErrorMessage('');
+      setSuccessMessage(`User registered successfully. Temporary password: ${generatedPassword}`);
     } catch (error) {
       console.error(error);
       setErrorMessage("Error registering user");
@@ -50,18 +56,42 @@ const Register = ({ selectedAccount }) => {
       setIsRegistering(false);
     }
   };
+
+  
  
-  // Update Account Information
   const onUpdate = async () => {
     if (!selectedAccount) {
       setErrorMessage('No instructor selected');
       return;
     }
+    
+    if (password || confirmPassword) {
+      if (password !== confirmPassword) {
+        setErrorMessage('Passwords do not match');
+        return;
+      }
+      if (password.length < 6) {
+        setErrorMessage('Password should be at least 6 characters long');
+        return;
+      }
+    }
+  
     setIsUpdating(true);
     try {
-      await doUpdateUser(selectedAccount.id, email, firstName, middleName, lastName, idNumber, null, status, null);
+      await doUpdateUser(
+        selectedAccount.id, 
+        email, 
+        firstName, 
+        middleName, 
+        lastName, 
+        idNumber, 
+        null, 
+        status, 
+        null,
+        password // Pass the new password if it's been entered
+      );
       console.log("User updated successfully");
-      clearForm(); // Clear the input fields
+      clearForm();
       setErrorMessage('');
       setSuccessMessage('User updated successfully');
     } catch (error) {
@@ -129,8 +159,28 @@ const Register = ({ selectedAccount }) => {
           <option value="Active">Active</option>
           <option value="Inactive">Inactive</option>
         </select>
-        <input className="form-control" type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} required />
-        <input className="form-control" type="password" placeholder='Confirm Password' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+        {selectedAccount ? (
+          <>
+            <input 
+              className="form-control" 
+              type="password" 
+              placeholder='New Password' 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+            />
+            <input 
+              className="form-control" 
+              type="password" 
+              placeholder='Confirm New Password' 
+              value={confirmPassword} 
+              onChange={(e) => setConfirmPassword(e.target.value)} 
+            />
+          </>
+        ) : null}
+        {successMessage && (
+          <span>{successMessage}</span>
+        )}
+
         <div className="mb-3 text-center acc-crud">
           <button type="submit" disabled={isRegistering} className="acc-crud-btn btn btn-danger">
             {isRegistering ? 'Adding Account...' : 'Add Account'}

@@ -566,7 +566,6 @@ const SubjectHome = () => {
               <option value="" disabled>Set all status to...</option>
               <option value="--">--</option>
               <option value="Present">Present</option>
-              <option value="Late">Late</option>
               <option value="Absent">Absent</option>
               <option value="Excused">Excused</option>
             </select>
@@ -633,7 +632,6 @@ const SubjectHome = () => {
                     >
                       <option value="--">--</option>
                       <option value="Present">Present</option>
-                      <option value="Late">Late</option>
                       <option value="Absent">Absent</option>
                       <option value="Excused">Excused</option>
                     </select>
