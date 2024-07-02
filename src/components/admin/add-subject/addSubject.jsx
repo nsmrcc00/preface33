@@ -110,7 +110,7 @@ const AddSubject = () => {
   const validateFields = (data) => {
     const validData = {};
     Object.keys(data).forEach((key) => {
-      if (data[key] !== undefined) validData[key] = data[key];
+      if (data[key] !== undefined && data[key] !== null) validData[key] = data[key];
     });
     return validData;
   };
@@ -157,16 +157,16 @@ const AddSubject = () => {
   };
 
   const prepareSubjectData = (instructorData, formattedSchedule, ref) => ({
-    subjectCode: subject.subjectCode,
+    subjectCode: subject.subjectCode,       
+    title: subject.title,
+    section: subject.section,
+    Schedule: formattedSchedule,
     instructor: {
       id: instructorData.id,
       ref: instructorData.ref,
       name: instructorData.name,
       email: instructorData.email,
     },
-    Schedule: formattedSchedule,
-    section: subject.section,
-    title: subject.title,
     year: subject.year,
     term: subject.term,
     archived: subject.archived,
@@ -355,7 +355,7 @@ const AddSubject = () => {
     if (charCode < 48 || charCode > 57 || evt.target.value.length >= 2) evt.preventDefault();
   };
 
-  const handleFileUpload = async (event) => {
+  const handleFileUpload = (event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
   
@@ -363,79 +363,72 @@ const AddSubject = () => {
       try {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const parsedData = XLSX.utils.sheet_to_json(sheet, { defval: null });
-        console.log(parsedData); // Log parsed data
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const parsedData = XLSX.utils.sheet_to_json(sheet);
   
         let addedCount = 0;
-        let errorCount = 0;
+        let skippedCount = 0;
   
         for (const row of parsedData) {
-          try {
-            // Check if instructor field is present and not empty
-            let instructorData;
-            if (row.instructor) {
-              instructorData = users.find(user => 
-                `${user.name}`.toLowerCase() === row.instructor.toLowerCase()
-              );
-            }
+          // Check if subject already exists
+          const existingSubject = subjects.find(sub => 
+            sub.subjectCode === row.subjectCode &&
+            sub.title === row.title &&
+            sub.section === row.section
+          );
   
-            // If no instructor is found, assign default values
-            if (!instructorData) {
-              instructorData = {
-                id: "", // Use a default or placeholder ID
-                ref: null, // No reference
-                name: "",
-                email: ""
-              };
-            }
-  
-            // Debugging: Log the row data
-            console.log('Processing row:', row);
-  
-            // Ensure all required fields are present
-            if (!row.subjectCode || !row.title || !row.year || !row.term) {
-              throw new Error('Missing required fields');
-            }
-  
-            const newSubject = {
-              subjectCode: row.subjectCode,
-              title: row.title,
-              instructor: instructorData,
-              year: row.year,
-              term: row.term,
-              section: row.section,
-              archived: row.archived?.toLowerCase() === "yes",
-              Schedule: {
-                days: row.days || "",
-                time: row.time || "",
-              },
-            };
-  
-            const formattedSchedule = {
-              days: newSubject.Schedule.days,
-              time: newSubject.Schedule.time
-            };
-  
-            const preparedSubject = prepareSubjectData(instructorData, formattedSchedule, null);
-  
-            const newSubjectRef = await addDoc(collection(db, "Subjects"), preparedSubject);
-            preparedSubject.ref = newSubjectRef;
-            preparedSubject.id = newSubjectRef.id;
-            await addOrUpdateInstructorSubcollection(instructorData.id, preparedSubject);
-  
-            setSubjects(prevSubjects => [...prevSubjects, { ...preparedSubject, id: preparedSubject.id }]);
-            setCachedSubjects(prevCachedSubjects => [...prevCachedSubjects, { ...preparedSubject, id: preparedSubject.id }]);
-  
-            addedCount++;
-            
-          } catch (error) {
-            console.error(`Error processing subject: ${row.title}`, error);
-            errorCount++;
+          if (existingSubject) {
+            console.log(`Skipping duplicate subject: ${row.subjectCode} - ${row.title} (Section: ${row.section})`);
+            skippedCount++;
+            continue;
           }
+  
+          let instructorData = users.find(user => 
+            `${user.name}`.toLowerCase() === row.instructor.toLowerCase()
+          );
+  
+          if (!instructorData) {
+            instructorData = {
+              id: "default_instructor_id",
+              ref: doc(db, "Users", "default_instructor_id"),
+              name: "Default Instructor",
+              email: "default@example.com"
+            };
+          }
+  
+          const newSubject = {
+            subjectCode: row.subjectCode,
+            title: row.title,
+            instructor: {
+              id: instructorData.id,
+              ref: instructorData.ref,
+              name: instructorData.name,
+              email: instructorData.email,
+            },
+            year: row.year,
+            term: row.term,
+            Schedule: {
+              days: row.days,
+              time: row.time
+            },
+            section: row.section,
+            archived: row.archived.toLowerCase() === "yes",
+          };
+  
+          // Add new subject to the Subjects collection
+          const newSubjectRef = await addDoc(collection(db, "Subjects"), newSubject);
+          const subjectWithId = { ...newSubject, id: newSubjectRef.id, ref: newSubjectRef };
+  
+          // Add the subject to the instructor's subjectsHandled subcollection
+          await addOrUpdateInstructorSubcollection(instructorData.id, subjectWithId);
+  
+          // Update local state
+          setSubjects(prevSubjects => [...prevSubjects, subjectWithId]);
+          addedCount++;
         }
   
-        alert(`Successfully added ${addedCount} new subjects. ${errorCount} subjects had errors and were skipped.`);
+        alert(`Successfully added ${addedCount} new subjects. Skipped ${skippedCount} duplicate subjects.`);
       } catch (error) {
         console.error("Error processing file:", error);
         alert("There was an error processing the file. Please check the file format and try again.");
