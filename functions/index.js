@@ -246,3 +246,51 @@ exports.updateClassListWithFcmToken = functions
 
       return null;
     });
+
+exports.autoAddStudentToClassList = functions.firestore
+    .document("Users/{userId}")
+    .onWrite((change, context) => {
+      const newValue = change.after.data();
+      const previousValue = change.before.data();
+
+      // Only proceed if this is a new document or
+      // if the section or role has changed
+      if (
+        !change.before.exists ||
+        newValue.section !== previousValue.section ||
+        newValue.role !== previousValue.role
+      ) {
+        // Check if the user is a student
+        if (newValue.role === "student") {
+          const studentSection = newValue.section;
+          const studentData = {
+            name: `${newValue.name.firstName} 
+            ${newValue.name.middleName} ${newValue.name.lastName}`,
+            idNumber: newValue.idNumber,
+            section: studentSection,
+            uid: context.params.userId,
+            ref: admin.firestore().doc(`Users/${context.params.userId}`),
+          };
+
+          // Query for matching subjects
+          return admin
+              .firestore()
+              .collection("Subjects")
+              .where("section", "==", studentSection)
+              .get()
+              .then((snapshot) => {
+                const promises = [];
+                snapshot.forEach((doc) => {
+                  // Add student to classList of each matching subject
+                  promises.push(
+                      doc.ref.collection("classList").add(studentData));
+                });
+                return Promise.all(promises);
+              })
+              .catch((error) => {
+                console.error("Error adding student to class lists:", error);
+              });
+        }
+      }
+      return null;
+    });
