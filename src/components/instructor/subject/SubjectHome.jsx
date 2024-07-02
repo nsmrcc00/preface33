@@ -19,6 +19,7 @@ import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "../subject/SubCalendar.css";
+import * as XLSX from 'xlsx';
 
 const localizer = momentLocalizer(moment);
 Modal.setAppElement("#root");
@@ -454,6 +455,21 @@ const SubjectHome = () => {
   const currentTime = new Date();
   const isWithinSchedule = subject && selectedDate && isDateInSchedule(selectedDate, subject.Schedule) && isTimeInSchedule(currentTime, subject.Schedule);
 
+  const exportToExcel = () => {
+    const worksheetData = filteredClassList.map(student => ({
+      "Name": student.name,
+      "Section": student.section,
+      "Time In": student.attendance.inTimestamp ? student.attendance.inTimestamp.toLocaleString() : "",
+      "Time Out": student.attendance.outTimestamp ? student.attendance.outTimestamp.toLocaleString() : "",
+      "Attendance Status": student.attendance.status,
+    }));
+    
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
+    XLSX.writeFile(workbook, `Attendance_${moment(selectedDate).format("MMMM_D_YYYY")}.xlsx`);
+  };
+
   return (
     <>
       <header>
@@ -567,6 +583,7 @@ const SubjectHome = () => {
                 </div>
               </>              
             )}
+            <button className="calendar-modal" onClick={exportToExcel}>Print Report</button>
           </div>
           <table className="striped-table">
             <thead>
