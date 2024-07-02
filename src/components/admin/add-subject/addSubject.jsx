@@ -364,7 +364,7 @@ const AddSubject = () => {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const parsedData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+        const parsedData = XLSX.utils.sheet_to_json(sheet, { defval: null });
         console.log(parsedData); // Log parsed data
   
         let addedCount = 0;
@@ -405,11 +405,11 @@ const AddSubject = () => {
               year: row.year,
               term: row.term,
               section: row.section,
-              archived: row.archived?.toLowerCase() === 'yes',
+              archived: row.archived?.toLowerCase() === "yes",
               Schedule: {
-                days: row.days || '',
-                time: row.time || ''
-              }
+                days: row.days || "",
+                time: row.time || "",
+              },
             };
   
             const formattedSchedule = {
@@ -444,7 +444,7 @@ const AddSubject = () => {
   
     reader.readAsArrayBuffer(file);
   };
-  
+
   return (
     <>
       <section id="schoolSectionPage">
@@ -534,7 +534,7 @@ const AddSubject = () => {
           >
             Add Subject
           </button>
-          <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload}/>
+          <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
         </div>
 
         <Modal
