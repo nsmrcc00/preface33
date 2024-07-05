@@ -43,17 +43,21 @@ const isDateInSchedule = (date, schedule) => {
 };
 
 const isTimeInSchedule = (date, schedule) => {
-  const [start, end] = schedule.time.split("-");
-  const [startHour, startMinute] = start.split(":").map(Number);
-  const [endHour, endMinute] = end.split(":").map(Number);
+  if (!schedule || !schedule.time) return false;
+  const timeRanges = schedule.time.split(",");
+  return timeRanges.some((timeRange) => {
+    const [start, end] = timeRange.split("-");
+    const [startHour, startMinute] = start.split(":").map(Number);
+    const [endHour, endMinute] = end.split(":").map(Number);
 
-  const startDateTime = new Date(date);
-  startDateTime.setHours(startHour, startMinute, 0, 0);
+    const startDateTime = new Date(date);
+    startDateTime.setHours(startHour, startMinute, 0, 0);
 
-  const endDateTime = new Date(date);
-  endDateTime.setHours(endHour, endMinute, 0, 0);
+    const endDateTime = new Date(date);
+    endDateTime.setHours(endHour, endMinute, 0, 0);
 
-  return date >= startDateTime && date <= endDateTime;
+    return date >= startDateTime && date <= endDateTime;
+  });
 };
 
 const SubjectHome = () => {
@@ -85,14 +89,19 @@ const SubjectHome = () => {
   }, [modalIsOpen]);
 
   const handleSelectSlot = ({ start }) => {
-    console.log("Slot selected:", start);
-    if (subject && isDateInSchedule(start, subject.Schedule)) {
+    const today = new Date();
+    const isSameDay =
+      start.getDate() === today.getDate() &&
+      start.getMonth() === today.getMonth() &&
+      start.getFullYear() === today.getFullYear();
+  
+    if (isSameDay && subject && isDateInSchedule(start, subject.Schedule)) {
       setSelectedDate(start);
       setModalIsOpen(true);
     } else {
-      alert("You can only monitor the attendance on scheduled days.");
+      alert("You can only monitor attendance on the current scheduled day.");
     }
-  };
+  };                       
 
   const closeModal = () => {
     console.log("Modal closed");
@@ -453,7 +462,7 @@ const SubjectHome = () => {
   };
 
   const currentTime = new Date();
-  const isWithinSchedule = subject && selectedDate && isDateInSchedule(selectedDate, subject.Schedule) && isTimeInSchedule(currentTime, subject.Schedule);
+  const isWithinSchedule = subject && selectedDate && isDateInSchedule(currentTime, subject.Schedule) && isTimeInSchedule(currentTime, subject.Schedule);
 
   const exportToExcel = () => {
     const worksheetData = filteredClassList.map(student => ({
@@ -543,6 +552,8 @@ const SubjectHome = () => {
               onChange={handleSearch}
               className="calendar-modal"
             />
+
+            {/*
             <button
               className="calendar-modal"
               onClick={handleStartAttendanceIn}
@@ -569,7 +580,8 @@ const SubjectHome = () => {
               <option value="Absent">Absent</option>
               <option value="Excused">Excused</option>
             </select>
-            {timerRunning && (
+
+             {timerRunning && (
               <>
                 <button
                   className="calendar-modal"
@@ -582,6 +594,7 @@ const SubjectHome = () => {
                 </div>
               </>              
             )}
+            */}           
             <button className="calendar-modal" onClick={exportToExcel}>Print Report</button>
           </div>
           <table className="striped-table">
@@ -629,6 +642,7 @@ const SubjectHome = () => {
                     <select
                       value={student.attendance.status}
                       onChange={(event) => handleStatusChange(event, student)}
+                      disabled={!isWithinSchedule}
                     >
                       <option value="--">--</option>
                       <option value="Present">Present</option>
