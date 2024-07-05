@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { doCreateUserWithEmailAndPassword, doDeleteUser, doUpdateUser } from "../../../firebase/auth";
 import { db } from '../../../firebase/firebase';
 import { getDocs, collection } from 'firebase/firestore';
-import emailjs from "@emailjs/browser"
+import emailjs from "@emailjs/browser";
+import DismissibleAlert from "./DismissibleAlert";
 
 const Register = ({ selectedAccount }) => {
   const [email, setEmail] = useState('');
@@ -182,6 +183,16 @@ const Register = ({ selectedAccount }) => {
     setSuccessMessage('');
   };
 
+  const renderAlert = (message, variant, onClose) => {
+    return (
+      <DismissibleAlert 
+        message={message} 
+        variant={variant} 
+        onClose={onClose} 
+      />
+    );
+  };
+
   return (
     <>
       <form id='addStudentInfo' onSubmit={onSubmit}>
@@ -224,9 +235,8 @@ const Register = ({ selectedAccount }) => {
             />
           </>
         ) : null}
-        {successMessage && (
-          <span>{successMessage}</span>
-        )}
+        {successMessage && renderAlert(successMessage, "success", () => setSuccessMessage(''))}
+        {errorMessage && renderAlert(errorMessage, "danger", () => setErrorMessage(''))}
 
         <div className="mb-3 text-center acc-crud">
           <button type="submit" disabled={isRegistering} className="acc-crud-btn btn btn-danger">

@@ -89,7 +89,7 @@ const InstructorsTable = ({ setSelectedAccount }) => {
           <option value="Active">Active</option>
           <option value="Inactive">Inactive</option>
         </select>
-        <input type="file" accept=".xlsx, .xls" />
+        {/*<input type="file" accept=".xlsx, .xls" />*/}        
       </div>
 
       <table className="striped-table">

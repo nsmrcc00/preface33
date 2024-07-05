@@ -552,7 +552,19 @@ const SubjectHome = () => {
               onChange={handleSearch}
               className="calendar-modal"
             />
-
+            
+            <select
+              className="calendar-modal"
+              onChange={handleSetAllStatus} 
+              defaultValue=""
+              disabled={!isWithinSchedule}
+            >
+              <option value="" disabled>Set all status to...</option>
+              <option value="Pending">Pending</option>
+              <option value="Present">Present</option>
+              <option value="Absent">Absent</option>
+              <option value="Excused">Excused</option>
+            </select>
             {/*
             <button
               className="calendar-modal"
@@ -567,19 +579,7 @@ const SubjectHome = () => {
               disabled={!isWithinSchedule}
             >
               Start Attendance Out
-            </button>
-            <select
-              className="calendar-modal"
-              onChange={handleSetAllStatus} 
-              defaultValue=""
-              disabled={!isWithinSchedule}
-            >
-              <option value="" disabled>Set all status to...</option>
-              <option value="--">--</option>
-              <option value="Present">Present</option>
-              <option value="Absent">Absent</option>
-              <option value="Excused">Excused</option>
-            </select>
+            </button>            
 
              {timerRunning && (
               <>
@@ -644,7 +644,7 @@ const SubjectHome = () => {
                       onChange={(event) => handleStatusChange(event, student)}
                       disabled={!isWithinSchedule}
                     >
-                      <option value="--">--</option>
+                      <option value="Pending">Pending</option>
                       <option value="Present">Present</option>
                       <option value="Absent">Absent</option>
                       <option value="Excused">Excused</option>
