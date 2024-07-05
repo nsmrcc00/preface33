@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { doCreateUserWithEmailAndPassword, doDeleteUser, doUpdateUser } from "../../../firebase/auth";
 import { db } from '../../../firebase/firebase';
 import { getDocs, collection } from 'firebase/firestore';
+import emailjs from "@emailjs/browser"
 
 const Register = ({ selectedAccount }) => {
   const [email, setEmail] = useState('');
@@ -45,6 +46,27 @@ const Register = ({ selectedAccount }) => {
     return password;
   };
 
+  const sendPasswordEmail = (email, password) => {
+    const serviceID = "***REMOVED***";
+    const templateID = "***REMOVED***";
+    const userID = "***REMOVED***";
+
+    const templateParams = {
+      email: email,
+      password: password,
+      firstName: firstName,
+      lastName: lastName,
+    };
+
+    emailjs.send(serviceID, templateID, templateParams, userID)
+      .then((response) => {
+        console.log('Email sent successfully', response.status, response.text);
+      })
+      .catch((error) => {
+        console.error('Failed to send email', error);
+      });
+  };
+
   //Fetch Sections from Collections
   useEffect(() => {
     const fetchSections = async () => {
@@ -71,9 +93,10 @@ const Register = ({ selectedAccount }) => {
       const generatedPassword = generatePassword();
       await doCreateUserWithEmailAndPassword(email, generatedPassword, role, firstName, middleName, lastName, idNumber, section, status, macAddress); // Pass section here
       console.log("User registered successfully");
+      sendPasswordEmail(email, generatedPassword);
       clearForm(); // Clear the input fields
       setErrorMessage(''); // Clear any previous error messages
-      setSuccessMessage(`User registered successfully. Temporary password: ${generatedPassword}`);
+      setSuccessMessage('User registered successfully. The temporary password has been sent to the user\'s email.');
     } catch (error) {
       console.error(error);
       setErrorMessage("Error registering user");
