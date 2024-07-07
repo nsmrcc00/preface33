@@ -70,16 +70,11 @@ const SubjectHome = () => {
   const [filteredClassList, setFilteredClassList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
-  const [timer, setTimer] = useState(null);
-  const [timerRunning, setTimerRunning] = useState(false);
   const [view, setView] = useState("month");
   const calendarRef = useRef(null);
   const [numStudents, setNumStudents] = useState(0);
   const [numPresent, setNumPresent] = useState(0);
   const [numAbsent, setNumAbsent] = useState(0);
-  const timerIntervalRef = useRef(null);
-  const [attendanceInStarted, setAttendanceInStarted] = useState(false);
-  const [attendanceOutStarted, setAttendanceOutStarted] = useState(false);
   const [loading, setLoading] = useState(true); // New loading state
 
 
@@ -233,97 +228,7 @@ const SubjectHome = () => {
       setFilteredClassList(filteredList);
     }
   };
-
-  const sendNotificationToStudents = async (title, body) => {
-    const tokens = classList.map(student => student.fcmToken).filter(token => token);
-  
-    if (tokens.length > 0) {
-      try {
-        const response = await fetch("https://asia-southeast1-***REMOVED***.cloudfunctions.net/sendNotification", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            tokens: tokens,
-            title: title,
-            body: body,
-          }),
-        });
-  
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-        }
-  
-        const data = await response.json();
-        console.log("Notification sent:", data);
-      } catch (error) {
-        console.error("Error sending notification:", error);
-      }
-    } else {
-      console.log("No FCM tokens available for sending notifications.");
-    }
-  };
-  
-
-  const startTimer = (duration, onEndCallback) => {
-    // Clear any existing interval
-    if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current);
-    }
-  
-    setTimer(duration);
-    setTimerRunning(true);
-    timerIntervalRef.current = setInterval(() => {
-      setTimer((prevTime) => {
-        if (prevTime <= 1) {
-          clearInterval(timerIntervalRef.current);
-          setTimerRunning(false);
-          if (onEndCallback) {
-            onEndCallback();
-          }
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
-  };
-  
-
-  const stopTimer = async () => {
-    clearInterval(timerIntervalRef.current);
-    setTimerRunning(false);
-    setTimer(null);
-
-    if (attendanceInStarted || attendanceOutStarted) {
-      const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
-      const updateAttendance = async (studentId, attendanceType) => {
-        await setDoc(
-          doc(collection(doc(db, "Subjects", subjectId), "classList", studentId, "attendanceLedger"), formattedDate),
-          { [attendanceType]: { accessible: false } },
-          { merge: true }
-        );
-      };
-      for (const student of classList) {
-        if (attendanceInStarted) await updateAttendance(student.id, "attendanceIn");
-        if (attendanceOutStarted) await updateAttendance(student.id, "attendanceOut");
-      }
-
-      if (attendanceInStarted) sendNotificationToStudents("Attendance In", `Attendance in process has ended for ${subject.title}.`);
-      if (attendanceOutStarted) sendNotificationToStudents("Attendance Out", `Attendance out process has ended for ${subject.title}.`);
-
-      setAttendanceInStarted(false);
-      setAttendanceOutStarted(false);
-    }
-  };
-    
-  const formatTimer = (time) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-  };
-
+ 
   const handleSetAllStatus = async (e) => {
     const selectedStatus = e.target.value;
     const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
@@ -369,73 +274,6 @@ const SubjectHome = () => {
   
     setClassList(updatedClassList);
     setFilteredClassList(updatedClassList);
-  };
-  
-  const handleStartAttendanceIn = async () => {
-    if (!selectedDate) return;
-    const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
-    const week = moment(selectedDate).isoWeek();
-    const dayOfWeek = moment(selectedDate).day(); // Get the day of the week (0-6)
-    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const humanReadableDay = dayNames[dayOfWeek]; // Get human-readable day name
-  
-    for (const student of classList) {
-      console.log("Processing student:", student.id);
-      await setDoc(
-        doc(collection(doc(db, "Subjects", student.subjectId), "classList", student.id, "attendanceLedger"), formattedDate),
-        {
-          attendanceIn: { 
-            In: false, 
-            timestamp: null, 
-            accessible: true 
-          }, 
-            status: "Pending", 
-            week: week, 
-            dayOfWeek: dayOfWeek, // Add the day of the week (numerical value)
-            day: humanReadableDay, // Add the human-readable day of the week          
-          },
-        { merge: true }
-      );    
-    }    
-    setAttendanceInStarted(true);
-    startTimer(300, async () => {
-      for (const student of classList) {
-        await setDoc(
-          doc(collection(doc(db, "Subjects", student.subjectId), "classList", student.id, "attendanceLedger"), formattedDate),
-          { attendanceIn: { accessible: false } },
-          { merge: true }
-        );
-        console.log("Updated accessible to false for student:", student.id);
-      }
-    });
-    console.log(`Attendance in process has started for ${subject.title}. Please mark your attendance.`);
-    sendNotificationToStudents("Attendance In", `Attendance in process has started for ${subject.title}. Please mark your attendance.`);
-  };
-
-  const handleStartAttendanceOut = async () => {
-    if (!selectedDate) return;
-    const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
-
-    for (const student of classList) {
-      await setDoc(
-        doc(collection(doc(db, "Subjects", student.subjectId), "classList", student.id, "attendanceLedger"), formattedDate),
-        { attendanceOut: { Out: false, timestamp: null, accessible: true } },
-        { merge: true }
-      );      
-    }
-    setAttendanceOutStarted(true);
-    startTimer(300, async () => {
-      for (const student of classList) {
-        await setDoc(
-          doc(collection(doc(db, "Subjects", student.subjectId), "classList", student.id, "attendanceLedger"), formattedDate),
-          { attendanceOut: { accessible: false } },
-          { merge: true }
-        );
-        console.log("Updated accessible to false for student:", student.id);
-      }
-    });
-    console.log(`Attendance out process has started for ${subject.title}. Please mark your attendance.`);
-    sendNotificationToStudents("Attendance Out", `Attendance out process has started for ${subject.title}. Please mark your attendance.`);
   };
 
   const handleStatusChange = async (event, student) => {
@@ -575,7 +413,7 @@ const SubjectHome = () => {
               disabled={!isWithinSchedule}
             >
               <option value="" disabled>Set all status to...</option>
-              <option value="Pending">Pending</option>
+              {/*<option value="Pending">Pending</option>*/}
               <option value="Present">Present</option>
               <option value="Absent">Absent</option>
               <option value="Excused">Excused</option>
@@ -684,3 +522,169 @@ const SubjectHome = () => {
 };
 
 export default SubjectHome;
+
+  
+/*
+  const [timer, setTimer] = useState(null);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const timerIntervalRef = useRef(null);
+  const [attendanceInStarted, setAttendanceInStarted] = useState(false);
+  const [attendanceOutStarted, setAttendanceOutStarted] = useState(false);
+
+  const startTimer = (duration, onEndCallback) => {
+    // Clear any existing interval
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+    }
+  
+    setTimer(duration);
+    setTimerRunning(true);
+    timerIntervalRef.current = setInterval(() => {
+      setTimer((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(timerIntervalRef.current);
+          setTimerRunning(false);
+          if (onEndCallback) {
+            onEndCallback();
+          }
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+  };
+  
+
+  const stopTimer = async () => {
+    clearInterval(timerIntervalRef.current);
+    setTimerRunning(false);
+    setTimer(null);
+
+    if (attendanceInStarted || attendanceOutStarted) {
+      const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
+      const updateAttendance = async (studentId, attendanceType) => {
+        await setDoc(
+          doc(collection(doc(db, "Subjects", subjectId), "classList", studentId, "attendanceLedger"), formattedDate),
+          { [attendanceType]: { accessible: false } },
+          { merge: true }
+        );
+      };
+      for (const student of classList) {
+        if (attendanceInStarted) await updateAttendance(student.id, "attendanceIn");
+        if (attendanceOutStarted) await updateAttendance(student.id, "attendanceOut");
+      }
+
+      if (attendanceInStarted) sendNotificationToStudents("Attendance In", `Attendance in process has ended for ${subject.title}.`);
+      if (attendanceOutStarted) sendNotificationToStudents("Attendance Out", `Attendance out process has ended for ${subject.title}.`);
+
+      setAttendanceInStarted(false);
+      setAttendanceOutStarted(false);
+    }
+  };
+    
+  const formatTimer = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  };
+
+  const sendNotificationToStudents = async (title, body) => {
+    const tokens = classList.map(student => student.fcmToken).filter(token => token);
+  
+    if (tokens.length > 0) {
+      try {
+        const response = await fetch("https://asia-southeast1-***REMOVED***.cloudfunctions.net/sendNotification", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            tokens: tokens,
+            title: title,
+            body: body,
+          }),
+        });
+  
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+  
+        const data = await response.json();
+        console.log("Notification sent:", data);
+      } catch (error) {
+        console.error("Error sending notification:", error);
+      }
+    } else {
+      console.log("No FCM tokens available for sending notifications.");
+    }
+  };
+
+  const handleStartAttendanceIn = async () => {
+    if (!selectedDate) return;
+    const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
+    const week = moment(selectedDate).isoWeek();
+    const dayOfWeek = moment(selectedDate).day(); // Get the day of the week (0-6)
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const humanReadableDay = dayNames[dayOfWeek]; // Get human-readable day name
+  
+    for (const student of classList) {
+      console.log("Processing student:", student.id);
+      await setDoc(
+        doc(collection(doc(db, "Subjects", student.subjectId), "classList", student.id, "attendanceLedger"), formattedDate),
+        {
+          attendanceIn: { 
+            In: false, 
+            timestamp: null, 
+            accessible: true 
+          }, 
+            status: "Pending", 
+            week: week, 
+            dayOfWeek: dayOfWeek, // Add the day of the week (numerical value)
+            day: humanReadableDay, // Add the human-readable day of the week          
+          },
+        { merge: true }
+      );    
+    }    
+    setAttendanceInStarted(true);
+    startTimer(300, async () => {
+      for (const student of classList) {
+        await setDoc(
+          doc(collection(doc(db, "Subjects", student.subjectId), "classList", student.id, "attendanceLedger"), formattedDate),
+          { attendanceIn: { accessible: false } },
+          { merge: true }
+        );
+        console.log("Updated accessible to false for student:", student.id);
+      }
+    });
+    console.log(`Attendance in process has started for ${subject.title}. Please mark your attendance.`);
+    sendNotificationToStudents("Attendance In", `Attendance in process has started for ${subject.title}. Please mark your attendance.`);
+  };
+
+  const handleStartAttendanceOut = async () => {
+    if (!selectedDate) return;
+    const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
+
+    for (const student of classList) {
+      await setDoc(
+        doc(collection(doc(db, "Subjects", student.subjectId), "classList", student.id, "attendanceLedger"), formattedDate),
+        { attendanceOut: { Out: false, timestamp: null, accessible: true } },
+        { merge: true }
+      );      
+    }
+    setAttendanceOutStarted(true);
+    startTimer(300, async () => {
+      for (const student of classList) {
+        await setDoc(
+          doc(collection(doc(db, "Subjects", student.subjectId), "classList", student.id, "attendanceLedger"), formattedDate),
+          { attendanceOut: { accessible: false } },
+          { merge: true }
+        );
+        console.log("Updated accessible to false for student:", student.id);
+      }
+    });
+    console.log(`Attendance out process has started for ${subject.title}. Please mark your attendance.`);
+    sendNotificationToStudents("Attendance Out", `Attendance out process has started for ${subject.title}. Please mark your attendance.`);
+  };
+*/
+ 
