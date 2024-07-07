@@ -89,19 +89,14 @@ const SubjectHome = () => {
   }, [modalIsOpen]);
 
   const handleSelectSlot = ({ start }) => {
-    const today = new Date();
-    const isSameDay =
-      start.getDate() === today.getDate() &&
-      start.getMonth() === today.getMonth() &&
-      start.getFullYear() === today.getFullYear();
-  
-    if (isSameDay && subject && isDateInSchedule(start, subject.Schedule)) {
+    console.log("Slot selected:", start);
+    if (subject && isDateInSchedule(start, subject.Schedule)) {
       setSelectedDate(start);
       setModalIsOpen(true);
     } else {
-      alert("You can only monitor attendance on the current scheduled day.");
+      alert("You can only monitor the attendance on scheduled days.");
     }
-  };                       
+  };                      
 
   const closeModal = () => {
     console.log("Modal closed");
@@ -144,7 +139,7 @@ const SubjectHome = () => {
               inTimestamp: null,
               out: false,
               outTimestamp: null,
-              status: "--",
+              status: "Pending",
             }
           };
           const attendanceLedgerRef = collection(
@@ -162,7 +157,7 @@ const SubjectHome = () => {
                 inTimestamp: attendanceData.attendanceIn?.timestamp ? attendanceData.attendanceIn.timestamp.toDate() : null,
                 out: attendanceData.attendanceOut?.Out || false,
                 outTimestamp: attendanceData.attendanceOut?.timestamp ? attendanceData.attendanceOut.timestamp.toDate() : null,
-                status: attendanceData.status || "--",
+                status: attendanceData.status || "Pending",
               };
             }
             setClassList((prevClassList) =>
@@ -332,8 +327,8 @@ const SubjectHome = () => {
   const handleSetAllStatus = async (e) => {
     const selectedStatus = e.target.value;
     const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
-
-    for (const student of classList) {
+  
+    const updatedClassList = await Promise.all(classList.map(async student => {
       const attendanceLedgerRef = collection(
         doc(db, "Subjects", student.subjectId),
         "classList",
@@ -341,27 +336,41 @@ const SubjectHome = () => {
         "attendanceLedger"
       );
       const attendanceDocRef = doc(attendanceLedgerRef, formattedDate);
-      await setDoc(
-        attendanceDocRef,
-        {
-          status: selectedStatus,
-        },
-        { merge: true }
-      );
-    }
-
-    // Update the status in the local state
-    const updatedClassList = classList.map(student => ({
-      ...student,
-      attendance: {
-        ...student.attendance,
-        status: selectedStatus
+  
+      const attendanceDoc = await getDoc(attendanceDocRef);
+  
+      let newStatus = selectedStatus;
+      if (attendanceDoc.exists() && attendanceDoc.data().hasOwnProperty("status")) {
+        newStatus = attendanceDoc.data().status;
+      } else {
+        await setDoc(
+          attendanceDocRef,
+          {
+            attendanceIn: { 
+              accessible: false, 
+            },
+            attendanceOut: { 
+              accessible: false, 
+            },
+            status: selectedStatus,
+          },
+          { merge: true }
+        );
       }
+  
+      return {
+        ...student,
+        attendance: {
+          ...student.attendance,
+          status: newStatus
+        }
+      };
     }));
+  
     setClassList(updatedClassList);
     setFilteredClassList(updatedClassList);
   };
-
+  
   const handleStartAttendanceIn = async () => {
     if (!selectedDate) return;
     const formattedDate = moment(selectedDate).format("MMMM D, YYYY");
@@ -380,7 +389,7 @@ const SubjectHome = () => {
             timestamp: null, 
             accessible: true 
           }, 
-            status: "--", 
+            status: "Pending", 
             week: week, 
             dayOfWeek: dayOfWeek, // Add the day of the week (numerical value)
             day: humanReadableDay, // Add the human-readable day of the week          
@@ -441,6 +450,12 @@ const SubjectHome = () => {
     const attendanceDocRef = doc(attendanceLedgerRef, formattedDate);
 
     await setDoc(attendanceDocRef, {
+      attendanceIn: { 
+        accessible: false, 
+      },
+      attendanceOut: { 
+        accessible: false, 
+      },
       status: newStatus,
     }, { merge: true });
 
