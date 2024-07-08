@@ -40,11 +40,13 @@ const StudentAccount = () => {
                 <AddSection/>
               </section>
             </Tab>
-            <Tab eventKey="subjectTable" title="Subjects">
-              <section id='schoolSectionPage'>
-                <AddToClassList/>
-              </section>
-            </Tab>
+            {/*
+              <Tab eventKey="subjectTable" title="Subjects">
+                <section id='schoolSectionPage'>
+                  <AddToClassList/>
+                </section>
+              </Tab>          
+            */}
           </Tabs>
         </main>
     </>
