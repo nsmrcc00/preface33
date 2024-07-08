@@ -11,6 +11,9 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import XLSX from 'xlsx';
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../contexts/authContext";
+import { doSignOut } from "../../../firebase/auth";
 
 Modal.setAppElement("#root");
 
@@ -43,6 +46,8 @@ const yearOptions = [
 ];
 
 const AddSubject = () => {
+  const navigate = useNavigate();
+  const { currentUser, userLoggedIn } = useAuth();
   const [subject, setSubject] = useState(initialSubjectState);
   const [subjects, setSubjects] = useState([]);
   const [users, setUsers] = useState([]);
@@ -55,6 +60,15 @@ const AddSubject = () => {
   const [filterYear, setFilterYear] = useState("");
   const [filterTerm, setFilterTerm] = useState("");
   const [previousInstructor, setPreviousInstructor] = useState("");
+
+  const navigateEnrollStudent = (subjectId) => {
+    if (userLoggedIn) {
+      navigate(`/enroll-student/${subjectId}`);
+    } else {
+      doSignOut();
+      navigate("/login");
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -713,6 +727,11 @@ const AddSubject = () => {
               <div id="subCrudDiv">
                 <button type="submit" className="subCrudButton">
                   {isEditMode ? "Update Subject" : "Add Subject"}
+                </button>
+                <button 
+                  className="subCrudButton"
+                  onClick={() => navigateEnrollStudent(subject.id)}>
+                  Enroll Students
                 </button>
                 <button
                   type="button"
