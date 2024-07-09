@@ -1,5 +1,5 @@
 import { db } from '../../../firebase/firebase';
-import { collection, onSnapshot, doc, deleteDoc, writeBatch } from 'firebase/firestore';
+import { collection, onSnapshot, doc, deleteDoc, writeBatch, getDocs, query, where } from 'firebase/firestore';
 import { useState, useEffect } from "react";
 import { useParams } from 'react-router-dom';
 import XLSX from 'xlsx';
@@ -85,7 +85,7 @@ const EnrollStudent = () => {
       const json = XLSX.utils.sheet_to_json(worksheet);
 
       const parsedStudents = json.map((row) => ({
-        idNumber: row.idNumber,
+        idNumber: row.idNumber.toString(),
         name: row.name,
         section: row.section,
       }));
@@ -101,33 +101,45 @@ const EnrollStudent = () => {
     if (subjectId) {
       console.log('Students:', students);
       console.log('Class List:', classList);
-
-      const existingStudentIds = classList.map(student => student.idNumber);
+  
+      const existingStudentIds = classList.map(student => student.idNumber.toString());
       console.log('Existing Student IDs:', existingStudentIds);
-
-      const studentsToAdd = students.filter(student => !existingStudentIds.includes(student.idNumber));
-      console.log('Students to Add:', studentsToAdd);
-
-      if (studentsToAdd.length === 0) {
-        alert('Error! Student/s already added to the class list');
-        return;
-      }
-
+  
       const batch = writeBatch(db);
-
-      studentsToAdd.forEach(student => {
-        console.log('Adding student:', student);
-
-        const classListRef = doc(collection(db, 'Subjects', subjectId, 'classList'));
-        batch.set(classListRef, {
-          name: student.name,
-          idNumber: student.idNumber,
-          section: student.section,
-          uid: student.id, // If you have 'id' available for each student
-          ref: doc(db, 'Users', student.id) // If you have 'id' available for each student
-        });
-      });
-
+      const usersRef = collection(db, 'Users');
+  
+      for (const student of students) {
+        console.log(`Processing student with ID Number ${student.idNumber}`);
+  
+        if (existingStudentIds.includes(student.idNumber.toString())) {
+          console.log(`Student with ID Number ${student.idNumber} is already in the class list.`);
+          continue;
+        }
+  
+        const q = query(usersRef, where('role', '==', 'student'), where('idNumber', '==', student.idNumber.toString()), where('section', '==', student.section));
+        const querySnapshot = await getDocs(q);
+  
+        if (!querySnapshot.empty) {
+          const userDoc = querySnapshot.docs[0]; // Assuming unique idNumber and section, so taking the first match
+          const userId = userDoc.id;
+          const userData = userDoc.data();
+          
+          console.log(`Found matching user: ${userId}, Data:`, userData);
+  
+          // Use userId as the document ID for the classList collection
+          const classListRef = doc(db, 'Subjects', subjectId, 'classList', userId);
+          batch.set(classListRef, {
+            name: student.name,
+            idNumber: student.idNumber.toString(),
+            section: student.section,
+            uid: userId,
+            ref: doc(db, 'Users', userId)
+          });
+        } else {
+          console.log(`No matching student found in Users collection for ID Number ${student.idNumber} and Section ${student.section}.`);
+        }
+      }
+  
       try {
         await batch.commit();
         alert('Students successfully added to class list');
@@ -137,24 +149,42 @@ const EnrollStudent = () => {
       }
     }
   };
+  
+  
 
   return (
     <>
       <header>
-        <Header />
+        <Header/>
       </header>
+
+      <div className="cdspHeader">
+        <img 
+          src="/cdspLogo.png"
+          alt="CDSP"
+          width={54}
+          height={54}
+        />    
+        <div className="cdspHeaderText">
+          <h4>COLEGIO DE SAN PEDRO, INC</h4>
+          <p>Phase 1A Pacita Complex I, San Pedro, Laguna</p>
+          <p>Information Technology Education Department</p>
+        </div>
+      </div>
+
       <main>
-        <section>
+        <section id='schoolSectionPage'>
           <div className='table-container'>
-            <h1>Student Enrollment</h1>
-            <h2>{subject.title} - {subject.section} - {subject.instructor.name}</h2>
+            <h2 className='no-print' style={{textAlign: "center"}}>Student Enrollment</h2>
+            <h3 className='h3-to-p'>{subject.title} - {subject.section}</h3>
+            <h3 className='h3-to-p'>Instructor: {subject.instructor.name}</h3>
             <table className='striped-table'>
               <thead>
                 <tr>
                   <th>ID Number</th>
                   <th>Name</th>
                   <th>Section</th>
-                  <th>Actions</th>  
+                  <th className='no-print'>Actions</th>  
                 </tr> 
               </thead>
               <tbody>
@@ -163,14 +193,18 @@ const EnrollStudent = () => {
                     <td>{student.idNumber}</td>
                     <td>{student.name}</td>
                     <td>{student.section}</td>
-                    <td><button className='classListButton' onClick={() => handleRemoveFromClassList(student.id)}>REMOVE</button></td>
+                    <td className='no-print'><button className='classListButton' onClick={() => handleRemoveFromClassList(student.id)}>REMOVE</button></td>
                   </tr>
                 ))}  
               </tbody>  
-            </table>  
-          </div>          
-          <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
-          <button onClick={handleAddToClassList}>Add Students to Class List</button>
+            </table>
+            <div className='enrollStudentOptions no-print'>
+              <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
+              <button className='classListButton' onClick={handleAddToClassList}>Add Students to Class List</button>
+              <button className='classListButton' onClick={window.print}>Print Class List</button>  
+            </div>                           
+          </div>
+                 
         </section>
       </main>
     </>

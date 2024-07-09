@@ -7,9 +7,8 @@ body {
   header,button {
     display: none;
   }
-  .striped-table th,
-  .striped-table td {
-    border: 1px solid #000000 !important;
+  .striped-table, .striped-table th, .striped-table td {
+    border: none !important;
   }
   
   .cdspHeader {
@@ -25,11 +24,28 @@ body {
     font-family: 'Times New Roman', Times, serif;
     font-weight: bold;
   }
+  .no-print {
+    display: none !important;
+  }
+  .h3-to-p {
+    display: block;
+    font-size: 1em;
+    font-weight: normal;
+    margin: 1em 0;
+  }
 }
 
 .cdspHeader {
   display: none;
 }
+
+/*Enroll Student*/
+.enrollStudentOptions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+
 
 /*Notif Cards*/
 .notification-content {
