@@ -416,7 +416,7 @@ const SubjectHome = () => {
               {/*<option value="Pending">Pending</option>*/}
               <option value="Present">Present</option>
               <option value="Absent">Absent</option>
-              <option value="Excused">Excused</option>
+              {/*<option value="Excused">Excused</option>*/}
             </select>
             {/*
             <button
@@ -495,12 +495,12 @@ const SubjectHome = () => {
                     <select
                       value={student.attendance.status}
                       onChange={(event) => handleStatusChange(event, student)}
-                      disabled={!isWithinSchedule}
+                      disabled={!isWithinSchedule || student.attendance.status !== "Pending"}
                     >
                       <option value="Pending">Pending</option>
                       <option value="Present">Present</option>
                       <option value="Absent">Absent</option>
-                      <option value="Excused">Excused</option>
+                      {/*<option value="Excused">Excused</option>*/}
                     </select>
                   </td>
                   <td>
