@@ -160,8 +160,8 @@ const StudentProfile = () => {
       <header>
         <InstructorHeader />
       </header>
-
-      <div className="cdspHeader">
+      {/*
+            <div className="cdspHeader">
         <img 
           src="/cdspLogo.png"
           alt="CDSP"
@@ -173,7 +173,9 @@ const StudentProfile = () => {
           <p>Phase 1A Pacita Complex I, San Pedro, Laguna</p>
           <p>Information Technology Education Department</p>
         </div>
-      </div>       
+      </div>  
+      */}
+     
 
       <main className="subject-home">
         <section className="subject-home-container">
