@@ -16,14 +16,16 @@ const StudentAccount = () => {
         <Header />        
         <main
           id='studentCrudPage'
-          style={{
-            backgroundImage: `url(${background})`,
-            backgroundPosition: 'center center',
-            backgroundSize: 'cover',
-            backgroundRepeat: 'no-repeat',
-            backgroundAttachment: 'fixed',
-          }}
         >
+            {/*
+            style={{ 
+                backgroundImage: `url(${background})`,
+                backgroundPosition: 'center center',
+                backgroundSize: 'cover',
+                backgroundRepeat: 'no-repeat',
+                backgroundAttachment: 'fixed',                         
+            }}            
+            */}
           <Tabs
           defaultActiveKey="studentTable"
           className="mb-3"

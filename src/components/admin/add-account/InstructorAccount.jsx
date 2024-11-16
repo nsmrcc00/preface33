@@ -15,15 +15,16 @@ const InsAccount = () => {
       <Header />
       <main
         id="instructorCrudPage"
-        style={{
-          backgroundImage: `url(${background})`,
-          backgroundPosition: 'center center',
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed',
-          
-        }}
       >
+            {/*
+            style={{ 
+                backgroundImage: `url(${background})`,
+                backgroundPosition: 'center center',
+                backgroundSize: 'cover',
+                backgroundRepeat: 'no-repeat',
+                backgroundAttachment: 'fixed',                         
+            }}            
+            */}
         <Tabs
           defaultActiveKey="instructorTable"
           className="mb-3"

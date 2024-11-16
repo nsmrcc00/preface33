@@ -35,14 +35,18 @@ const AdminHome = () => {
             <Header/>
             <main 
             id="adminHome"
+
+            >
+            
+            {/*
             style={{ 
                 backgroundImage: `url(${background})`,
                 backgroundPosition: 'center center',
                 backgroundSize: 'cover',
                 backgroundRepeat: 'no-repeat',
                 backgroundAttachment: 'fixed',                         
-            }}
-            >
+            }}            
+            */}
                 
                 <section id='adminHome-sec'>
                     <div id="instructor-acc-div"className="admin-dash-div" onClick={navi1}>
