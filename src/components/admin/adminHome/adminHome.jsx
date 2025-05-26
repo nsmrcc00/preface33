@@ -35,17 +35,17 @@ const AdminHome = () => {
             <Header/>
             <main 
             id="adminHome"
-
-            >
-            
-            
             style={{ 
                 backgroundImage: `url(${background})`,
                 backgroundPosition: 'center center',
                 backgroundSize: 'cover',
                 backgroundRepeat: 'no-repeat',
                 backgroundAttachment: 'fixed',                         
-            }}            
+            }} 
+            >
+            
+            
+                       
            
                 
                 <section id='adminHome-sec'>
