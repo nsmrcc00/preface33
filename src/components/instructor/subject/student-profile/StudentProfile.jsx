@@ -160,7 +160,7 @@ const StudentProfile = () => {
       <header>
         <InstructorHeader />
       </header>
-      {/*
+      
             <div className="cdspHeader">
         <img 
           src="/cdspLogo.png"
@@ -174,7 +174,7 @@ const StudentProfile = () => {
           <p>Information Technology Education Department</p>
         </div>
       </div>  
-      */}
+     
      
 
       <main className="subject-home">

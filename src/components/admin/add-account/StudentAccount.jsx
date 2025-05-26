@@ -17,7 +17,7 @@ const StudentAccount = () => {
         <main
           id='studentCrudPage'
         >
-            {/*
+            
             style={{ 
                 backgroundImage: `url(${background})`,
                 backgroundPosition: 'center center',
@@ -25,7 +25,7 @@ const StudentAccount = () => {
                 backgroundRepeat: 'no-repeat',
                 backgroundAttachment: 'fixed',                         
             }}            
-            */}
+           
           <Tabs
           defaultActiveKey="studentTable"
           className="mb-3"

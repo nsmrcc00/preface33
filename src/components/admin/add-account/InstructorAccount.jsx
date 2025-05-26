@@ -16,7 +16,7 @@ const InsAccount = () => {
       <main
         id="instructorCrudPage"
       >
-            {/*
+            
             style={{ 
                 backgroundImage: `url(${background})`,
                 backgroundPosition: 'center center',
@@ -24,7 +24,7 @@ const InsAccount = () => {
                 backgroundRepeat: 'no-repeat',
                 backgroundAttachment: 'fixed',                         
             }}            
-            */}
+           
         <Tabs
           defaultActiveKey="instructorTable"
           className="mb-3"
