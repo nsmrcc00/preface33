@@ -1,5 +1,9 @@
 # preface33
 
+### NOTE: Some features are currently disabled due to cloud function dependencies. Core authentication and attendance viewing remain functional.
+
+## Run Locally
+
 Install [Node.js](https://nodejs.org/en/download) first.
 
 Then clone this repo.
@@ -23,3 +27,5 @@ EmailJS setup
 - Create an email service and get the Service ID.
 - Create an email template and get the Template ID.
 - Then replace or create environment variables in the sendPasswordEmail function found in Register1.jsx and Register2.jsx
+
+
